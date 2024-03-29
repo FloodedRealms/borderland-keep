@@ -7,4 +7,5 @@ type Repository interface {
 	GetCampaign(int) (*types.Campaign, error)
 	ListCampaigns() ([]*types.Campaign, error)
 	GetAdventureRecordsForCampaign(int) ([]*types.AdventureRecord, error)
+	CreateAdventureRecordForCampaign(*types.CreateAdventureRecordRequest) (*types.AdventureRecord, error)
 }

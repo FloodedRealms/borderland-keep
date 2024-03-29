@@ -6,11 +6,11 @@ import (
 )
 
 type Coins struct {
-	Copper   int
-	Silver   int
-	Electrum int
-	Gold     int
-	Platinum int
+	Copper   int `json:"copper"`
+	Silver   int `json:"silver"`
+	Electrum int `json:"electrum"`
+	Gold     int `json:"gold"`
+	Platinum int `json:"platinum"`
 }
 
 func copperToGold(cp int) float64 {

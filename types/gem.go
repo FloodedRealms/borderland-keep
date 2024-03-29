@@ -3,16 +3,18 @@ package types
 import "fmt"
 
 type Gem struct {
-	Name        string
-	Description string
-	Value       int
+	Name        string `json:"name"`
+	Description string `json:"description"`
+	Value       int    `json:"value"`
+	Total       int    `json:"total"`
 }
 
-func NewGem(n, d string, v int) *Gem {
+func NewGem(n, d string, v, t int) *Gem {
 	return &Gem{
 		Name:        n,
 		Description: d,
 		Value:       v,
+		Total:       t,
 	}
 }
 

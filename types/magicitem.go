@@ -3,9 +3,9 @@ package types
 import "fmt"
 
 type MagicItem struct {
-	Name          string
-	Description   string
-	ApparentValue int
+	Name          string `json:"name"`
+	Description   string `json:"description"`
+	ApparentValue int    `json:"apparent_value"`
 }
 
 func NewMagicItem(n, d string, v int) *MagicItem {

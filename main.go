@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+
 	"github.com/kevin/adventure-archivist/api"
 	"github.com/kevin/adventure-archivist/repository"
 	"github.com/kevin/adventure-archivist/services"
@@ -23,14 +24,16 @@ func main() {
 	router.GET("/campaigns", campaignApi.ListCampaigns)
 	router.GET("/campaigns/:campaignId", campaignApi.GetCampaign)
 	router.GET("/campaigns/:campaignId/adventures", adventurRecordApi.ListAdventureRecordsForCampaign)
+	router.POST("/adventures", adventurRecordApi.CreateAdventureRecord)
 
 	router.OPTIONS("/campaigns", preflight)
 	router.OPTIONS("/campaigns/:campaignId", preflight)
+	router.OPTIONS("/adventures", preflight)
 	router.Run("localhost:9090")
 }
 
 func preflight(c *gin.Context) {
 	c.Header("Access-Control-Allow-Origin", "*")
-	c.Header("Access-Control-Allow-Headers", "access-control-allow-origin, access-control-allow-headers")
+	c.Header("Access-Control-Allow-Headers", "access-control-allow-origin, access-control-allow-headers, content-type")
 	c.JSON(http.StatusOK, struct{}{})
 }

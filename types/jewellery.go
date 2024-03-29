@@ -3,16 +3,18 @@ package types
 import "fmt"
 
 type Jewellery struct {
-	Name        string
-	Description string
-	Value       int
+	Name        string `json:"name"`
+	Description string `json:"description"`
+	Value       int    `json:"value"`
+	Total       int    `json:"total"`
 }
 
-func NewJewellery(n, d string, v int) *Jewellery {
+func NewJewellery(n, d string, v, t int) *Jewellery {
 	return &Jewellery{
 		Name:        n,
 		Description: d,
 		Value:       v,
+		Total:       t,
 	}
 }
 

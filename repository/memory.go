@@ -10,10 +10,12 @@ import (
 
 const dateLayout = "2006-01-02"
 
-type MemoryRepo struct{}
+type MemoryRepo struct {
+	currentAdventureId int
+}
 
 func NewMemoryRepo() (*MemoryRepo, error) {
-	return &MemoryRepo{}, nil
+	return &MemoryRepo{currentAdventureId: 0}, nil
 }
 
 func (s *MemoryRepo) CreateCampaign(c *types.CreateCampaignRequest) (*types.Campaign, error) {
@@ -65,6 +67,23 @@ func (s *MemoryRepo) GetCampaign(id int) (*types.Campaign, error) {
 		}, nil
 
 	}
+	if id == 3 {
+		cat, _ := time.Parse(dateLayout, "2024-03-01")
+		uat, _ := time.Parse(dateLayout, "2024-03-01")
+		laa, _ := time.Parse(dateLayout, "2024-03-01")
+		return &types.Campaign{
+			ID:            3,
+			Name:          "Test Three",
+			Recruitment:   false,
+			Judge:         "Shock",
+			Timekeeping:   "Reference",
+			Cadence:       "open",
+			CreatedAt:     cat,
+			UpdatedAt:     uat,
+			LastAdventure: laa,
+		}, nil
+
+	}
 	return nil, errors.New(fmt.Sprintf("Unable to retrieve campaign with id %d", id))
 }
 
@@ -72,8 +91,10 @@ func (s *MemoryRepo) ListCampaigns() ([]*types.Campaign, error) {
 	var ret []*types.Campaign
 	c1, _ := s.GetCampaign(1)
 	c2, _ := s.GetCampaign(2)
+	c3, _ := s.GetCampaign(3)
 	ret = append(ret, c1)
 	ret = append(ret, c2)
+	ret = append(ret, c3)
 	return ret, nil
 }
 
@@ -84,11 +105,19 @@ func (s *MemoryRepo) GetAdventureRecordsForCampaign(id int) ([]*types.AdventureR
 	startDate, _ := time.Parse(dateLayout, "2024-01-01")
 	second := startDate.AddDate(0, 0, 7)
 	third := second.AddDate(0, 0, 7)
-	a := types.NewAdventureRecord(1, 1, memCoins(), memGems(), memJewellery(), memMagicItem(), memMonsters(), startDate)
-	b := types.NewAdventureRecord(2, 1, memCoins(), memGems(), memJewellery(), memMagicItem(), memMonsters(), second)
-	c := types.NewAdventureRecord(3, 1, memCoins(), memGems(), memJewellery(), memMagicItem(), memMonsters(), third)
+	a := types.NewAdventureRecord(1, 1, memCoins(), memGems(), memJewellery(), memMonsters(), memMagicItem(), "", startDate)
+	b := types.NewAdventureRecord(2, 1, memCoins(), memGems(), memJewellery(), memMonsters(), memMagicItem(), "", second)
+	c := types.NewAdventureRecord(3, 1, memCoins(), memGems(), memJewellery(), memMonsters(), memMagicItem(), "", third)
 
 	return []*types.AdventureRecord{a, b, c}, nil
+
+}
+
+func (s *MemoryRepo) CreateAdventureRecordForCampaign(r *types.CreateAdventureRecordRequest) (*types.AdventureRecord, error) {
+	startDate, _ := time.Parse(dateLayout, "2024-01-01")
+	ret := types.NewAdventureRecord(s.currentAdventureId, r.CampaignID, memCoins(), memGems(), memJewellery(), memMonsters(), memMagicItem(), "New Adventure", startDate)
+	s.currentAdventureId++
+	return ret, nil
 
 }
 
@@ -96,13 +125,13 @@ func memCoins() *types.Coins {
 	return types.NewCoins(10000, 1000, 200, 100, 20)
 }
 func memGems() []*types.Gem {
-	a := types.NewGem("Amethyst", "Shines brightly", 100)
-	d := types.NewGem("Diamond", "", 1000)
+	a := types.NewGem("Amethyst", "Shines brightly", 100, 10)
+	d := types.NewGem("Diamond", "", 1000, 1)
 	return []*types.Gem{a, d}
 }
 func memJewellery() []*types.Jewellery {
-	a := types.NewJewellery("Necklace", "is broken", 100)
-	d := types.NewJewellery("Crown", "", 1000)
+	a := types.NewJewellery("Necklace", "is broken", 100, 2)
+	d := types.NewJewellery("Crown", "", 1000, 1)
 	return []*types.Jewellery{a, d}
 }
 func memMagicItem() []*types.MagicItem {

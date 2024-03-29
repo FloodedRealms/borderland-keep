@@ -17,7 +17,7 @@ type AdventureRecordService interface {
 }
 
 type AdventureRecordServiceImpl struct {
-	Repo repository.Repository
+	repo repository.Repository
 	Ctx  context.Context
 }
 
@@ -26,7 +26,7 @@ func NewAdventureRecordService(repo repository.Repository, ctx context.Context) 
 }
 
 func (a *AdventureRecordServiceImpl) CreateAdventureRecordForCampaign(r *types.CreateAdventureRecordRequest) (*types.AdventureRecord, error) {
-	return nil, util.NotYetImplmented()
+	return a.repo.CreateAdventureRecordForCampaign(r)
 }
 
 func (a *AdventureRecordServiceImpl) UpdateAdventureRecord(r *types.UpdateAdventureRecordRequest) (*types.AdventureRecord, error) {
@@ -35,7 +35,7 @@ func (a *AdventureRecordServiceImpl) UpdateAdventureRecord(r *types.UpdateAdvent
 func (a *AdventureRecordServiceImpl) ListAdventureRecordsForCampaign(i string) ([]*types.AdventureRecord, error) {
 	id, err := strconv.Atoi(i)
 	util.CheckErr(err)
-	return a.Repo.GetAdventureRecordsForCampaign(id)
+	return a.repo.GetAdventureRecordsForCampaign(id)
 
 }
 
