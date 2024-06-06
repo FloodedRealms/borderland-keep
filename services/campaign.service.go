@@ -15,6 +15,7 @@ type CampaignService interface {
 	UpdateCampaign(*types.UpdateCampaignRequest) (*types.Campaign, error)
 	GetCampaign(string) (*types.Campaign, error)
 	ListCampaigns() ([]*types.Campaign, error)
+	DeleteCampaign(string) (bool, error)
 }
 
 type CampaignServiceImpl struct {
@@ -52,4 +53,13 @@ func (c *CampaignServiceImpl) GetCampaign(id string) (*types.Campaign, error) {
 
 func (c *CampaignServiceImpl) ListCampaigns() ([]*types.Campaign, error) {
 	return c.repo.ListCampaigns()
+}
+
+func (c *CampaignServiceImpl) DeleteCampaign(id string) (bool, error) {
+	campaignId, err := strconv.Atoi(id)
+	if err != nil {
+		return false, err
+	}
+	campaignToDelete := types.NewCampaign(campaignId)
+	return c.repo.DeleteCampaign(campaignToDelete)
 }

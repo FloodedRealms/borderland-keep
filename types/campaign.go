@@ -37,3 +37,11 @@ type UpdateCampaignRequest struct {
 }
 
 func ValidateCampaign(u *Campaign) bool { return true }
+
+func NewCampaign(id int) *Campaign {
+	return &Campaign{id, "", false, "", "", "", time.Now(), time.Now(), time.Now()}
+}
+
+func NewCampaignFull(id int, name, judge, timekeeping, cadence string, recruit bool, cdate, udate, ldate time.Time) *Campaign {
+	return &Campaign{id, name, recruit, judge, timekeeping, cadence, time.Now(), time.Now(), time.Now()}
+}

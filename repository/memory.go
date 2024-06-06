@@ -98,6 +98,10 @@ func (s *MemoryRepo) ListCampaigns() ([]*types.Campaign, error) {
 	return ret, nil
 }
 
+func (s *MemoryRepo) DeleteCampaign(id string) (bool, error) {
+	return true, nil
+}
+
 func (s *MemoryRepo) GetAdventureRecordsForCampaign(id int) ([]*types.AdventureRecord, error) {
 	if id != 1 {
 		return nil, errors.New("campaign id not found")
@@ -105,9 +109,9 @@ func (s *MemoryRepo) GetAdventureRecordsForCampaign(id int) ([]*types.AdventureR
 	startDate, _ := time.Parse(dateLayout, "2024-01-01")
 	second := startDate.AddDate(0, 0, 7)
 	third := second.AddDate(0, 0, 7)
-	a := types.NewAdventureRecord(1, 1, memCoins(), memGems(), memJewellery(), memMonsters(), memMagicItem(), "", startDate)
-	b := types.NewAdventureRecord(2, 1, memCoins(), memGems(), memJewellery(), memMonsters(), memMagicItem(), "", second)
-	c := types.NewAdventureRecord(3, 1, memCoins(), memGems(), memJewellery(), memMonsters(), memMagicItem(), "", third)
+	a := types.NewAdventureRecord(1, 1, memGems(), memJewellery(), memMonsters(), memMagicItem(), nil, "", time.Now(), time.Now(), startDate)
+	b := types.NewAdventureRecord(2, 1, memGems(), memJewellery(), memMonsters(), memMagicItem(), nil, "", time.Now(), time.Now(), second)
+	c := types.NewAdventureRecord(3, 1, memGems(), memJewellery(), memMonsters(), memMagicItem(), nil, "", time.Now(), time.Now(), third)
 
 	return []*types.AdventureRecord{a, b, c}, nil
 
@@ -115,7 +119,7 @@ func (s *MemoryRepo) GetAdventureRecordsForCampaign(id int) ([]*types.AdventureR
 
 func (s *MemoryRepo) CreateAdventureRecordForCampaign(r *types.CreateAdventureRecordRequest) (*types.AdventureRecord, error) {
 	startDate, _ := time.Parse(dateLayout, "2024-01-01")
-	ret := types.NewAdventureRecord(s.currentAdventureId, r.CampaignID, memCoins(), memGems(), memJewellery(), memMonsters(), memMagicItem(), "New Adventure", startDate)
+	ret := types.NewAdventureRecord(s.currentAdventureId, r.CampaignID, memGems(), memJewellery(), memMonsters(), memMagicItem(), nil, "New Adventure", time.Now(), time.Now(), startDate)
 	s.currentAdventureId++
 	return ret, nil
 

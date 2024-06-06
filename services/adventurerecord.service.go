@@ -35,7 +35,8 @@ func (a *AdventureRecordServiceImpl) UpdateAdventureRecord(r *types.UpdateAdvent
 func (a *AdventureRecordServiceImpl) ListAdventureRecordsForCampaign(i string) ([]*types.AdventureRecord, error) {
 	id, err := strconv.Atoi(i)
 	util.CheckErr(err)
-	return a.repo.GetAdventureRecordsForCampaign(id)
+	campaign := types.NewCampaign(id)
+	return a.repo.GetAdventureRecordsForCampaign(campaign)
 
 }
 

@@ -64,6 +64,23 @@ func (ca *CampaignApi) GetCampaign(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, gin.H{"status": "success", "data": campaign})
 }
 
+func (ca *CampaignApi) DeleteCampaign(ctx *gin.Context) {
+	applyCorsHeaders(ctx)
+	id := ctx.Param("campaignId")
+
+	campaign, err := ca.campaignService.DeleteCampaign(id)
+
+	if err != nil {
+		if strings.Contains(err.Error(), "Index already exists") {
+			ctx.JSON(http.StatusNotFound, gin.H{"status": "fail", "message": err.Error()})
+			return
+		}
+		ctx.JSON(http.StatusBadGateway, gin.H{"status": "fail", "message": err.Error()})
+		return
+	}
+	ctx.JSON(http.StatusOK, gin.H{"status": "success", "data": campaign})
+}
+
 func applyCorsHeaders(ctx *gin.Context) {
 	ctx.Header("Access-Control-Allow-Origin", "*")
 	ctx.Header("Access-Control-Allow-Headers", "access-control-allow-origin, access-control-allow-headers")
