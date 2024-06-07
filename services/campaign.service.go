@@ -5,9 +5,9 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/kevin/adventure-archivist/repository"
-	"github.com/kevin/adventure-archivist/types"
-	"github.com/kevin/adventure-archivist/util"
+	"github.com/floodedrealms/adventure-archivist/repository"
+	"github.com/floodedrealms/adventure-archivist/types"
+	"github.com/floodedrealms/adventure-archivist/util"
 )
 
 type CampaignService interface {

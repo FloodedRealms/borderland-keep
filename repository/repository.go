@@ -1,6 +1,6 @@
 package repository
 
-import "github.com/kevin/adventure-archivist/types"
+import "github.com/floodedrealms/adventure-archivist/types"
 
 type Repository interface {
 	CreateCampaign(*types.CreateCampaignRequest) (*types.Campaign, error)
@@ -10,4 +10,6 @@ type Repository interface {
 
 	GetAdventureRecordsForCampaign(*types.Campaign) ([]*types.AdventureRecord, error)
 	CreateAdventureRecordForCampaign(*types.CreateAdventureRecordRequest) (*types.AdventureRecord, error)
+	GetAdventureRecordById(*types.AdventureRecord) (*types.AdventureRecord, error)
+	AddGemToAdventure(*types.AdventureRecord, *types.Gem) (bool, error)
 }

@@ -6,10 +6,10 @@ import (
 
 	"github.com/gin-gonic/gin"
 
-	"github.com/kevin/adventure-archivist/api"
-	"github.com/kevin/adventure-archivist/repository"
-	"github.com/kevin/adventure-archivist/services"
-	"github.com/kevin/adventure-archivist/util"
+	"github.com/floodedrealms/adventure-archivist/api"
+	"github.com/floodedrealms/adventure-archivist/repository"
+	"github.com/floodedrealms/adventure-archivist/services"
+	"github.com/floodedrealms/adventure-archivist/util"
 )
 
 func main() {
@@ -34,9 +34,11 @@ func main() {
 
 	//Campaign Endpoints
 	router.POST("/campaigns", campaignApi.CreateCampaign)
+	router.POST("/campaigns/:campaignId/adventures", adventureRecordApi.CreateAdventureRecord)
 
 	router.GET("/campaigns", campaignApi.ListCampaigns)
 	router.GET("/campaigns/:campaignId", campaignApi.GetCampaign)
+	router.GET("/campaigns/:campaignId/adventures", adventureRecordApi.ListAdventureRecordsForCampaign)
 
 	router.DELETE("/campaigns/:campaignId", campaignApi.DeleteCampaign)
 
@@ -44,21 +46,24 @@ func main() {
 	router.OPTIONS("/campaigns/:campaignId", preflight)
 
 	//Adventure Endpoints
-	router.GET("/adventures/:campaignId", adventureRecordApi.ListAdventureRecordsForCampaign)
-	//	router.GET("/adventures/:adventureId", adventureRecordApi.GetAdventure)
-	//	router.GET("/adventures/:adventureId/experience", adventureRecordApi.GetAdventureExperience)
 
-	router.POST("/adventures/:campaignId", adventureRecordApi.CreateAdventureRecord)
-	//	router.POST("/adventures/:adventureId/loot/:type", adventureRecordApi.AddLootToAdventure)
-	//	router.POST("/adventures/:adventureId/combat", adventureRecordApi.AddCombatToAdventure)
-	//	router.POST("/adventures/:adventureId/:characterId/add", adventureRecordApi.AddCharacterToAdventure)
-	//	router.POST("/adventures/:adventureId/:characterId/remove", adventureRecordApi.RemoveCharacterFromAdventure)
+	router.POST("/adventures/:adventureId/loot", /*func(c *gin.Context) {
+			id := c.Param("adventureIdid")
+			c.String(http.StatusOK, id)
+			// Handle request with id parameter
+		}) */adventureRecordApi.AddLootToAdventure)
+	router.GET("/adventures/:adventureId", adventureRecordApi.GetAdventure)
+	// router.GET("/adventures/:adventureId/experience", adventureRecordApi.GetAdventureExperience)
+
+	// router.POST("/adventures/:adventureId/combat", adventureRecordApi.AddCombatToAdventure)
+	// router.POST("/adventures/:adventureId/:characterId/add", adventureRecordApi.AddCharacterToAdventure)
+	// router.POST("/adventures/:adventureId/:characterId/remove", adventureRecordApi.RemoveCharacterFromAdventure)
 
 	//	router.DELETE("/adventures/{adventureId}", adventureRecordApi.DeleteAdventure)
 
 	router.OPTIONS("/adventures", preflight)
 	router.OPTIONS("/adventures/:adventureId", preflight)
-	router.OPTIONS("/adventures/:adventureId/loot/:type", preflight)
+	//router.OPTIONS("/adventures/:adventureId/loot/:type", preflight)
 	router.OPTIONS("/adventures/:adventureId/combat", preflight)
 	router.OPTIONS("/adventures/:adventureId/:characterId/:op", preflight)
 

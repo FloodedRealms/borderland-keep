@@ -4,9 +4,9 @@ import (
 	"net/http"
 	"strings"
 
+	"github.com/floodedrealms/adventure-archivist/services"
+	"github.com/floodedrealms/adventure-archivist/types"
 	"github.com/gin-gonic/gin"
-	"github.com/kevin/adventure-archivist/services"
-	"github.com/kevin/adventure-archivist/types"
 )
 
 type CampaignApi struct {

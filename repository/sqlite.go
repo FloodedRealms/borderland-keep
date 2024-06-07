@@ -3,9 +3,10 @@ package repository
 import (
 	"database/sql"
 	"fmt"
+	"time"
 
-	"github.com/kevin/adventure-archivist/types"
-	"github.com/kevin/adventure-archivist/util"
+	"github.com/floodedrealms/adventure-archivist/types"
+	"github.com/floodedrealms/adventure-archivist/util"
 	_ "github.com/mattn/go-sqlite3"
 )
 
@@ -43,6 +44,8 @@ const magicItemsTable string = "magic_items"
 const combatTable string = "monster_groups"
 const characterToAdventureTable string = "adventures_to_characters"
 const characterTable string = "characters"
+
+var trash int = 0
 
 type SqliteRepo struct {
 	db     *sql.DB
@@ -139,9 +142,11 @@ func (s SqliteRepo) DeleteCampaign(c *types.Campaign) (bool, error) {
 
 // Adventures
 func (s SqliteRepo) insertAdventureRecord(a types.CreateAdventureRecordRequest) (int, error) {
-	stmt, err := s.db.Prepare(fmt.Sprintf("INSERT INTO %s (campaign_id, name, adventure_date, copper, silver, electrum, gold, platinum created_at, updated_at) (?, ?, ?, ?, ?)", adventureTable))
+	stmt_string := fmt.Sprintf("INSERT INTO %s(campaign_id, name, created_at, updated_at, adventure_date) values(?, ?, ?, ?, ?)", adventureTable)
+	s.logger.Debug(stmt_string)
+	stmt, err := s.db.Prepare(stmt_string)
 	util.CheckErr(err)
-	res, err := stmt.Exec(a.CampaignID, a.Name, a.AdventureDate, a.Copper, a.Silver, a.Electrum, a.Gold, a.Platinum, a.CreatedAt, a.UpdatedAt)
+	res, err := stmt.Exec(a.CampaignID, a.Name, time.Now(), time.Now(), a.AdventureDate)
 	util.CheckErr(err)
 	stmt2, err := s.db.Prepare(fmt.Sprintf("UPDATE %s SET last_adventure=? WHERE id=?", campaignTable))
 	util.CheckErr(err)
@@ -157,8 +162,8 @@ func (s SqliteRepo) insertAdventureRecord(a types.CreateAdventureRecordRequest) 
 func (s SqliteRepo) selectAdventureById(id int) *types.AdventureRecord {
 	tableq := fmt.Sprintf("SELECT * FROM %s c where c.id = ?", adventureTable)
 	rows, err := s.runQuery(tableq, id)
-	defer rows.Close()
 	util.CheckErr(err)
+	defer rows.Close()
 
 	results := s.processAdventureRows(rows)
 
@@ -168,8 +173,8 @@ func (s SqliteRepo) selectAdventureByCampaignId(c *types.Campaign) ([]*types.Adv
 
 	tableq := fmt.Sprintf("SELECT * FROM %s c where c.campaign_id = ?", adventureTable)
 	rows, err := s.runQuery(tableq, c.ID)
-	defer rows.Close()
 	util.CheckErr(err)
+	defer rows.Close()
 
 	results := s.processAdventureRows(rows)
 
@@ -179,7 +184,7 @@ func (s SqliteRepo) processAdventureRows(r *sql.Rows) []*types.AdventureRecord {
 	adventures := make([]*types.AdventureRecord, 0)
 	for r.Next() {
 		current := &types.AdventureRecord{}
-		err := r.Scan(current.ID, current.CampaignID, current.Name, current.AdventureDate, current.Copper, current.Silver, current.Electrum, current.Gold, current.Electrum)
+		err := r.Scan(&current.ID, &current.CampaignID, &current.Name, &current.AdventureDate, &current.CreatedAt, &current.UpdatedAt, &current.Copper, &current.Silver, &current.Electrum, &current.Gold, &current.Electrum)
 		current.Gems = s.getGemsForAdventure(current.ID)
 		current.Jewellery = s.getJewelleryForAdventure(current.ID)
 		current.MagicItems = s.getMagicItemsForAdventure(current.ID)
@@ -191,70 +196,71 @@ func (s SqliteRepo) processAdventureRows(r *sql.Rows) []*types.AdventureRecord {
 	return adventures
 }
 
-func (s SqliteRepo) getGemsForAdventure(id int) []*types.Gem {
-	tableq := fmt.Sprintf("SELECT * FROM %s g where c.adventure_id = ?", gemTable)
+func (s SqliteRepo) getGemsForAdventure(id int) []types.Gem {
+	tableq := fmt.Sprintf("SELECT * FROM %s g where g.adventure_id = ?", gemTable)
 	rows, err := s.runQuery(tableq, id)
-	defer rows.Close()
 	util.CheckErr(err)
-	gems := make([]*types.Gem, 0)
+	defer rows.Close()
+	gems := make([]types.Gem, 0)
 	for rows.Next() {
+		s.logger.Debug("Trying to get gem")
 		current := &types.Gem{}
-		err := rows.Scan(nil, nil, current.Name, current.Description, current.Value, current.Total)
+		err := rows.Scan(&trash, &trash, &current.Loot.Name, &current.Loot.Description, &current.Loot.XPValue, &current.Loot.Number)
 		util.CheckErr(err)
-		gems = append(gems, current)
+		gems = append(gems, *current)
 	}
 	return gems
 }
-func (s SqliteRepo) getJewelleryForAdventure(id int) []*types.Jewellery {
-	tableq := fmt.Sprintf("SELECT * FROM %s g where c.adventure_id = ?", jewelleryTable)
+func (s SqliteRepo) getJewelleryForAdventure(id int) []types.Jewellery {
+	tableq := fmt.Sprintf("SELECT * FROM %s j where j.adventure_id = ?", jewelleryTable)
 	rows, err := s.runQuery(tableq, id)
-	defer rows.Close()
 	util.CheckErr(err)
-	jewellery := make([]*types.Jewellery, 0)
+	defer rows.Close()
+	jewellery := make([]types.Jewellery, 0)
 	for rows.Next() {
 		current := &types.Jewellery{}
-		err := rows.Scan(nil, nil, current.Name, current.Description, current.Value, current.Total)
+		err := rows.Scan(nil, nil, &current.Loot.Name, &current.Loot.Description, &current.Loot.XPValue, &current.Loot.Number)
 		util.CheckErr(err)
-		jewellery = append(jewellery, current)
+		jewellery = append(jewellery, *current)
 	}
 	return jewellery
 }
 
-func (s SqliteRepo) getMagicItemsForAdventure(id int) []*types.MagicItem {
-	tableq := fmt.Sprintf("SELECT * FROM %s g where c.adventure_id = ?", magicItemsTable)
+func (s SqliteRepo) getMagicItemsForAdventure(id int) []types.MagicItem {
+	tableq := fmt.Sprintf("SELECT * FROM %s m where m.adventure_id = ?", magicItemsTable)
 	rows, err := s.runQuery(tableq, id)
-	defer rows.Close()
 	util.CheckErr(err)
-	magicItems := make([]*types.MagicItem, 0)
+	defer rows.Close()
+	magicItems := make([]types.MagicItem, 0)
 	for rows.Next() {
 		current := &types.MagicItem{}
-		err := rows.Scan(nil, nil, current.Name, current.Description, current.ApparentValue)
+		err := rows.Scan(trash, trash, &current.Loot.Name, &current.Loot.Description, &current.Loot.XPValue, &current.ActualValue)
 		util.CheckErr(err)
-		magicItems = append(magicItems, current)
+		magicItems = append(magicItems, *current)
 	}
 	return magicItems
 }
 
-func (s SqliteRepo) getCombatForAdventure(id int) []*types.MonsterGroup {
-	tableq := fmt.Sprintf("SELECT * FROM %s g where c.adventure_id = ?", combatTable)
+func (s SqliteRepo) getCombatForAdventure(id int) []types.MonsterGroup {
+	tableq := fmt.Sprintf("SELECT * FROM %s c where c.adventure_id = ?", combatTable)
 	rows, err := s.runQuery(tableq, id)
-	defer rows.Close()
 	util.CheckErr(err)
-	combat := make([]*types.MonsterGroup, 0)
+	defer rows.Close()
+	combat := make([]types.MonsterGroup, 0)
 	for rows.Next() {
 		current := &types.MonsterGroup{}
-		err := rows.Scan(nil, nil, current.MonsterName, current.NumberDefeated, current.XP, current.TotalXP)
+		err := rows.Scan(trash, trash, &current.XP.Name, &current.XP.Number, &current.XP.XPValue, trash)
 		util.CheckErr(err)
-		combat = append(combat, current)
+		combat = append(combat, *current)
 	}
 	return combat
 }
-func (s SqliteRepo) getCharactersForAdventure(id int) []*types.Character {
-	tableq := fmt.Sprintf("SELECT * FROM %s g where c.adventure_id = ?", characterToAdventureTable)
+func (s SqliteRepo) getCharactersForAdventure(id int) []types.Character {
+	tableq := fmt.Sprintf("SELECT * FROM %s c where c.adventure_id = ?", characterToAdventureTable)
 	rows, err := s.runQuery(tableq, id)
-	defer rows.Close()
 	util.CheckErr(err)
-	characters := make([]*types.Character, 0)
+	defer rows.Close()
+	characters := make([]types.Character, 0)
 	for rows.Next() {
 		var rid int
 		var aid int
@@ -267,7 +273,7 @@ func (s SqliteRepo) getCharactersForAdventure(id int) []*types.Character {
 			current.Halfshare = true
 		}
 		util.CheckErr(err)
-		characters = append(characters, current)
+		characters = append(characters, *current)
 	}
 	return characters
 
@@ -281,6 +287,22 @@ func (s SqliteRepo) CreateAdventureRecordForCampaign(a *types.CreateAdventureRec
 
 func (s SqliteRepo) GetAdventureRecordsForCampaign(c *types.Campaign) ([]*types.AdventureRecord, error) {
 	return s.selectAdventureByCampaignId(c)
+}
+
+func (s SqliteRepo) GetAdventureRecordById(a *types.AdventureRecord) (*types.AdventureRecord, error) {
+	return s.selectAdventureById(a.ID), nil
+}
+
+func (s SqliteRepo) AddGemToAdventure(a *types.AdventureRecord, g *types.Gem) (bool, error) {
+	stmt_string := fmt.Sprintf("INSERT INTO %s(adventure_id, name, description, value, total) values(?, ?, ?, ?, ?)", gemTable)
+	s.logger.Debug(stmt_string)
+	stmt, err := s.db.Prepare(stmt_string)
+	util.CheckErr(err)
+	_, resErr := stmt.Exec(a.ID, g.Loot.Name, g.Loot.Description, g.Loot.XPValue, g.Loot.Number)
+	if resErr != nil {
+		return false, resErr
+	}
+	return true, nil
 }
 
 // Characters

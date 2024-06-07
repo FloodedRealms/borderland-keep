@@ -2,11 +2,12 @@ package services
 
 import (
 	"context"
+	"log"
 	"strconv"
 
-	"github.com/kevin/adventure-archivist/repository"
-	"github.com/kevin/adventure-archivist/types"
-	"github.com/kevin/adventure-archivist/util"
+	"github.com/floodedrealms/adventure-archivist/repository"
+	"github.com/floodedrealms/adventure-archivist/types"
+	"github.com/floodedrealms/adventure-archivist/util"
 )
 
 type AdventureRecordService interface {
@@ -14,6 +15,7 @@ type AdventureRecordService interface {
 	UpdateAdventureRecord(*types.UpdateAdventureRecordRequest) (*types.AdventureRecord, error)
 	ListAdventureRecordsForCampaign(string) ([]*types.AdventureRecord, error)
 	GetAdventureRecordById(string) (*types.AdventureRecord, error)
+	AddGemLootToAdventure(*types.AdventureRecord, *types.Gem) (bool, error)
 }
 
 type AdventureRecordServiceImpl struct {
@@ -41,5 +43,16 @@ func (a *AdventureRecordServiceImpl) ListAdventureRecordsForCampaign(i string) (
 }
 
 func (a *AdventureRecordServiceImpl) GetAdventureRecordById(i string) (*types.AdventureRecord, error) {
-	return nil, util.NotYetImplmented()
+	id, err := strconv.Atoi(i)
+	util.CheckErr(err)
+	ad, err2 := a.repo.GetAdventureRecordById(types.NewAdventureRecordById(id))
+	if err2 != nil {
+		return nil, util.NotYetImplmented()
+	}
+	return ad, nil
+}
+
+func (a *AdventureRecordServiceImpl) AddGemLootToAdventure(ad *types.AdventureRecord, g *types.Gem) (bool, error) {
+	log.Print("hit")
+	return a.repo.AddGemToAdventure(ad, g)
 }
