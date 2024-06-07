@@ -16,10 +16,12 @@ func main() {
 	//	memRepo, err := repository.NewMemoryRepo()
 	//	util.CheckErr(err)
 
-	sqlRepo, err := repository.NewSqliteRepo("archivist.db")
+	logger := util.NewLogger(true)
+
+	sqlRepo, err := repository.NewSqliteRepo("archivist.db", logger)
 	util.CheckErr(err)
 
-	campaignService := services.NewCampaignService(sqlRepo, context.TODO())
+	campaignService := services.NewCampaignService(sqlRepo, logger, context.TODO())
 	campaignApi := api.NewCampaignApi(campaignService)
 
 	adventureRecordService := services.NewAdventureRecordService(sqlRepo, context.TODO())
@@ -56,7 +58,6 @@ func main() {
 
 	router.OPTIONS("/adventures", preflight)
 	router.OPTIONS("/adventures/:adventureId", preflight)
-	router.OPTIONS("/adventures/:campaignId", preflight)
 	router.OPTIONS("/adventures/:adventureId/loot/:type", preflight)
 	router.OPTIONS("/adventures/:adventureId/combat", preflight)
 	router.OPTIONS("/adventures/:adventureId/:characterId/:op", preflight)
@@ -74,9 +75,6 @@ func main() {
 
 	router.OPTIONS("/characters", preflight)
 	router.OPTIONS("/characters/:adventureId", preflight)
-	router.OPTIONS("/characters/:campaignId", preflight)
-	router.OPTIONS("/characters/:characterId", preflight)
-	router.OPTIONS("/characters/:characterId/attributes", preflight)
 
 	router.Run("localhost:9090")
 }

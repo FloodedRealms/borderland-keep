@@ -19,12 +19,13 @@ type CampaignService interface {
 }
 
 type CampaignServiceImpl struct {
-	repo repository.Repository
-	ctx  context.Context
+	repo   repository.Repository
+	logger util.Logger
+	ctx    context.Context
 }
 
-func NewCampaignService(repo repository.Repository, ctx context.Context) *CampaignServiceImpl {
-	return &CampaignServiceImpl{repo, ctx}
+func NewCampaignService(repo repository.Repository, logger *util.Logger, ctx context.Context) *CampaignServiceImpl {
+	return &CampaignServiceImpl{repo, *logger, ctx}
 }
 
 func (c *CampaignServiceImpl) CreateCampaign(cr *types.CreateCampaignRequest) (*types.Campaign, error) {

@@ -45,10 +45,11 @@ const characterToAdventureTable string = "adventures_to_characters"
 const characterTable string = "characters"
 
 type SqliteRepo struct {
-	db *sql.DB
+	db     *sql.DB
+	logger *util.Logger
 }
 
-func NewSqliteRepo(f string) (*SqliteRepo, error) {
+func NewSqliteRepo(f string, logger *util.Logger) (*SqliteRepo, error) {
 	db, err := sql.Open("sqlite3", f)
 	if err != nil {
 		return nil, err
@@ -59,7 +60,7 @@ func NewSqliteRepo(f string) (*SqliteRepo, error) {
 	if _, err := db.Exec(createAdventureTable); err != nil {
 		return nil, err
 	}
-	return &SqliteRepo{db: db}, nil
+	return &SqliteRepo{db: db, logger: logger}, nil
 }
 
 func (s SqliteRepo) runQuery(q string, params ...interface{}) (*sql.Rows, error) {
@@ -73,7 +74,7 @@ func (s SqliteRepo) processCampaignRows(r *sql.Rows) []*types.Campaign {
 	campaigns := make([]*types.Campaign, 0)
 	for r.Next() {
 		current := &types.Campaign{}
-		err := r.Scan(current.ID, current.Name, current.Recruitment, current.Judge, current.Timekeeping, current.Cadence, current.Cadence, current.UpdatedAt, current.LastAdventure)
+		err := r.Scan(&current.ID, &current.Name, &current.Recruitment, &current.Judge, &current.Timekeeping, &current.Cadence, &current.CreatedAt, &current.UpdatedAt, &current.LastAdventure)
 		util.CheckErr(err)
 		campaigns = append(campaigns, current)
 	}
@@ -92,8 +93,13 @@ func (s SqliteRepo) selectAllCampaigns() []*types.Campaign {
 }
 
 func (s SqliteRepo) insertCampaign(c types.CreateCampaignRequest) (int, error) {
-	stmt, err := s.db.Prepare(fmt.Sprintf("INSERT INTO %s (name, recruitment, judge, timekeeping, cadence, created_at, updated_at, last_adventure) (?, ?, ?, ?, ?, ?, ?, ?)", campaignTable))
+	s.logger.Debug("tried to insert campaign")
+	stmtString := fmt.Sprintf("INSERT INTO %s(name, recruitment, judge, timekeeping, cadence, created_at, updated_at, last_adventure) values(?, ?, ?, ?, ?, ?, ?, ?) ;", campaignTable)
+	s.logger.Debug("String is:")
+	s.logger.Debug(stmtString)
+	stmt, err := s.db.Prepare(stmtString)
 	util.CheckErr(err)
+	s.logger.Debug("statement successully prepared.")
 	res, err := stmt.Exec(c.Name, c.Recruitment, c.Judge, c.Timekeeping, c.Cadence, c.CreatedAt, c.UpdatedAt, c.LastAdventure)
 	util.CheckErr(err)
 	var id int64
