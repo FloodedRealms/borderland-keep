@@ -1,9 +1,13 @@
 package types
 
 type Jewellery struct {
-	Loot *XPSource
+	Id            int `json:"id"`
+	TotalXPAmount int `json:"jewellery_xp"`
+	Loot          XPSource
 }
 
-func NewJewellery(n, d string, v float64, t int) *Jewellery {
-	return &Jewellery{NewLoot(n, d, v, t)}
+func NewJewellery(n, d string, v float64, number, id int) *Jewellery {
+	return &Jewellery{
+		Id:   id,
+		Loot: *NewLoot(n, d, v, number)}
 }

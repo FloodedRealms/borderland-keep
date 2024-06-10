@@ -22,10 +22,12 @@ func main() {
 	util.CheckErr(err)
 
 	campaignService := services.NewCampaignService(sqlRepo, logger, context.TODO())
-	campaignApi := api.NewCampaignApi(campaignService)
-
+	characterService := services.NewCharacterService(sqlRepo, logger, context.TODO())
 	adventureRecordService := services.NewAdventureRecordService(sqlRepo, context.TODO())
+
+	campaignApi := api.NewCampaignApi(campaignService, characterService)
 	adventureRecordApi := api.NewAdventureRecordApi(adventureRecordService)
+	characterApi := api.NewCharacterApi(characterService)
 
 	//characterService := services.NewCharacterService(memRepo, context.TODO())
 	//characterApi := api.NewCharacterApi(characterService)
@@ -35,6 +37,7 @@ func main() {
 	//Campaign Endpoints
 	router.POST("/campaigns", campaignApi.CreateCampaign)
 	router.POST("/campaigns/:campaignId/adventures", adventureRecordApi.CreateAdventureRecord)
+	router.POST("/campaigns/:campaignId/characters", characterApi.CreateCharacterForCampaign)
 
 	router.GET("/campaigns", campaignApi.ListCampaigns)
 	router.GET("/campaigns/:campaignId", campaignApi.GetCampaign)
@@ -47,17 +50,10 @@ func main() {
 
 	//Adventure Endpoints
 
-	router.POST("/adventures/:adventureId/loot", /*func(c *gin.Context) {
-			id := c.Param("adventureIdid")
-			c.String(http.StatusOK, id)
-			// Handle request with id parameter
-		}) */adventureRecordApi.AddLootToAdventure)
+	router.POST("/adventures/:adventureId/loot", adventureRecordApi.AddLootToAdventure)
+	router.POST("/adventures/:adventureId/characters/:characterId", characterApi.ManageCharactersForAdventure)
 	router.GET("/adventures/:adventureId", adventureRecordApi.GetAdventure)
 	// router.GET("/adventures/:adventureId/experience", adventureRecordApi.GetAdventureExperience)
-
-	// router.POST("/adventures/:adventureId/combat", adventureRecordApi.AddCombatToAdventure)
-	// router.POST("/adventures/:adventureId/:characterId/add", adventureRecordApi.AddCharacterToAdventure)
-	// router.POST("/adventures/:adventureId/:characterId/remove", adventureRecordApi.RemoveCharacterFromAdventure)
 
 	//	router.DELETE("/adventures/{adventureId}", adventureRecordApi.DeleteAdventure)
 
@@ -71,8 +67,6 @@ func main() {
 	//	router.GET("/characters/:campaignId", characterApi.GetCharactersForCampaign)
 	//	router.GET("/characters/:adventureId", characterApi.GetCharactersForAdventure)
 	//	router.GET("/characters/:characterId", characterApi.GetCharacterById)
-
-	//	router.POST("/characters/:campaignId", characterApi.CreateCharacterForCampaign)
 
 	//	router.PATCH("/characters/:characterId/:attributes", characterApi.UpdateCharacter)
 

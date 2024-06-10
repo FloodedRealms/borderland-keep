@@ -10,11 +10,14 @@ import (
 )
 
 type CampaignApi struct {
-	campaignService services.CampaignService
+	campaignService  services.CampaignService
+	characterService services.CharacterService
 }
 
-func NewCampaignApi(cs services.CampaignService) CampaignApi {
-	return CampaignApi{campaignService: cs}
+func NewCampaignApi(cs services.CampaignService, chars services.CharacterService) CampaignApi {
+	return CampaignApi{
+		campaignService:  cs,
+		characterService: chars}
 }
 
 func (ca *CampaignApi) CreateCampaign(ctx *gin.Context) {
@@ -61,6 +64,17 @@ func (ca *CampaignApi) GetCampaign(ctx *gin.Context) {
 		ctx.JSON(http.StatusBadGateway, gin.H{"status": "fail", "message": err.Error()})
 		return
 	}
+
+	campaign.Characters, err = ca.characterService.GetCharactersForCampaign(campaign)
+	if err != nil {
+		if strings.Contains(err.Error(), "Index already exists") {
+			ctx.JSON(http.StatusNotFound, gin.H{"status": "fail", "message": err.Error()})
+			return
+		}
+		ctx.JSON(http.StatusBadGateway, gin.H{"status": "fail", "message": err.Error()})
+		return
+	}
+
 	ctx.JSON(http.StatusOK, gin.H{"status": "success", "data": campaign})
 }
 

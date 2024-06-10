@@ -82,24 +82,78 @@ func (ara AdventureRecordApi) AddLootToAdventure(ctx *gin.Context) {
 	util.CheckErr(err)
 	adventure := types.NewAdventureRecordById(adventureId)
 	lootType := ctx.Query("type")
-	var lootObject *types.XPSource
-	if err = ctx.ShouldBindJSON(&lootObject); err != nil {
-		ctx.JSON(http.StatusBadRequest, err.Error())
-		return
-	}
 
-	log.Print(lootObject)
 	if lootType == "" {
 		ctx.JSON(http.StatusPreconditionFailed, gin.H{"status": "fail", "message": util.RequiredParameterNotProvided()})
 		return
 	}
 	switch lootType {
+	case string(types.CoinLoot):
+		var coinObject *types.CoinUpdateRequest
+		if err = ctx.ShouldBindJSON(&coinObject); err != nil {
+			ctx.JSON(http.StatusBadRequest, err.Error())
+			return
+		}
+		coins := types.NewCoins(coinObject.Copper, coinObject.Silver, coinObject.Electrum, coinObject.Gold, coinObject.Platinum)
+		status, err := ara.adventureRecordService.AddCoinsAdventure(adventure, coins)
+		ara.makeBoolResponse(status, err, ctx)
 	case string(types.GemLoot):
-		gem := types.NewGem(lootObject.Name, lootObject.Description, lootObject.XPValue, lootObject.Number)
+		var lootObject *types.XPSource
+		if err = ctx.ShouldBindJSON(&lootObject); err != nil {
+			ctx.JSON(http.StatusBadRequest, err.Error())
+			return
+		}
+		gem := types.NewGem(lootObject.Name, lootObject.Description, lootObject.XPValue, lootObject.Number, -1)
 		log.Print(ctx.Request.Body)
-		ara.adventureRecordService.AddGemLootToAdventure(adventure, gem)
+		status, err := ara.adventureRecordService.AddGemLootToAdventure(adventure, gem)
+		ara.makeBoolResponse(status, err, ctx)
+
+	case string(types.JewelleryLoot):
+		var lootObject *types.XPSource
+		if err = ctx.ShouldBindJSON(&lootObject); err != nil {
+			ctx.JSON(http.StatusBadRequest, err.Error())
+			return
+		}
+		jewellery := types.NewJewellery(lootObject.Name, lootObject.Description, lootObject.XPValue, lootObject.Number, -1)
+		log.Print(ctx.Request.Body)
+		status, err := ara.adventureRecordService.AddJewelleryLootToAdventure(adventure, jewellery)
+		ara.makeBoolResponse(status, err, ctx)
+
+	case string(types.MagicItemLoot):
+		var lootObject *types.MagicItemRequest
+		if err = ctx.ShouldBindJSON(&lootObject); err != nil {
+			ctx.JSON(http.StatusBadRequest, err.Error())
+			return
+		}
+		magicItem := types.NewMagicItem(lootObject.Name, lootObject.Description, float64(lootObject.ApparentValue), lootObject.ActualValue, -1)
+		status, err := ara.adventureRecordService.AddMagicItemToAdventure(adventure, magicItem)
+		ara.makeBoolResponse(status, err, ctx)
+
+	case string(types.Combat):
+		var lootObject *types.MonsterGroupRequest
+		if err = ctx.ShouldBindJSON(&lootObject); err != nil {
+			ctx.JSON(http.StatusBadRequest, err.Error())
+			return
+		}
+		combat := types.NewMonsterGroup(lootObject.MonsterName, lootObject.NumberDefeated, -1, float64(lootObject.XPPerMonster))
+		status, err := ara.adventureRecordService.AddCombatToAdventure(adventure, combat)
+		ara.makeBoolResponse(status, err, ctx)
+
 	default:
 		ctx.JSON(http.StatusNotImplemented, util.NotYetImplmented())
 
 	}
+}
+
+func (ara AdventureRecordApi) makeBoolResponse(status bool, err error, ctx *gin.Context) {
+	if err != nil {
+		ctx.JSON(http.StatusBadGateway, gin.H{"status": "fail", "message": err.Error()})
+		return
+	}
+	if status != true {
+		ctx.JSON(http.StatusExpectationFailed, gin.H{"status": "fail", "message": "The requested action failed to complete, but no error was report"})
+		return
+	}
+	ctx.JSON(http.StatusOK, gin.H{"status": "success", "message": "The requested action succeeded"})
+
 }
