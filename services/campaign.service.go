@@ -5,9 +5,9 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/kevin/adventure-archivist/repository"
-	"github.com/kevin/adventure-archivist/types"
-	"github.com/kevin/adventure-archivist/util"
+	"github.com/floodedrealms/adventure-archivist/repository"
+	"github.com/floodedrealms/adventure-archivist/types"
+	"github.com/floodedrealms/adventure-archivist/util"
 )
 
 type CampaignService interface {
@@ -15,15 +15,17 @@ type CampaignService interface {
 	UpdateCampaign(*types.UpdateCampaignRequest) (*types.Campaign, error)
 	GetCampaign(string) (*types.Campaign, error)
 	ListCampaigns() ([]*types.Campaign, error)
+	DeleteCampaign(string) (bool, error)
 }
 
 type CampaignServiceImpl struct {
-	repo repository.Repository
-	ctx  context.Context
+	repo   repository.Repository
+	logger util.Logger
+	ctx    context.Context
 }
 
-func NewCampaignService(repo repository.Repository, ctx context.Context) *CampaignServiceImpl {
-	return &CampaignServiceImpl{repo, ctx}
+func NewCampaignService(repo repository.Repository, logger *util.Logger, ctx context.Context) *CampaignServiceImpl {
+	return &CampaignServiceImpl{repo, *logger, ctx}
 }
 
 func (c *CampaignServiceImpl) CreateCampaign(cr *types.CreateCampaignRequest) (*types.Campaign, error) {
@@ -52,4 +54,13 @@ func (c *CampaignServiceImpl) GetCampaign(id string) (*types.Campaign, error) {
 
 func (c *CampaignServiceImpl) ListCampaigns() ([]*types.Campaign, error) {
 	return c.repo.ListCampaigns()
+}
+
+func (c *CampaignServiceImpl) DeleteCampaign(id string) (bool, error) {
+	campaignId, err := strconv.Atoi(id)
+	if err != nil {
+		return false, err
+	}
+	campaignToDelete := types.NewCampaign(campaignId)
+	return c.repo.DeleteCampaign(campaignToDelete)
 }

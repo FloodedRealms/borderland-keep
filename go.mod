@@ -1,4 +1,4 @@
-module github.com/kevin/adventure-archivist
+module github.com/floodedrealms/adventure-archivist
 
 go 1.22.1
 

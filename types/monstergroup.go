@@ -1,31 +1,40 @@
 package types
 
-import "fmt"
+import (
+	"log"
+	"math"
+)
 
 type MonsterGroup struct {
+	Id            int `json:"id"`
+	TotalXPAmount int `json:"combat_xp"`
+	XP            XPSource
+}
+
+type MonsterGroupRequest struct {
 	MonsterName    string `json:"monster_name"`
+	XPPerMonster   int    `json:"xp"`
 	NumberDefeated int    `json:"number_defeated"`
-	XP             int    `json:"xp_per_monster"`
-	TotalXP        int    `json:"total_xp"`
 }
 
-func NewMonsterGroup(n string, d, v int) *MonsterGroup {
-	group := &MonsterGroup{
-		MonsterName:    n,
-		NumberDefeated: d,
-		XP:             v,
+func NewMonsterGroup(name string, numberDefeated, id int, xpValue float64) *MonsterGroup {
+	mon := MonsterGroup{
+		Id: id,
+		XP: *NewLoot(name, "vicous monsters", xpValue, numberDefeated),
 	}
-	group.TotalXP = group.NumberDefeated * group.XP
-	return group
+
+	mon.TotalXPAmount = mon.XP.CalculateTotalXPValue()
+	return &mon
+
 }
 
-func (m *MonsterGroup) XPValue() int {
-	return m.TotalXP
-}
+func (g *MonsterGroup) calculateTotalXP() int {
+	value := g.XP.XPValue * float64(g.XP.Number)
+	log.Printf("Calculating XP for Gem named %s. Individual worth %f, number of items %d. Got a value of %f", g.XP.Name, g.XP.XPValue, g.XP.Number, value)
+	rounded := math.Floor(value)
+	log.Printf("Rounded to %f", rounded)
+	final := int(rounded)
+	log.Printf("Int value to %d", final)
+	return final
 
-func (m *MonsterGroup) Summary() string {
-	if m.NumberDefeated == 1 {
-		return fmt.Sprintf("Defeated a vile %s. This brings %d XP.", m.MonsterName, m.TotalXP)
-	}
-	return fmt.Sprintf("Defeated a group of vile %ss. This brings %d XP.", m.MonsterName, m.TotalXP)
 }

@@ -6,29 +6,75 @@ import (
 
 	"github.com/gin-gonic/gin"
 
-	"github.com/kevin/adventure-archivist/api"
-	"github.com/kevin/adventure-archivist/repository"
-	"github.com/kevin/adventure-archivist/services"
-	"github.com/kevin/adventure-archivist/util"
+	"github.com/floodedrealms/adventure-archivist/api"
+	"github.com/floodedrealms/adventure-archivist/repository"
+	"github.com/floodedrealms/adventure-archivist/services"
+	"github.com/floodedrealms/adventure-archivist/util"
 )
 
 func main() {
-	repo, err := repository.NewMemoryRepo()
+	//	memRepo, err := repository.NewMemoryRepo()
+	//	util.CheckErr(err)
+
+	logger := util.NewLogger(true)
+
+	sqlRepo, err := repository.NewSqliteRepo("archivist.db", logger)
 	util.CheckErr(err)
-	campaignService := services.NewCampaignService(repo, context.TODO())
-	campaignApi := api.NewCampaignApi(campaignService)
-	adventurRecordService := services.NewAdventureRecordService(repo, context.TODO())
-	adventurRecordApi := api.NewAdventureRecordApi(adventurRecordService)
+
+	campaignService := services.NewCampaignService(sqlRepo, logger, context.TODO())
+	characterService := services.NewCharacterService(sqlRepo, logger, context.TODO())
+	adventureRecordService := services.NewAdventureRecordService(sqlRepo, context.TODO())
+
+	campaignApi := api.NewCampaignApi(campaignService, characterService)
+	adventureRecordApi := api.NewAdventureRecordApi(adventureRecordService)
+	characterApi := api.NewCharacterApi(characterService)
+
+	//characterService := services.NewCharacterService(memRepo, context.TODO())
+	//characterApi := api.NewCharacterApi(characterService)
+
 	router := gin.Default()
+
+	//Campaign Endpoints
 	router.POST("/campaigns", campaignApi.CreateCampaign)
+	router.POST("/campaigns/:campaignId/adventures", adventureRecordApi.CreateAdventureRecord)
+	router.POST("/campaigns/:campaignId/characters", characterApi.CreateCharacterForCampaign)
+
 	router.GET("/campaigns", campaignApi.ListCampaigns)
 	router.GET("/campaigns/:campaignId", campaignApi.GetCampaign)
-	router.GET("/campaigns/:campaignId/adventures", adventurRecordApi.ListAdventureRecordsForCampaign)
-	router.POST("/adventures", adventurRecordApi.CreateAdventureRecord)
+	router.GET("/campaigns/:campaignId/adventures", adventureRecordApi.ListAdventureRecordsForCampaign)
+
+	router.DELETE("/campaigns/:campaignId", campaignApi.DeleteCampaign)
 
 	router.OPTIONS("/campaigns", preflight)
 	router.OPTIONS("/campaigns/:campaignId", preflight)
+
+	//Adventure Endpoints
+
+	router.POST("/adventures/:adventureId/loot", adventureRecordApi.AddLootToAdventure)
+	router.POST("/adventures/:adventureId/characters/:characterId", characterApi.ManageCharactersForAdventure)
+	router.GET("/adventures/:adventureId", adventureRecordApi.GetAdventure)
+	// router.GET("/adventures/:adventureId/experience", adventureRecordApi.GetAdventureExperience)
+
+	//	router.DELETE("/adventures/{adventureId}", adventureRecordApi.DeleteAdventure)
+
 	router.OPTIONS("/adventures", preflight)
+	router.OPTIONS("/adventures/:adventureId", preflight)
+	//router.OPTIONS("/adventures/:adventureId/loot/:type", preflight)
+	router.OPTIONS("/adventures/:adventureId/combat", preflight)
+	router.OPTIONS("/adventures/:adventureId/:characterId/:op", preflight)
+
+	//Character Endpoints
+	//	router.GET("/characters/:campaignId", characterApi.GetCharactersForCampaign)
+	//	router.GET("/characters/:adventureId", characterApi.GetCharactersForAdventure)
+	//	router.GET("/characters/:characterId", characterApi.GetCharacterById)
+
+	//	router.PATCH("/characters/:characterId/:attributes", characterApi.UpdateCharacter)
+
+	//	router.DELETE("/characters/:characterId", characterApi.DeleteCharacter)
+
+	router.OPTIONS("/characters", preflight)
+	router.OPTIONS("/characters/:adventureId", preflight)
+
 	router.Run("localhost:9090")
 }
 

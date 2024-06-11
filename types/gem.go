@@ -1,35 +1,36 @@
 package types
 
-import "fmt"
+import (
+	"log"
+	"math"
+)
 
 type Gem struct {
-	Name        string `json:"name"`
-	Description string `json:"description"`
-	Value       int    `json:"value"`
-	Total       int    `json:"total"`
+	Id            int `json:"id"`
+	TotalXPAmount int `json:"gem_xp"`
+	Loot          XPSource
 }
 
-func NewGem(n, d string, v, t int) *Gem {
-	return &Gem{
-		Name:        n,
-		Description: d,
-		Value:       v,
-		Total:       t,
+func NewGem(n, d string, v float64, number, id int) *Gem {
+	gem := Gem{
+		Id:   id,
+		Loot: *NewLoot(n, d, v, number),
 	}
+	gem.TotalXPAmount = gem.calculateTotalXP()
+	return &gem
 }
 
-func (g *Gem) XPValue() int {
-	return g.Value
+func (g *Gem) Name() string {
+	return g.Loot.Name
 }
 
-func (g *Gem) GoldValue() float64 {
-	return float64(g.Value)
-}
-
-func (g *Gem) Summary() string {
-	if g.Description == "" {
-		return fmt.Sprintf("Recovered a %s. It is worth %d gold.", g.Name, g.Value)
-	}
-	return fmt.Sprintf("Recovered a %s worth %d gold. It %s.", g.Name, g.Value, g.Description)
+func (g *Gem) calculateTotalXP() int {
+	value := g.Loot.XPValue * float64(g.Loot.Number)
+	log.Printf("Calculating XP for Gem named %s. Individual worth %f, number of items %d. Got a value of %f", g.Name(), g.Loot.XPValue, g.Loot.Number, value)
+	rounded := math.Floor(value)
+	log.Printf("Rounded to %f", rounded)
+	final := int(rounded)
+	log.Printf("Int value to %d", final)
+	return final
 
 }
