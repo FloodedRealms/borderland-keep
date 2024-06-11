@@ -15,7 +15,8 @@ CREATE TABLE adventures_to_characters (
 id INTEGER NOT NULL PRIMARY KEY,
 adventure_id INTEGER,
 character_id INTEGER,
-halfshare INTEGER NOT NULL CHECK (halfshare IN (0,1)),
+half_share INTEGER NOT NULL CHECK (half_share IN (0,1)),
 FOREIGN KEY(adventure_id) REFERENCES adventures(id),
-FOREIGN KEY(character_id) REFERENCES characters(id)
+FOREIGN KEY(character_id) REFERENCES characters(id),
+UNIQUE(adventure_id, character_id)
 );
