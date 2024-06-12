@@ -2,82 +2,113 @@ package main
 
 import (
 	"context"
+	"flag"
+	"fmt"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
 
 	"github.com/floodedrealms/adventure-archivist/api"
+	"github.com/floodedrealms/adventure-archivist/commands"
 	"github.com/floodedrealms/adventure-archivist/repository"
 	"github.com/floodedrealms/adventure-archivist/services"
 	"github.com/floodedrealms/adventure-archivist/util"
 )
 
 func main() {
-	//	memRepo, err := repository.NewMemoryRepo()
-	//	util.CheckErr(err)
+	flag.Parse()
+	flags := flag.Args()
 
-	logger := util.NewLogger(true)
+	if len(flags) == 0 {
+		fmt.Print("usage: archivist [operation] <args>")
+	}
+	operation := flag.Arg(0)
+	switch operation {
 
-	sqlRepo, err := repository.NewSqliteRepo("archivist.db", logger)
-	util.CheckErr(err)
+	case "create-user":
+		if len(flags) == 1 {
+			fmt.Println("usage: archivist create-user [friendly-name]")
+			return
+		}
+		friendlyName := flag.Arg(1)
+		if len(flags) == 3 {
+			commands.CreateUser("api", friendlyName, false)
+		} else {
+			commands.CreateUser("api", friendlyName, true)
+		}
+	default:
+		//	memRepo, err := repository.NewMemoryRepo()
+		//	util.CheckErr(err)
 
-	campaignService := services.NewCampaignService(sqlRepo, logger, context.TODO())
-	characterService := services.NewCharacterService(sqlRepo, logger, context.TODO())
-	adventureRecordService := services.NewAdventureRecordService(sqlRepo, context.TODO())
+		logger := util.NewLogger(true)
 
-	campaignApi := api.NewCampaignApi(campaignService, characterService)
-	adventureRecordApi := api.NewAdventureRecordApi(adventureRecordService)
-	characterApi := api.NewCharacterApi(characterService)
+		sqlRepo, err := repository.NewSqliteRepo("archivist.db", logger)
+		util.CheckErr(err)
 
-	//characterService := services.NewCharacterService(memRepo, context.TODO())
-	//characterApi := api.NewCharacterApi(characterService)
+		campaignService := services.NewCampaignService(sqlRepo, logger, context.TODO())
+		characterService := services.NewCharacterService(sqlRepo, logger, context.TODO())
+		adventureRecordService := services.NewAdventureRecordService(sqlRepo, context.TODO())
+		userService := services.NewUserService(sqlRepo, *logger)
 
-	router := gin.Default()
+		campaignApi := api.NewCampaignApi(campaignService, characterService)
+		adventureRecordApi := api.NewAdventureRecordApi(adventureRecordService)
+		characterApi := api.NewCharacterApi(characterService)
+		userApi := api.NewUserApi(userService)
 
-	//Campaign Endpoints
-	router.POST("/api/campaigns", campaignApi.CreateCampaign)
-	router.POST("/api/campaigns/:campaignId/adventures", adventureRecordApi.CreateAdventureRecord)
-	router.POST("/api/campaigns/:campaignId/characters", characterApi.CreateCharacterForCampaign)
+		//characterService := services.NewCharacterService(memRepo, context.TODO())
+		//characterApi := api.NewCharacterApi(characterService)
 
-	router.PATCH("/api/campaigns/:campaignId", campaignApi.UpdateCampaign)
+		router := gin.Default()
 
-	router.GET("/api/campaigns", campaignApi.ListCampaigns)
-	router.GET("/api/campaigns/:campaignId", campaignApi.GetCampaign)
-	router.GET("/api/campaigns/:campaignId/adventures", adventureRecordApi.ListAdventureRecordsForCampaign)
+		//Campaign Endpoints
+		router.POST("/api/campaigns", userApi.RequireUserValidation(), campaignApi.CreateCampaign)
+		router.POST("/api/campaigns/:campaignId/adventures", adventureRecordApi.CreateAdventureRecord)
+		router.POST("/api/campaigns/:campaignId/characters", characterApi.CreateCharacterForCampaign)
 
-	router.DELETE("/api/campaigns/:campaignId", campaignApi.DeleteCampaign)
+		router.PATCH("/api/campaigns/:campaignId", campaignApi.UpdateCampaign)
 
-	router.OPTIONS("/api/campaigns", preflight)
-	router.OPTIONS("/api/campaigns/:campaignId", preflight)
+		router.GET("/api/campaigns", campaignApi.ListCampaigns)
+		router.GET("/api/campaigns/:campaignId", campaignApi.GetCampaign)
+		router.GET("/api/campaigns/:campaignId/adventures", adventureRecordApi.ListAdventureRecordsForCampaign)
 
-	//Adventure Endpoints
-	//router.POST("/adventures/:adventureId/loot", adventureRecordApi.AddLootToAdventure)
-	router.POST("/api/adventures/:adventureId/characters/:characterId", characterApi.ManageCharactersForAdventure)
+		router.DELETE("/api/campaigns/:campaignId", campaignApi.DeleteCampaign)
 
-	router.PATCH("/api/adventures/:adventureId", adventureRecordApi.UpdateAdventure)
+		router.OPTIONS("/api/campaigns", preflight)
+		router.OPTIONS("/api/campaigns/:campaignId", preflight)
 
-	router.GET("/api/adventures/:adventureId", adventureRecordApi.GetAdventure)
-	// router.GET("/adventures/:adventureId/experience", adventureRecordApi.GetAdventureExperience)
+		//Adventure Endpoints
+		//router.POST("/adventures/:adventureId/loot", adventureRecordApi.AddLootToAdventure)
+		router.POST("/api/adventures/:adventureId/characters/:characterId", characterApi.ManageCharactersForAdventure)
 
-	//	router.DELETE("/adventures/{adventureId}", adventureRecordApi.DeleteAdventure)
+		router.PATCH("/api/adventures/:adventureId", adventureRecordApi.UpdateAdventure)
 
-	router.OPTIONS("/api/adventures", preflight)
-	router.OPTIONS("/api/adventures/:adventureId", preflight)
-	//router.OPTIONS("/adventures/:adventureId/loot/:type", preflight)
-	router.OPTIONS("/api/adventures/:adventureId/combat", preflight)
-	router.OPTIONS("/api/adventures/:adventureId/:characterId/:op", preflight)
+		router.GET("/api/adventures/:adventureId", adventureRecordApi.GetAdventure)
+		// router.GET("/adventures/:adventureId/experience", adventureRecordApi.GetAdventureExperience)
 
-	//Character Endpoints
-	router.GET("/api/characters/:characterId", characterApi.GetCharacterById)
+		//	router.DELETE("/adventures/{adventureId}", adventureRecordApi.DeleteAdventure)
 
-	//router.PATCH("/characters/:characterId", characterApi.UpdateCharacter)
+		router.OPTIONS("/api/adventures", preflight)
+		router.OPTIONS("/api/adventures/:adventureId", preflight)
+		//router.OPTIONS("/adventures/:adventureId/loot/:type", preflight)
+		router.OPTIONS("/api/adventures/:adventureId/combat", preflight)
+		router.OPTIONS("/api/adventures/:adventureId/:characterId/:op", preflight)
 
-	//	router.DELETE("/characters/:characterId", characterApi.DeleteCharacter)
+		//Character Endpoints
+		router.GET("/api/characters/:characterId", characterApi.GetCharacterById)
 
-	router.OPTIONS("/api/characters", preflight)
-	router.OPTIONS("/api/characters/:adventureId", preflight)
+		//router.PATCH("/characters/:characterId", characterApi.UpdateCharacter)
 
-	router.Run("localhost:9090")
+		//	router.DELETE("/characters/:characterId", characterApi.DeleteCharacter)
+
+		// USER
+		router.GET("/api/user/validate", userApi.ValidateApiUser)
+
+		router.OPTIONS("/api/characters", preflight)
+		router.OPTIONS("/api/characters/:adventureId", preflight)
+
+		router.Run("localhost:9090")
+	}
+
 }
 
 func preflight(c *gin.Context) {

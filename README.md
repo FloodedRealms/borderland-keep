@@ -1,6 +1,9 @@
 # The Adventure Archivist API
 This is the API project for the Adventure Archivist. The API itself will have a front end hosted on borderlandkeep.com, but is available for self hosting should people desire. 
 
+# Local Development
+If you want to develop the API locally, you will need to first create a user in the database. Simply run ```go run main.go create-user <name>``` and then copy the displayed client_id and api_key down to whatever you are using to make test requests.
+
 # API Structure
 The API is primarily concerned with simple data management. It will include functionality for calculating experience on characters, based on the assumptions made in the Adventure Conqueror King System core rules. Other systems will be up to front ends to implement themselves, if desired. The primary functions of the API, as well as their endpoints will be listed here. 
 

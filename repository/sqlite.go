@@ -44,6 +44,7 @@ const magicItemsTable string = "magic_items"
 const combatTable string = "monster_groups"
 const characterToAdventureTable string = "adventures_to_characters"
 const characterTable string = "characters"
+const apiUserTable string = "api_users"
 
 var trashInt int = 0
 var trashDate time.Time = time.Now()
@@ -83,7 +84,7 @@ func (s SqliteRepo) processCampaignRows(r *sql.Rows) []*types.CampaignRecord {
 	campaigns := make([]*types.CampaignRecord, 0)
 	for r.Next() {
 		current := &types.CampaignRecord{}
-		err := r.Scan(&current.ID, &current.Name, &current.Recruitment, &current.Judge, &current.Timekeeping, &current.Cadence, &current.CreatedAt, &current.UpdatedAt, &current.LastAdventure)
+		err := r.Scan(&current.ID, &current.Name, &current.Recruitment, &current.Judge, &current.Timekeeping, &current.Cadence, &current.CreatedAt, &current.UpdatedAt, &current.LastAdventure, &current.ClientId)
 		util.CheckErr(err)
 		current.Characters, err = s.getCampaignCharacters(current.ID)
 		util.CheckErr(err)
@@ -103,15 +104,15 @@ func (s SqliteRepo) selectAllCampaigns() []*types.CampaignRecord {
 	return results
 }
 
-func (s SqliteRepo) insertCampaign(c types.CreateCampaignRecordRequest) (int, error) {
+func (s SqliteRepo) insertCampaign(c types.CampaignRecord) (int, error) {
 	s.logger.Debug("tried to insert campaign")
-	stmtString := fmt.Sprintf("INSERT INTO %s(name, recruitment, judge, timekeeping, cadence, created_at, updated_at, last_adventure) values(?, ?, ?, ?, ?, ?, ?, ?) ;", campaignTable)
+	stmtString := fmt.Sprintf("INSERT INTO %s(name, recruitment, judge, timekeeping, cadence, created_at, updated_at, last_adventure, api_user_id) values(?, ?, ?, ?, ?, ?, ?, ?, ?) ;", campaignTable)
 	s.logger.Debug("String is:")
 	s.logger.Debug(stmtString)
 	stmt, err := s.db.Prepare(stmtString)
 	util.CheckErr(err)
 	s.logger.Debug("statement successully prepared.")
-	res, err := stmt.Exec(c.Name, c.Recruitment, c.Judge, c.Timekeeping, c.Cadence, c.CreatedAt, c.UpdatedAt, c.LastAdventure)
+	res, err := stmt.Exec(c.Name, c.Recruitment, c.Judge, c.Timekeeping, c.Cadence, c.CreatedAt, c.UpdatedAt, c.LastAdventure, c.ClientId)
 	util.CheckErr(err)
 	var id int64
 	if id, err = res.LastInsertId(); err != nil {
@@ -131,7 +132,7 @@ func (s SqliteRepo) selectCampaignById(id int) (*types.CampaignRecord, error) {
 	return results[0], nil
 }
 
-func (s SqliteRepo) CreateCampaign(c *types.CreateCampaignRecordRequest) (*types.CampaignRecord, error) {
+func (s SqliteRepo) CreateCampaign(c *types.CampaignRecord) (*types.CampaignRecord, error) {
 	id, err := s.insertCampaign(*c)
 	util.CheckErr(err)
 	return s.selectCampaignById(id)
@@ -158,6 +159,18 @@ func (s SqliteRepo) GetCampaign(id int) (*types.CampaignRecord, error) {
 
 func (s SqliteRepo) ListCampaigns() ([]*types.CampaignRecord, error) {
 	return s.selectAllCampaigns(), nil
+}
+
+func (s SqliteRepo) ListCampaignsForClient(clientId string) ([]*types.CampaignRecord, error) {
+	tableq := fmt.Sprintf("SELECT * FROM %s c where c.api_user_id = ?", campaignTable)
+	rows, err := s.runQuery(tableq, clientId)
+	util.CheckErr(err)
+	defer rows.Close()
+
+	results := s.processCampaignRows(rows)
+
+	return results, nil
+
 }
 func (s SqliteRepo) DeleteCampaign(c *types.CampaignRecord) (bool, error) {
 	return false, util.NotYetImplmented()
@@ -620,4 +633,49 @@ func (s SqliteRepo) ChangeCharacterShares(ad *types.AdventureRecord, char *types
 
 func (s SqliteRepo) GetCharactersForCampaign(camp *types.CampaignRecord) ([]types.CharacterRecord, error) {
 	return s.getCampaignCharacters(camp.ID)
+}
+
+// Users
+func (s SqliteRepo) GetApiUserById(providedClientId, providedAPIKey string) (*types.APIUser, error) {
+	tableq := fmt.Sprintf("SELECT * FROM %s u where u.id = ?", apiUserTable)
+	s.logger.Debug(tableq)
+	s.logger.Debug(fmt.Printf("Looking for id: %s", providedClientId))
+	rows, err := s.runQuery(tableq, providedClientId)
+	util.CheckErr(err)
+	defer rows.Close()
+	users := make([]*types.APIUser, 0)
+	for rows.Next() {
+		s.logger.Debug("Trying to get user")
+		id, hashedKey, name, salt := "", "", "", ""
+		err := rows.Scan(&id, &hashedKey, &name, &trashInt, &salt)
+		util.CheckErr(err)
+		current, err := types.LoadUser(id, providedAPIKey, name, hashedKey, salt)
+		if err != nil {
+			return nil, err
+		}
+		users = append(users, current)
+	}
+	return users[0], nil
+
+}
+
+func (s SqliteRepo) SaveApiUser(user types.User, campaignNumberLimited bool) error {
+	stmtString := fmt.Sprintf("INSERT INTO %s(id,api_key,friendly_name,campaign_number_limited,salt) values(?,?,?,?,?);", apiUserTable)
+	stmt, err := s.db.Prepare(stmtString)
+	if err != nil {
+		return err
+	}
+
+	if campaignNumberLimited {
+		_, err := stmt.Exec(user.DisplayUUID(), user.RetreiveHash(), user.DisplayUserName(), 1, user.RetreiveSalt())
+		if err != nil {
+			return err
+		}
+	} else {
+		_, err := stmt.Exec(user.DisplayUUID(), user.RetreiveHash(), user.DisplayUserName(), 1, user.RetreiveSalt())
+		if err != nil {
+			return err
+		}
+	}
+	return nil
 }

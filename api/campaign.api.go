@@ -1,6 +1,7 @@
 package api
 
 import (
+	"io"
 	"net/http"
 	"strings"
 
@@ -22,12 +23,14 @@ func NewCampaignApi(cs services.CampaignService, chars services.CharacterService
 
 func (ca *CampaignApi) CreateCampaign(ctx *gin.Context) {
 	var cr *types.CreateCampaignRecordRequest
-
+	clientId := ctx.Request.Header.Get("X-Archivist-Client-Id")
 	if err := ctx.ShouldBindJSON(&cr); err != nil {
+		body, _ := io.ReadAll(ctx.Request.Body)
+		println(string(body))
 		ctx.JSON(http.StatusBadRequest, err.Error())
 		return
 	}
-	nc, err := ca.campaignService.CreateCampaign(cr)
+	nc, err := ca.campaignService.CreateCampaign(cr, clientId)
 	if err != nil {
 		if strings.Contains(err.Error(), "Index already exists") {
 			ctx.JSON(http.StatusConflict, gin.H{"status": "fail", "message": err.Error()})
@@ -61,8 +64,15 @@ func (ca *CampaignApi) UpdateCampaign(ctx *gin.Context) {
 
 func (ca *CampaignApi) ListCampaigns(ctx *gin.Context) {
 	applyCorsHeaders(ctx)
+	clientId := ctx.Request.Header.Get("X-Archivist-Client-Id")
 
-	arr, err := ca.campaignService.ListCampaigns()
+	var arr []*types.CampaignRecord
+	var err error
+	if clientId != "" {
+		arr, err = ca.campaignService.ListCampaignsForClient(clientId)
+	} else {
+		arr, err = ca.campaignService.ListCampaigns()
+	}
 	if err != nil {
 		ctx.JSON(http.StatusBadGateway, gin.H{"status": "fail", "message": err.Error()})
 		return

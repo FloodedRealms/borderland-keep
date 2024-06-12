@@ -4,11 +4,12 @@ import "github.com/floodedrealms/adventure-archivist/types"
 
 type Repository interface {
 	//PerformInsertStatement(*types.SQLLiteExportable) (*types.JSONExportable, error)
-	CreateCampaign(*types.CreateCampaignRecordRequest) (*types.CampaignRecord, error)
+	CreateCampaign(*types.CampaignRecord) (*types.CampaignRecord, error)
 	UpdateCampaign(*types.CampaignRecord) (*types.CampaignRecord, error)
 	GetCampaign(int) (*types.CampaignRecord, error)
 	DeleteCampaign(*types.CampaignRecord) (bool, error)
 	ListCampaigns() ([]*types.CampaignRecord, error)
+	ListCampaignsForClient(string) ([]*types.CampaignRecord, error)
 
 	GetAdventureRecordsForCampaign(*types.CampaignRecord) ([]*types.AdventureRecord, error)
 	CreateAdventureRecordForCampaign(*types.CreateAdventureRequest) (*types.AdventureRecord, error)
@@ -32,4 +33,7 @@ type Repository interface {
 	AddCharacterToAdventure(*types.AdventureRecord, *types.AdventureCharacter) (bool, error)
 	RemoveCharacterFromAdventure(*types.AdventureRecord, *types.CharacterRecord) (bool, error)
 	ChangeCharacterShares(*types.AdventureRecord, *types.CharacterRecord, bool) (bool, error)
+
+	SaveApiUser(types.User, bool) error
+	GetApiUserById(providedClientId, providedAPIKey string) (*types.APIUser, error)
 }

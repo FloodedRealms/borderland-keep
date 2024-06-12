@@ -11,10 +11,11 @@ import (
 )
 
 type CampaignService interface {
-	CreateCampaign(*types.CreateCampaignRecordRequest) (*types.CampaignRecord, error)
+	CreateCampaign(*types.CreateCampaignRecordRequest, string) (*types.CampaignRecord, error)
 	UpdateCampaign(*types.CampaignRecord) (*types.CampaignRecord, error)
 	GetCampaign(string) (*types.CampaignRecord, error)
 	ListCampaigns() ([]*types.CampaignRecord, error)
+	ListCampaignsForClient(string) ([]*types.CampaignRecord, error)
 	DeleteCampaign(string) (bool, error)
 }
 
@@ -28,12 +29,9 @@ func NewCampaignService(repo repository.Repository, logger *util.Logger, ctx con
 	return &CampaignServiceImpl{repo, *logger, ctx}
 }
 
-func (c *CampaignServiceImpl) CreateCampaign(cr *types.CreateCampaignRecordRequest) (*types.CampaignRecord, error) {
-	cr.CreatedAt = time.Now()
-	cr.UpdatedAt = cr.CreatedAt
-	cr.LastAdventure = cr.CreatedAt
-
-	return c.repo.CreateCampaign(cr)
+func (c *CampaignServiceImpl) CreateCampaign(cr *types.CreateCampaignRecordRequest, clientId string) (*types.CampaignRecord, error) {
+	campaignToCreate := types.NewCampaignInsertion(cr.Name, clientId, cr.Judge, cr.Timekeeping, cr.Cadence, cr.Recruitment, time.Now(), time.Now(), time.Now(), nil)
+	return c.repo.CreateCampaign(campaignToCreate)
 }
 
 func (c *CampaignServiceImpl) UpdateCampaign(ur *types.CampaignRecord) (*types.CampaignRecord, error) {
@@ -56,6 +54,10 @@ func (c *CampaignServiceImpl) GetCampaign(id string) (*types.CampaignRecord, err
 
 func (c *CampaignServiceImpl) ListCampaigns() ([]*types.CampaignRecord, error) {
 	return c.repo.ListCampaigns()
+}
+
+func (c *CampaignServiceImpl) ListCampaignsForClient(clientId string) ([]*types.CampaignRecord, error) {
+	return c.repo.ListCampaignsForClient(clientId)
 }
 
 func (c *CampaignServiceImpl) DeleteCampaign(id string) (bool, error) {
