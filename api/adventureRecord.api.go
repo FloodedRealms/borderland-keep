@@ -1,9 +1,7 @@
 package api
 
 import (
-	"log"
 	"net/http"
-	"strconv"
 	"strings"
 
 	"github.com/floodedrealms/adventure-archivist/services"
@@ -12,17 +10,17 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-type AdventureRecordApi struct {
-	adventureRecordService services.AdventureRecordService
+type AdventureApi struct {
+	adventureRecordService services.AdventureService
 }
 
-func NewAdventureRecordApi(as services.AdventureRecordService) *AdventureRecordApi {
-	return &AdventureRecordApi{adventureRecordService: as}
+func NewAdventureRecordApi(as services.AdventureService) *AdventureApi {
+	return &AdventureApi{adventureRecordService: as}
 }
 
-func (ara AdventureRecordApi) CreateAdventureRecord(ctx *gin.Context) {
+func (ara AdventureApi) CreateAdventureRecord(ctx *gin.Context) {
 	util.ApplyCorsHeaders(ctx)
-	var cr *types.CreateAdventureRecordRequest
+	var cr *types.CreateAdventureRequest
 
 	if err := ctx.ShouldBindJSON(&cr); err != nil {
 		ctx.JSON(http.StatusBadRequest, err.Error())
@@ -41,7 +39,7 @@ func (ara AdventureRecordApi) CreateAdventureRecord(ctx *gin.Context) {
 
 }
 
-func (ara AdventureRecordApi) ListAdventureRecordsForCampaign(ctx *gin.Context) {
+func (ara AdventureApi) ListAdventureRecordsForCampaign(ctx *gin.Context) {
 	util.ApplyCorsHeaders(ctx)
 
 	id := ctx.Param("campaignId")
@@ -58,7 +56,7 @@ func (ara AdventureRecordApi) ListAdventureRecordsForCampaign(ctx *gin.Context) 
 	ctx.JSON(http.StatusOK, gin.H{"status": "success", "data": arr})
 }
 
-func (ara AdventureRecordApi) GetAdventure(ctx *gin.Context) {
+func (ara AdventureApi) GetAdventure(ctx *gin.Context) {
 	util.ApplyCorsHeaders(ctx)
 	id := ctx.Param("adventureId")
 	arr, err := ara.adventureRecordService.GetAdventureRecordById(id)
@@ -75,7 +73,32 @@ func (ara AdventureRecordApi) GetAdventure(ctx *gin.Context) {
 
 }
 
-func (ara AdventureRecordApi) AddLootToAdventure(ctx *gin.Context) {
+func (ara AdventureApi) UpdateAdventure(ctx *gin.Context) {
+	util.ApplyCorsHeaders(ctx)
+	var ur *types.UpdateAdventureRequest
+
+	if err := ctx.ShouldBindJSON(&ur); err != nil {
+		ctx.JSON(http.StatusBadRequest, err.Error())
+		return
+	}
+	uAdventure, err := ara.adventureRecordService.UpdateAdventureRecord(ur)
+	if err != nil {
+		if strings.Contains(err.Error(), "Index already exists") {
+			ctx.JSON(http.StatusConflict, gin.H{"status": "fail", "message": err.Error()})
+			return
+		}
+		if strings.Contains(err.Error(), "not yet implemented") {
+			ctx.JSON(http.StatusNotImplemented, gin.H{"status": "fail", "message": ur})
+			return
+		}
+		ctx.JSON(http.StatusBadGateway, gin.H{"status": "fail", "message": err.Error()})
+		return
+	}
+	ctx.JSON(http.StatusOK, gin.H{"status": "success", "data": uAdventure})
+
+}
+
+/* func (ara AdventureRecordApi) AddLootToAdventure(ctx *gin.Context) {
 	log.Print("hit")
 	util.ApplyCorsHeaders(ctx)
 	adventureId, err := strconv.Atoi(ctx.Param("adventureId"))
@@ -143,9 +166,9 @@ func (ara AdventureRecordApi) AddLootToAdventure(ctx *gin.Context) {
 		ctx.JSON(http.StatusNotImplemented, util.NotYetImplmented())
 
 	}
-}
+} */
 
-func (ara AdventureRecordApi) makeBoolResponse(status bool, err error, ctx *gin.Context) {
+func (ara AdventureApi) makeBoolResponse(status bool, err error, ctx *gin.Context) {
 	if err != nil {
 		ctx.JSON(http.StatusBadGateway, gin.H{"status": "fail", "message": err.Error()})
 		return

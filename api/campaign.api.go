@@ -21,7 +21,7 @@ func NewCampaignApi(cs services.CampaignService, chars services.CharacterService
 }
 
 func (ca *CampaignApi) CreateCampaign(ctx *gin.Context) {
-	var cr *types.CreateCampaignRequest
+	var cr *types.CreateCampaignRecordRequest
 
 	if err := ctx.ShouldBindJSON(&cr); err != nil {
 		ctx.JSON(http.StatusBadRequest, err.Error())
@@ -37,6 +37,26 @@ func (ca *CampaignApi) CreateCampaign(ctx *gin.Context) {
 		return
 	}
 	ctx.JSON(http.StatusCreated, gin.H{"status": "success", "data": nc})
+}
+
+func (ca *CampaignApi) UpdateCampaign(ctx *gin.Context) {
+	var cr *types.CampaignRecord
+
+	if err := ctx.ShouldBindJSON(&cr); err != nil {
+		ctx.JSON(http.StatusBadRequest, err.Error())
+		return
+	}
+	nc, err := ca.campaignService.UpdateCampaign(cr)
+	if err != nil {
+		if strings.Contains(err.Error(), "Index already exists") {
+			ctx.JSON(http.StatusConflict, gin.H{"status": "fail", "message": err.Error()})
+			return
+		}
+		ctx.JSON(http.StatusBadGateway, gin.H{"status": "fail", "message": err.Error()})
+		return
+	}
+	ctx.JSON(http.StatusOK, gin.H{"status": "success", "data": nc})
+
 }
 
 func (ca *CampaignApi) ListCampaigns(ctx *gin.Context) {

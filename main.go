@@ -39,6 +39,8 @@ func main() {
 	router.POST("/campaigns/:campaignId/adventures", adventureRecordApi.CreateAdventureRecord)
 	router.POST("/campaigns/:campaignId/characters", characterApi.CreateCharacterForCampaign)
 
+	router.PATCH("campaigns/:campaignId", campaignApi.UpdateCampaign)
+
 	router.GET("/campaigns", campaignApi.ListCampaigns)
 	router.GET("/campaigns/:campaignId", campaignApi.GetCampaign)
 	router.GET("/campaigns/:campaignId/adventures", adventureRecordApi.ListAdventureRecordsForCampaign)
@@ -49,9 +51,11 @@ func main() {
 	router.OPTIONS("/campaigns/:campaignId", preflight)
 
 	//Adventure Endpoints
-
-	router.POST("/adventures/:adventureId/loot", adventureRecordApi.AddLootToAdventure)
+	//router.POST("/adventures/:adventureId/loot", adventureRecordApi.AddLootToAdventure)
 	router.POST("/adventures/:adventureId/characters/:characterId", characterApi.ManageCharactersForAdventure)
+
+	router.PATCH("/adventures/:adventureId", adventureRecordApi.UpdateAdventure)
+
 	router.GET("/adventures/:adventureId", adventureRecordApi.GetAdventure)
 	// router.GET("/adventures/:adventureId/experience", adventureRecordApi.GetAdventureExperience)
 
@@ -64,11 +68,9 @@ func main() {
 	router.OPTIONS("/adventures/:adventureId/:characterId/:op", preflight)
 
 	//Character Endpoints
-	//	router.GET("/characters/:campaignId", characterApi.GetCharactersForCampaign)
-	//	router.GET("/characters/:adventureId", characterApi.GetCharactersForAdventure)
-	//	router.GET("/characters/:characterId", characterApi.GetCharacterById)
+	router.GET("/characters/:characterId", characterApi.GetCharacterById)
 
-	//	router.PATCH("/characters/:characterId/:attributes", characterApi.UpdateCharacter)
+	//router.PATCH("/characters/:characterId", characterApi.UpdateCharacter)
 
 	//	router.DELETE("/characters/:characterId", characterApi.DeleteCharacter)
 

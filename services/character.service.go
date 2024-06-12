@@ -9,9 +9,10 @@ import (
 )
 
 type CharacterService interface {
-	CreateCharacterForCampaign(campaign *types.Campaign) (*types.Character, error)
-	ManageCharactersForAdventure(adventure *types.Adventure, character *types.Character, operation, halfshare string) (bool, error)
-	GetCharactersForCampaign(campaign *types.Campaign) ([]types.Character, error)
+	CreateCharacterForCampaign(*types.CampaignRecord, *types.CreateCharacterRecordRequest) (*types.CharacterRecord, error)
+	UpdateCharacter(int, *types.UpdateCharacterRecordRequest) (*types.CharacterRecord, error)
+	ManageCharactersForAdventure(adventure *types.AdventureRecord, character *types.CharacterRecord, operation, halfshare string) (bool, error)
+	GetCharactersForCampaign(campaign *types.CampaignRecord) ([]types.CharacterRecord, error)
 }
 
 type CharacterServiceImpl struct {
@@ -28,18 +29,25 @@ func NewCharacterService(repo repository.Repository, logger *util.Logger, ctx co
 	}
 }
 
-func (s CharacterServiceImpl) CreateCharacterForCampaign(campaign *types.Campaign) (*types.Character, error) {
-	return s.repo.CreateCharacterForCampaign(campaign)
+func (s CharacterServiceImpl) CreateCharacterForCampaign(campaign *types.CampaignRecord, charToInsert *types.CreateCharacterRecordRequest) (*types.CharacterRecord, error) {
+	character := types.NewCharacterFromCreateRequest(-1, *charToInsert)
+	return s.repo.CreateCharacterForCampaign(campaign, character)
 }
 
-func (s CharacterServiceImpl) ManageCharactersForAdventure(ad *types.Adventure, char *types.Character, operation, halfshare string) (bool, error) {
+func (s CharacterServiceImpl) UpdateCharacter(id int, updateReq *types.UpdateCharacterRecordRequest) (*types.CharacterRecord, error) {
+	characterToUpdate := types.NewCharacterFromUpdateRequest(id, *updateReq)
+	return s.repo.UpdateCharacter(characterToUpdate)
+}
+
+func (s CharacterServiceImpl) ManageCharactersForAdventure(ad *types.AdventureRecord, char *types.CharacterRecord, operation, halfshare string) (bool, error) {
 	isGettingHalfshare := false
 	if halfshare != "false" {
 		isGettingHalfshare = true
 	}
 	switch operation {
 	case "add":
-		return s.repo.AddCharacterToAdventure(ad, char, isGettingHalfshare)
+		adventureCharacter := types.NewAdventureCharacter(char, isGettingHalfshare)
+		return s.repo.AddCharacterToAdventure(ad, adventureCharacter)
 	case "remove":
 		return s.repo.RemoveCharacterFromAdventure(ad, char)
 	case "change-shares":
@@ -49,7 +57,7 @@ func (s CharacterServiceImpl) ManageCharactersForAdventure(ad *types.Adventure, 
 	}
 }
 
-func (s CharacterServiceImpl) GetCharactersForCampaign(campaign *types.Campaign) ([]types.Character, error) {
+func (s CharacterServiceImpl) GetCharactersForCampaign(campaign *types.CampaignRecord) ([]types.CharacterRecord, error) {
 	characterList, err := s.repo.GetCharactersForCampaign(campaign)
 	if err != nil {
 		return nil, err

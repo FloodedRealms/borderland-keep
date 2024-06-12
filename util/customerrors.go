@@ -20,3 +20,7 @@ func NamedParameterNotProvided(paramName string) error {
 func UnknownCharacterOperation(given string) error {
 	return fmt.Errorf("an unknown operation was given. the valid operations are \"add\" and \"remove.\" the given operation was: %s ", given)
 }
+
+func UnableToUpdateAdventure(step, errorMessage string) error {
+	return fmt.Errorf("unable to update the adventure on step %s, the following error was thrown: %s", step, errorMessage)
+}
