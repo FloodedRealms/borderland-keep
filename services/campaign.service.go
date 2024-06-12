@@ -11,10 +11,10 @@ import (
 )
 
 type CampaignService interface {
-	CreateCampaign(*types.CreateCampaignRequest) (*types.Campaign, error)
-	UpdateCampaign(*types.UpdateCampaignRequest) (*types.Campaign, error)
-	GetCampaign(string) (*types.Campaign, error)
-	ListCampaigns() ([]*types.Campaign, error)
+	CreateCampaign(*types.CreateCampaignRecordRequest) (*types.CampaignRecord, error)
+	UpdateCampaign(*types.CampaignRecord) (*types.CampaignRecord, error)
+	GetCampaign(string) (*types.CampaignRecord, error)
+	ListCampaigns() ([]*types.CampaignRecord, error)
 	DeleteCampaign(string) (bool, error)
 }
 
@@ -28,7 +28,7 @@ func NewCampaignService(repo repository.Repository, logger *util.Logger, ctx con
 	return &CampaignServiceImpl{repo, *logger, ctx}
 }
 
-func (c *CampaignServiceImpl) CreateCampaign(cr *types.CreateCampaignRequest) (*types.Campaign, error) {
+func (c *CampaignServiceImpl) CreateCampaign(cr *types.CreateCampaignRecordRequest) (*types.CampaignRecord, error) {
 	cr.CreatedAt = time.Now()
 	cr.UpdatedAt = cr.CreatedAt
 	cr.LastAdventure = cr.CreatedAt
@@ -36,11 +36,13 @@ func (c *CampaignServiceImpl) CreateCampaign(cr *types.CreateCampaignRequest) (*
 	return c.repo.CreateCampaign(cr)
 }
 
-func (c *CampaignServiceImpl) UpdateCampaign(ur *types.UpdateCampaignRequest) (*types.Campaign, error) {
-	return nil, util.NotYetImplmented()
+func (c *CampaignServiceImpl) UpdateCampaign(ur *types.CampaignRecord) (*types.CampaignRecord, error) {
+	ur.UpdatedAt = time.Now()
+
+	return c.repo.UpdateCampaign(ur)
 }
 
-func (c *CampaignServiceImpl) GetCampaign(id string) (*types.Campaign, error) {
+func (c *CampaignServiceImpl) GetCampaign(id string) (*types.CampaignRecord, error) {
 	campaignId, err := strconv.Atoi(id)
 	if err != nil {
 		return nil, err
@@ -52,7 +54,7 @@ func (c *CampaignServiceImpl) GetCampaign(id string) (*types.Campaign, error) {
 	return campaign, nil
 }
 
-func (c *CampaignServiceImpl) ListCampaigns() ([]*types.Campaign, error) {
+func (c *CampaignServiceImpl) ListCampaigns() ([]*types.CampaignRecord, error) {
 	return c.repo.ListCampaigns()
 }
 

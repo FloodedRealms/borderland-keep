@@ -72,12 +72,17 @@ func (s SqliteRepo) runQuery(q string, params ...interface{}) (*sql.Rows, error)
 	util.CheckErr(err)
 	return stmt.Query(params...)
 }
+func (s SqliteRepo) executeQuery(q string, params ...interface{}) (sql.Result, error) {
+	stmt, err := s.db.Prepare(q)
+	util.CheckErr(err)
+	return stmt.Exec(params...)
+}
 
 // Campaigns
-func (s SqliteRepo) processCampaignRows(r *sql.Rows) []*types.Campaign {
-	campaigns := make([]*types.Campaign, 0)
+func (s SqliteRepo) processCampaignRows(r *sql.Rows) []*types.CampaignRecord {
+	campaigns := make([]*types.CampaignRecord, 0)
 	for r.Next() {
-		current := &types.Campaign{}
+		current := &types.CampaignRecord{}
 		err := r.Scan(&current.ID, &current.Name, &current.Recruitment, &current.Judge, &current.Timekeeping, &current.Cadence, &current.CreatedAt, &current.UpdatedAt, &current.LastAdventure)
 		util.CheckErr(err)
 		current.Characters, err = s.getCampaignCharacters(current.ID)
@@ -87,7 +92,7 @@ func (s SqliteRepo) processCampaignRows(r *sql.Rows) []*types.Campaign {
 	return campaigns
 }
 
-func (s SqliteRepo) selectAllCampaigns() []*types.Campaign {
+func (s SqliteRepo) selectAllCampaigns() []*types.CampaignRecord {
 	tableq := fmt.Sprintf("SELECT * FROM %s", campaignTable)
 	rows, err := s.runQuery(tableq)
 	util.CheckErr(err)
@@ -98,7 +103,7 @@ func (s SqliteRepo) selectAllCampaigns() []*types.Campaign {
 	return results
 }
 
-func (s SqliteRepo) insertCampaign(c types.CreateCampaignRequest) (int, error) {
+func (s SqliteRepo) insertCampaign(c types.CreateCampaignRecordRequest) (int, error) {
 	s.logger.Debug("tried to insert campaign")
 	stmtString := fmt.Sprintf("INSERT INTO %s(name, recruitment, judge, timekeeping, cadence, created_at, updated_at, last_adventure) values(?, ?, ?, ?, ?, ?, ?, ?) ;", campaignTable)
 	s.logger.Debug("String is:")
@@ -115,36 +120,51 @@ func (s SqliteRepo) insertCampaign(c types.CreateCampaignRequest) (int, error) {
 	return int(id), nil
 }
 
-func (s SqliteRepo) selectCampaignById(id int) (*types.Campaign, error) {
+func (s SqliteRepo) selectCampaignById(id int) (*types.CampaignRecord, error) {
 	tableq := fmt.Sprintf("SELECT * FROM %s c where c.id = ?", campaignTable)
 	rows, err := s.runQuery(tableq, id)
-	defer rows.Close()
 	util.CheckErr(err)
+	defer rows.Close()
 
 	results := s.processCampaignRows(rows)
 
 	return results[0], nil
 }
 
-func (s SqliteRepo) CreateCampaign(c *types.CreateCampaignRequest) (*types.Campaign, error) {
+func (s SqliteRepo) CreateCampaign(c *types.CreateCampaignRecordRequest) (*types.CampaignRecord, error) {
 	id, err := s.insertCampaign(*c)
 	util.CheckErr(err)
 	return s.selectCampaignById(id)
 }
 
-func (s SqliteRepo) GetCampaign(id int) (*types.Campaign, error) {
+func (s SqliteRepo) UpdateCampaign(c *types.CampaignRecord) (*types.CampaignRecord, error) {
+	stmtString := fmt.Sprintf("UPDATE %s SET name=?, recruitment=?, judge=?, timekeeping=?, cadence=?, created_at=?, updated_at=? WHERE id=?;", campaignTable)
+	s.logger.Print(stmtString)
+	stmt, err := s.db.Prepare(stmtString)
+	if err != nil {
+		return nil, err
+	}
+	_, err = stmt.Exec(c.Name, c.Recruitment, c.Judge, c.Timekeeping, c.Cadence, c.CreatedAt, c.UpdatedAt, c.ID)
+	if err != nil {
+		return nil, err
+	}
+	return s.selectCampaignById(c.ID)
+
+}
+
+func (s SqliteRepo) GetCampaign(id int) (*types.CampaignRecord, error) {
 	return s.selectCampaignById(id)
 }
 
-func (s SqliteRepo) ListCampaigns() ([]*types.Campaign, error) {
+func (s SqliteRepo) ListCampaigns() ([]*types.CampaignRecord, error) {
 	return s.selectAllCampaigns(), nil
 }
-func (s SqliteRepo) DeleteCampaign(c *types.Campaign) (bool, error) {
+func (s SqliteRepo) DeleteCampaign(c *types.CampaignRecord) (bool, error) {
 	return false, util.NotYetImplmented()
 }
 
 // Adventures
-func (s SqliteRepo) insertAdventureRecord(a types.CreateAdventureRecordRequest) (int, error) {
+func (s SqliteRepo) insertAdventureRecord(a types.CreateAdventureRequest) (int, error) {
 	stmt_string := fmt.Sprintf("INSERT INTO %s(campaign_id, name, created_at, updated_at, adventure_date) values(?, ?, ?, ?, ?)", adventureTable)
 	s.logger.Debug(stmt_string)
 	stmt, err := s.db.Prepare(stmt_string)
@@ -162,7 +182,7 @@ func (s SqliteRepo) insertAdventureRecord(a types.CreateAdventureRecordRequest) 
 	}
 	return int(id), nil
 }
-func (s SqliteRepo) selectAdventureById(id int) *types.Adventure {
+func (s SqliteRepo) selectAdventureById(id int) *types.AdventureRecord {
 	tableq := fmt.Sprintf("SELECT * FROM %s c where c.id = ?", adventureTable)
 	rows, err := s.runQuery(tableq, id)
 	util.CheckErr(err)
@@ -172,7 +192,7 @@ func (s SqliteRepo) selectAdventureById(id int) *types.Adventure {
 
 	return results[0]
 }
-func (s SqliteRepo) selectAdventureByCampaignId(c *types.Campaign) ([]*types.Adventure, error) {
+func (s SqliteRepo) selectAdventureByCampaignId(c *types.CampaignRecord) ([]*types.AdventureRecord, error) {
 
 	tableq := fmt.Sprintf("SELECT * FROM %s c where c.campaign_id = ?", adventureTable)
 	rows, err := s.runQuery(tableq, c.ID)
@@ -183,17 +203,18 @@ func (s SqliteRepo) selectAdventureByCampaignId(c *types.Campaign) ([]*types.Adv
 
 	return results, nil
 }
-func (s SqliteRepo) processAdventureRows(r *sql.Rows) []*types.Adventure {
-	adventures := make([]*types.Adventure, 0)
+func (s SqliteRepo) processAdventureRows(r *sql.Rows) []*types.AdventureRecord {
+	adventures := make([]*types.AdventureRecord, 0)
 	for r.Next() {
 		var id int
 		var campaignId int
+		var duration int
 		var name string
 		var createdDate time.Time
 		var updatedDate time.Time
 		var adventureDate time.Time
 		copper, silver, electrum, gold, platinum := 0, 0, 0, 0, 0
-		err := r.Scan(&id, &campaignId, &name, &adventureDate, &createdDate, &updatedDate, &copper, &silver, &electrum, &gold, &platinum)
+		err := r.Scan(&id, &campaignId, &name, &adventureDate, &createdDate, &updatedDate, &copper, &silver, &electrum, &gold, &platinum, &duration)
 
 		currentCoins := types.NewCoins(copper, silver, electrum, gold, platinum)
 		currentGems := s.getGemsForAdventure(id)
@@ -201,7 +222,7 @@ func (s SqliteRepo) processAdventureRows(r *sql.Rows) []*types.Adventure {
 		currentMagicItems := s.getMagicItemsForAdventure(id)
 		currentCombat := s.getCombatForAdventure(id)
 		currentCharacters := s.getCharactersForAdventure(id)
-		current := types.NewAdventureRecord(id, campaignId, *currentCoins, currentGems, currentJewellery, currentCombat, currentMagicItems, currentCharacters, name, createdDate, updatedDate, adventureDate)
+		current := types.NewAdventureRecord(id, campaignId, duration, *currentCoins, currentGems, currentJewellery, currentCombat, currentMagicItems, currentCharacters, name, createdDate, updatedDate, adventureDate)
 		util.CheckErr(err)
 		adventures = append(adventures, current)
 	}
@@ -254,10 +275,10 @@ func (s SqliteRepo) getMagicItemsForAdventure(id int) []types.MagicItem {
 	magicItems := make([]types.MagicItem, 0)
 	for rows.Next() {
 		s.logger.Debug("Trying to get magic item")
-		id, number, actualValue := 0, 0, 0
+		id, actualValue := 0, 0
 		name, desc := "", ""
 		value := 0.0
-		err := rows.Scan(&id, &trashInt, &name, &desc, &value, &number, &actualValue)
+		err := rows.Scan(&id, &trashInt, &name, &desc, &value, &actualValue)
 		util.CheckErr(err)
 		current := types.NewMagicItem(name, desc, value, actualValue, id)
 		magicItems = append(magicItems, *current)
@@ -309,26 +330,26 @@ func (s SqliteRepo) getCharactersForAdventure(id int) []types.AdventureCharacter
 
 }
 
-func (s SqliteRepo) CreateAdventureRecordForCampaign(a *types.CreateAdventureRecordRequest) (*types.Adventure, error) {
+func (s SqliteRepo) CreateAdventureRecordForCampaign(a *types.CreateAdventureRequest) (*types.AdventureRecord, error) {
 	id, err := s.insertAdventureRecord(*a)
 	util.CheckErr(err)
 	return s.selectAdventureById(id), nil
 }
 
-func (s SqliteRepo) GetAdventureRecordsForCampaign(c *types.Campaign) ([]*types.Adventure, error) {
+func (s SqliteRepo) GetAdventureRecordsForCampaign(c *types.CampaignRecord) ([]*types.AdventureRecord, error) {
 	return s.selectAdventureByCampaignId(c)
 }
 
-func (s SqliteRepo) GetAdventureRecordById(a *types.Adventure) (*types.Adventure, error) {
+func (s SqliteRepo) GetAdventureRecordById(a *types.AdventureRecord) (*types.AdventureRecord, error) {
 	return s.selectAdventureById(a.ID), nil
 }
 
-func (s SqliteRepo) AddCoinsToAdventure(a *types.Adventure, c *types.Coins) (bool, error) {
+func (s SqliteRepo) UpdateCoinsForAdventure(a *types.AdventureRecord, c *types.Coins) (bool, error) {
 	stmt_string := fmt.Sprintf("UPDATE %s SET copper = ?, silver = ?, electrum = ?, gold = ?, platinum = ? WHERE id=?;", adventureTable)
 	s.logger.Debug(stmt_string)
 	stmt, err := s.db.Prepare(stmt_string)
 	util.CheckErr(err)
-	_, resErr := stmt.Exec(c.Copper.Number, c.Silver.Number, c.Electrum.Number, c.Gold.Number, c.Platinum.Number, a.ID)
+	_, resErr := stmt.Exec(c.Copper.NumberOfItem, c.Silver.NumberOfItem, c.Electrum.NumberOfItem, c.Gold.NumberOfItem, c.Platinum.NumberOfItem, a.ID)
 	if resErr != nil {
 		return false, resErr
 	}
@@ -336,31 +357,87 @@ func (s SqliteRepo) AddCoinsToAdventure(a *types.Adventure, c *types.Coins) (boo
 
 }
 
-func (s SqliteRepo) AddGemToAdventure(a *types.Adventure, g *types.Gem) (bool, error) {
+func (s SqliteRepo) DeleteGemsForAdventure(a *types.AdventureRecord) error {
+	stmt_string := fmt.Sprintf("DELETE FROM %s WHERE adventure_id=?;", gemTable)
+	s.logger.Debug(stmt_string)
+	stmt, err := s.db.Prepare(stmt_string)
+	util.CheckErr(err)
+	_, resErr := stmt.Exec(a.ID)
+	if resErr != nil {
+		return resErr
+	}
+	return nil
+}
+func (s SqliteRepo) DeleteJewelleryForAdventure(a *types.AdventureRecord) error {
+	stmt_string := fmt.Sprintf("DELETE FROM %s WHERE adventure_id=?;", jewelleryTable)
+	s.logger.Debug(stmt_string)
+	stmt, err := s.db.Prepare(stmt_string)
+	util.CheckErr(err)
+	_, resErr := stmt.Exec(a.ID)
+	if resErr != nil {
+		return resErr
+	}
+	return nil
+}
+func (s SqliteRepo) DeleteMagicItemsForAdventure(a *types.AdventureRecord) error {
+	stmt_string := fmt.Sprintf("DELETE FROM %s WHERE adventure_id=?;", magicItemsTable)
+	s.logger.Debug(stmt_string)
+	stmt, err := s.db.Prepare(stmt_string)
+	util.CheckErr(err)
+	_, resErr := stmt.Exec(a.ID)
+	if resErr != nil {
+		return resErr
+	}
+	return nil
+}
+func (s SqliteRepo) DeleteCombatForAdventure(a *types.AdventureRecord) error {
+	stmt_string := fmt.Sprintf("DELETE FROM %s WHERE adventure_id=?;", combatTable)
+	s.logger.Debug(stmt_string)
+	stmt, err := s.db.Prepare(stmt_string)
+	util.CheckErr(err)
+	_, resErr := stmt.Exec(a.ID)
+	if resErr != nil {
+		return resErr
+	}
+	return nil
+}
+func (s SqliteRepo) DeleteCharactersForAdventure(a *types.AdventureRecord) error {
+	stmt_string := fmt.Sprintf("DELETE FROM %s WHERE adventure_id=?;", characterToAdventureTable)
+	s.logger.Debug(stmt_string)
+	stmt, err := s.db.Prepare(stmt_string)
+	util.CheckErr(err)
+	_, resErr := stmt.Exec(a.ID)
+	if resErr != nil {
+		return resErr
+	}
+	return nil
+}
+
+func (s SqliteRepo) AddGemToAdventure(a *types.AdventureRecord, g *types.Gem) (bool, error) {
 	stmt_string := fmt.Sprintf("INSERT INTO %s(adventure_id, name, description, value, total) values(?, ?, ?, ?, ?)", gemTable)
 	s.logger.Debug(stmt_string)
 	stmt, err := s.db.Prepare(stmt_string)
 	util.CheckErr(err)
-	_, resErr := stmt.Exec(a.ID, g.Loot.Name, g.Loot.Description, g.Loot.XPValue, g.Loot.Number)
+	_, resErr := stmt.Exec(a.ID, g.Loot.Name, g.Loot.Description, g.Loot.XPValueOfOne, g.Loot.NumberOfItem)
 	if resErr != nil {
 		return false, resErr
 	}
 	return true, nil
 }
 
-func (s SqliteRepo) AddJewelleryToAdventure(a *types.Adventure, g *types.Jewellery) (bool, error) {
+func (s SqliteRepo) AddJewelleryToAdventure(a *types.AdventureRecord, g *types.Jewellery) (bool, error) {
 	stmt_string := fmt.Sprintf("INSERT INTO %s(adventure_id, name, description, value, total) values(?, ?, ?, ?, ?)", jewelleryTable)
 	s.logger.Debug(stmt_string)
 	stmt, err := s.db.Prepare(stmt_string)
 	util.CheckErr(err)
-	_, resErr := stmt.Exec(a.ID, g.Loot.Name, g.Loot.Description, g.Loot.XPValue, g.Loot.Number)
+	_, resErr := stmt.Exec(a.ID, g.Loot.Name, g.Loot.Description, g.Loot.XPValueOfOne, g.Loot.NumberOfItem)
 	if resErr != nil {
 		return false, resErr
 	}
 	return true, nil
 }
 
-func (s SqliteRepo) AddMagicItemToAdventure(a *types.Adventure, g *types.MagicItem) (bool, error) {
+func (s SqliteRepo) AddMagicItemToAdventure(a *types.AdventureRecord, g *types.MagicItem) (bool, error) {
 	stmt_string := fmt.Sprintf("INSERT INTO %s(adventure_id, name, description, apparent_value, actual_value) values(?, ?, ?, ?, ?)", magicItemsTable)
 	s.logger.Debug(stmt_string)
 	stmt, err := s.db.Prepare(stmt_string)
@@ -372,12 +449,12 @@ func (s SqliteRepo) AddMagicItemToAdventure(a *types.Adventure, g *types.MagicIt
 	return true, nil
 }
 
-func (s SqliteRepo) AddCombatToAdventure(a *types.Adventure, g *types.MonsterGroup) (bool, error) {
+func (s SqliteRepo) AddCombatToAdventure(a *types.AdventureRecord, g *types.MonsterGroup) (bool, error) {
 	stmt_string := fmt.Sprintf("INSERT INTO %s(adventure_id, monster_name, number_defeated, xp_per_monster, total_xp) values(?, ?, ?, ?, ?)", combatTable)
 	s.logger.Debug(stmt_string)
 	stmt, err := s.db.Prepare(stmt_string)
 	util.CheckErr(err)
-	_, resErr := stmt.Exec(a.ID, g.XP.Name, g.XP.Number, g.XP.XPValue, g.TotalXPAmount)
+	_, resErr := stmt.Exec(a.ID, g.XP.Name, g.XP.XPValueOfOne, g.XP.XPValueOfOne, g.XP.TotalXPAmount())
 	if resErr != nil {
 		return false, resErr
 	}
@@ -385,8 +462,7 @@ func (s SqliteRepo) AddCombatToAdventure(a *types.Adventure, g *types.MonsterGro
 }
 
 // Characters
-func (s SqliteRepo) insertCharacter(campaignId int) (int, error) {
-	characterToInsert := types.BlankCharacter()
+func (s SqliteRepo) insertCharacter(campaignId int, char types.Character) (int, error) {
 	s.logger.Debug("tried to insert characer")
 	stmtString := fmt.Sprintf("INSERT INTO %s(campaign_id, name, current_xp, prime_req_percent, character_level, character_class, created_at, updated_at) values(?, ?, ?, ?, ?, ?, ?, ?) ;", characterTable)
 	s.logger.Debug("String is:")
@@ -394,7 +470,8 @@ func (s SqliteRepo) insertCharacter(campaignId int) (int, error) {
 	stmt, err := s.db.Prepare(stmtString)
 	util.CheckErr(err)
 	s.logger.Debug("statement successully prepared.")
-	res, err := stmt.Exec(campaignId, characterToInsert.Name, characterToInsert.CurrentXP, characterToInsert.PrimeReqPercent, characterToInsert.Level, characterToInsert.Class, time.Now(), time.Now())
+	name, xp, primReq, level, class := char.GenerateInsertAttributes()
+	res, err := stmt.Exec(campaignId, name, xp, primReq, level, class, time.Now(), time.Now())
 	util.CheckErr(err)
 	var id int64
 	if id, err = res.LastInsertId(); err != nil {
@@ -404,7 +481,7 @@ func (s SqliteRepo) insertCharacter(campaignId int) (int, error) {
 
 }
 
-func (s SqliteRepo) selectCharacterById(id int) *types.Character {
+func (s SqliteRepo) selectCharacterById(id int) *types.CharacterRecord {
 	tableq := fmt.Sprintf("SELECT * FROM %s c where c.id = ?", characterTable)
 	rows, err := s.runQuery(tableq, id)
 	util.CheckErr(err)
@@ -415,7 +492,21 @@ func (s SqliteRepo) selectCharacterById(id int) *types.Character {
 	return results[0]
 }
 
-func (s SqliteRepo) getCampaignCharacters(campaignId int) ([]types.Character, error) {
+func (s SqliteRepo) updateCharacter(char types.Character) error {
+	tableq := char.GenerateUpdateStatement()
+	stmt, err := s.db.Prepare(tableq)
+	if err != nil {
+		return err
+	}
+	_, err = stmt.Exec(char.GenerateUpdateAttributes())
+	if err != nil {
+		return err
+	}
+	return nil
+
+}
+
+func (s SqliteRepo) getCampaignCharacters(campaignId int) ([]types.CharacterRecord, error) {
 	tableq := fmt.Sprintf("SELECT * FROM %s c where c.id = ?", characterTable)
 	rows, err := s.runQuery(tableq, campaignId)
 	defer rows.Close()
@@ -426,36 +517,49 @@ func (s SqliteRepo) getCampaignCharacters(campaignId int) ([]types.Character, er
 	return results, nil
 }
 
-func (s SqliteRepo) processCharacterRowsForCampaign(r *sql.Rows) []types.Character {
-	characters := make([]types.Character, 0)
+func (s SqliteRepo) processCharacterRowsForCampaign(r *sql.Rows) []types.CharacterRecord {
+	characters := make([]types.CharacterRecord, 0)
 	for r.Next() {
-		current := types.Character{}
-		err := r.Scan(&current.ID, &trashInt, &current.Name, &current.CurrentXP, &current.PrimeReqPercent, &current.Level, &current.Class, &trashDate, &trashDate)
+		name, class := "", ""
+		id, xp, primeReq, level := 0, 0, 0, 0
+		err := r.Scan(&id, &trashInt, &name, &xp, &primeReq, &level, &class, &trashDate, &trashDate)
 		util.CheckErr(err)
-		characters = append(characters, current)
+		current := types.NewCharacter(id, xp, primeReq, level, name, class)
+		characters = append(characters, *current)
 	}
 	return characters
 }
 
-func (s SqliteRepo) processCharacterRows(r *sql.Rows) []*types.Character {
-	characters := make([]*types.Character, 0)
+func (s SqliteRepo) processCharacterRows(r *sql.Rows) []*types.CharacterRecord {
+	characters := make([]*types.CharacterRecord, 0)
 	for r.Next() {
-		current := &types.Character{}
-		err := r.Scan(&current.ID, &trashInt, &current.Name, &current.CurrentXP, &current.PrimeReqPercent, &current.Level, &current.Class, &trashDate, &trashDate)
+		name, class := "", ""
+		id, xp, primeReq, level := 0, 0, 0, 0
+		err := r.Scan(&id, &trashInt, &name, &xp, &primeReq, &level, &class, &trashDate, &trashDate)
 		util.CheckErr(err)
+		current := types.NewCharacter(id, xp, primeReq, level, name, class)
 		characters = append(characters, current)
+
 	}
 	return characters
 }
 
-func (s SqliteRepo) CreateCharacterForCampaign(campaign *types.Campaign) (*types.Character, error) {
-	id, err := s.insertCharacter(campaign.ID)
+func (s SqliteRepo) CreateCharacterForCampaign(campaign *types.CampaignRecord, character types.Character) (*types.CharacterRecord, error) {
+	id, err := s.insertCharacter(campaign.ID, character)
 	if err != nil {
 		return nil, err
 	}
 	return s.selectCharacterById(id), nil
 }
-func (s SqliteRepo) AddCharacterToAdventure(ad *types.Adventure, char *types.Character, isGettingHalfshare bool) (bool, error) {
+
+func (s SqliteRepo) UpdateCharacter(character types.Character) (*types.CharacterRecord, error) {
+	err := s.updateCharacter(character)
+	if err != nil {
+		return nil, err
+	}
+	return s.selectCharacterById(character.Id()), nil
+}
+func (s SqliteRepo) AddCharacterToAdventure(ad *types.AdventureRecord, char *types.AdventureCharacter) (bool, error) {
 	s.logger.Debug("tried to insert characer to adventure mapping")
 	stmtString := fmt.Sprintf("INSERT INTO %s(adventure_id, character_id, half_share) values(?, ?, ?) ;", characterToAdventureTable)
 	s.logger.Debug("String is:")
@@ -463,13 +567,13 @@ func (s SqliteRepo) AddCharacterToAdventure(ad *types.Adventure, char *types.Cha
 	stmt, err := s.db.Prepare(stmtString)
 	util.CheckErr(err)
 	s.logger.Debug("statement successully prepared.")
-	if isGettingHalfshare {
-		_, err := stmt.Exec(ad.ID, char.ID, 1)
+	if char.Halfshare {
+		_, err := stmt.Exec(ad.ID, char.Details.Id(), 1)
 		if err != nil {
 			return false, err
 		}
 	} else {
-		_, err := stmt.Exec(ad.ID, char.ID, 0)
+		_, err := stmt.Exec(ad.ID, char.Details.Id(), 0)
 		if err != nil {
 			return false, err
 		}
@@ -477,7 +581,7 @@ func (s SqliteRepo) AddCharacterToAdventure(ad *types.Adventure, char *types.Cha
 	return true, nil
 
 }
-func (s SqliteRepo) RemoveCharacterFromAdventure(ad *types.Adventure, char *types.Character) (bool, error) {
+func (s SqliteRepo) RemoveCharacterFromAdventure(ad *types.AdventureRecord, char *types.CharacterRecord) (bool, error) {
 	s.logger.Debug("tried to insert characer to adventure mapping")
 	stmtString := fmt.Sprintf("DELETE FROM %s WHERE adventure_id = ? AND character_id = ?;", characterToAdventureTable)
 	s.logger.Debug("String is:")
@@ -485,14 +589,14 @@ func (s SqliteRepo) RemoveCharacterFromAdventure(ad *types.Adventure, char *type
 	stmt, err := s.db.Prepare(stmtString)
 	util.CheckErr(err)
 	s.logger.Debug("statement successully prepared.")
-	_, err = stmt.Exec(ad.ID, char.ID)
+	_, err = stmt.Exec(ad.ID, char.Id())
 	if err != nil {
 		return false, err
 	}
 
 	return true, nil
 }
-func (s SqliteRepo) ChangeCharacterShares(ad *types.Adventure, char *types.Character, isGettingHalfShare bool) (bool, error) {
+func (s SqliteRepo) ChangeCharacterShares(ad *types.AdventureRecord, char *types.CharacterRecord, isGettingHalfShare bool) (bool, error) {
 	s.logger.Debug("tried to insert characer to adventure mapping")
 	stmtString := fmt.Sprintf("UPDATE %s set half_share=? WHERE adventure_id = ? AND character_id = ?;", characterToAdventureTable)
 	s.logger.Debug("String is:")
@@ -501,12 +605,12 @@ func (s SqliteRepo) ChangeCharacterShares(ad *types.Adventure, char *types.Chara
 	util.CheckErr(err)
 	s.logger.Debug("statement successully prepared.")
 	if isGettingHalfShare {
-		_, err = stmt.Exec(ad.ID, char.ID, 1)
+		_, err = stmt.Exec(ad.ID, char.Id(), 1)
 		if err != nil {
 			return false, err
 		}
 	} else {
-		_, err = stmt.Exec(ad.ID, char.ID, 0)
+		_, err = stmt.Exec(ad.ID, char.Id(), 0)
 		if err != nil {
 			return false, err
 		}
@@ -514,6 +618,6 @@ func (s SqliteRepo) ChangeCharacterShares(ad *types.Adventure, char *types.Chara
 	return true, nil
 }
 
-func (s SqliteRepo) GetCharactersForCampaign(camp *types.Campaign) ([]types.Character, error) {
+func (s SqliteRepo) GetCharactersForCampaign(camp *types.CampaignRecord) ([]types.CharacterRecord, error) {
 	return s.getCampaignCharacters(camp.ID)
 }

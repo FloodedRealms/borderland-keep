@@ -24,13 +24,38 @@ func (c CharacterApi) CreateCharacterForCampaign(ctx *gin.Context) {
 	if util.CheckApiErr(err, ctx) {
 		return
 	}
-	created, err := c.characterService.CreateCharacterForCampaign(campaign)
+
+	var characterToInsert *types.CreateCharacterRecordRequest
+	if err := ctx.ShouldBind(&characterToInsert); err != nil {
+		ctx.JSON(http.StatusBadRequest, err.Error())
+		return
+
+	}
+	created, err := c.characterService.CreateCharacterForCampaign(campaign, characterToInsert)
+	if util.CheckApiErr(err, ctx) {
+		return
+	}
+	ctx.JSON(http.StatusCreated, gin.H{"status": "success", "data": created.GenerateSuccessfulCreationJSON()})
+}
+
+func (c CharacterApi) UpdateCharacter(ctx *gin.Context) {
+	id, err := strconv.Atoi(ctx.Param("characterId"))
+	if util.CheckApiErr(err, ctx) {
+		return
+	}
+
+	var characterToUpdate *types.UpdateCharacterRecordRequest
+	if err := ctx.ShouldBind(&characterToUpdate); err != nil {
+		ctx.JSON(http.StatusBadRequest, err.Error())
+		return
+
+	}
+	created, err := c.characterService.UpdateCharacter(id, characterToUpdate)
 	if util.CheckApiErr(err, ctx) {
 		return
 	}
 	ctx.JSON(http.StatusOK, gin.H{"status": "success", "data": created})
 }
-
 func (c CharacterApi) ManageCharactersForAdventure(ctx *gin.Context) {
 	util.ApplyCorsHeaders(ctx)
 	adventureId, err := strconv.Atoi(ctx.Param("adventureId"))
@@ -59,4 +84,8 @@ func (c CharacterApi) ManageCharactersForAdventure(ctx *gin.Context) {
 		ctx.JSON(http.StatusOK, gin.H{"status": "fail", "data": status})
 	}
 	ctx.JSON(http.StatusOK, gin.H{"status": "success", "data": status})
+}
+
+func (c CharacterApi) GetCharacterById(ctx *gin.Context) {
+	ctx.JSON(http.StatusNotImplemented, gin.H{"status": "success", "data": util.NotYetImplmented()})
 }

@@ -1,11 +1,12 @@
 package types
 
 import (
+	"log"
 	"math"
 	"time"
 )
 
-type Adventure struct {
+type AdventureRecord struct {
 	ID             int                  `json:"id"`
 	CampaignId     int                  `json:"campaign_id"`
 	Name           string               `json:"name"`
@@ -14,6 +15,7 @@ type Adventure struct {
 	FullShareXP    int                  `json:"full_share"`
 	HalfShareXP    int                  `json:"half_share"`
 	AdventureDate  time.Time            `json:"adventure_date"`
+	GameDays       int                  `json:"duration"`
 	Coins          Coins                `json:"coins"`
 	Gems           []Gem                `json:"gems"`
 	Jewellery      []Jewellery          `json:"jewellery"`
@@ -24,7 +26,7 @@ type Adventure struct {
 	UpdatedAt      time.Time            `json:"updated_at"`
 }
 
-type CreateAdventureRecordRequest struct {
+type CreateAdventureRequest struct {
 	CampaignID int `json:"campaign_id"`
 	//Copper        int             `json:"copper"`
 	//Silver        int             `json:"silver"`
@@ -40,18 +42,8 @@ type CreateAdventureRecordRequest struct {
 	AdventureDate time.Time `json:"adventure_date"`
 }
 
-type UpdateAdventureRecordRequest struct {
-	ID         int
-	CampaignID int
-	Coins      Coins
-	Gems       []Gem
-	Jewellery  []Jewellery
-	Combat     []MonsterGroup
-	MagicItems []MagicItem
-}
-
-func NewAdventureRecord(id, campId int, c Coins, g []Gem, j []Jewellery, mo []MonsterGroup, mi []MagicItem, ch []AdventureCharacter, name string, cdate, udate, adate time.Time) *Adventure {
-	newAdventure := Adventure{
+func NewAdventureRecord(id, campId, duration int, c Coins, g []Gem, j []Jewellery, mo []MonsterGroup, mi []MagicItem, ch []AdventureCharacter, name string, cdate, udate, adate time.Time) *AdventureRecord {
+	newAdventure := AdventureRecord{
 		ID:            id,
 		CampaignId:    campId,
 		Coins:         c,
@@ -63,6 +55,7 @@ func NewAdventureRecord(id, campId int, c Coins, g []Gem, j []Jewellery, mo []Mo
 		CreatedAt:     cdate,
 		UpdatedAt:     udate,
 		AdventureDate: adate,
+		GameDays:      duration,
 	}
 	newAdventure.NumberOfShares = newAdventure.calculateNumberOfShares()
 	newAdventure.TotalXPAmount = newAdventure.calculateTotalXP()
@@ -70,21 +63,21 @@ func NewAdventureRecord(id, campId int, c Coins, g []Gem, j []Jewellery, mo []Mo
 	return &newAdventure
 }
 
-func NewAdventureRecordById(id int) *Adventure {
+func NewAdventureRecordById(id int) *AdventureRecord {
 	gems := make([]Gem, 0)
 	jewellery := make([]Jewellery, 0)
 	magicItems := make([]MagicItem, 0)
 	combats := make([]MonsterGroup, 0)
 	chars := make([]AdventureCharacter, 0)
-	return NewAdventureRecord(id, -1, *NewCoins(0, 0, 0, 0, 0), gems, jewellery, combats, magicItems, chars, "", time.Now(), time.Now(), time.Now())
+	return NewAdventureRecord(id, -1, 1, *NewCoins(0, 0, 0, 0, 0), gems, jewellery, combats, magicItems, chars, "", time.Now(), time.Now(), time.Now())
 }
 
-func (a Adventure) calculateTotalXP() int {
+func (a AdventureRecord) calculateTotalXP() int {
 	totalXp := a.Coins.TotalXPAmount + a.totalGemXp() + a.totalJewelleryXp() + a.totalMagicItemXp() + a.totalCombatXp()
 	return totalXp
 }
 
-func (a Adventure) calculateXPShares() (int, int) {
+func (a AdventureRecord) calculateXPShares() (int, int) {
 	numberOfShares := a.calculateNumberOfShares()
 	totalXp := a.Coins.TotalXPAmount + a.totalGemXp() + a.totalJewelleryXp() + a.totalMagicItemXp() + a.totalCombatXp()
 	fullShareXP := math.RoundToEven(float64(totalXp) / numberOfShares)
@@ -92,7 +85,7 @@ func (a Adventure) calculateXPShares() (int, int) {
 	return int(fullShareXP), int(halfShareXP)
 }
 
-func (a Adventure) calculateNumberOfShares() float64 {
+func (a AdventureRecord) calculateNumberOfShares() float64 {
 	totalShares := 0.0
 	for _, char := range a.Characters {
 		if char.Halfshare {
@@ -104,16 +97,16 @@ func (a Adventure) calculateNumberOfShares() float64 {
 	return totalShares
 }
 
-func (a Adventure) totalGemXp() (xp int) {
+func (a AdventureRecord) totalGemXp() (xp int) {
 	xp = 0
 	for _, gem := range a.Gems {
-		xp += gem.TotalXPAmount
+		xp += gem.TotalXPAmount()
 	}
 
 	return xp
 }
 
-func (a Adventure) totalJewelleryXp() (xp int) {
+func (a AdventureRecord) totalJewelleryXp() (xp int) {
 	xp = 0
 	for _, jewellery := range a.Jewellery {
 		xp += jewellery.TotalXPAmount
@@ -121,7 +114,7 @@ func (a Adventure) totalJewelleryXp() (xp int) {
 	return xp
 }
 
-func (a Adventure) totalMagicItemXp() (xp int) {
+func (a AdventureRecord) totalMagicItemXp() (xp int) {
 	xp = 0
 	for _, mi := range a.MagicItems {
 		xp += mi.TotalXPAmount
@@ -130,11 +123,70 @@ func (a Adventure) totalMagicItemXp() (xp int) {
 	return xp
 }
 
-func (a Adventure) totalCombatXp() (xp int) {
+func (a AdventureRecord) totalCombatXp() (xp int) {
 	xp = 0
 	for _, c := range a.Combat {
-		xp += c.TotalXPAmount
+		xp += c.XPEarned
 	}
 
 	return xp
+}
+
+type UpdateAdventureRequest struct {
+	ID            int                        `json:"id"`
+	CampaignID    int                        `json:"campaign_id"`
+	Copper        int                        `json:"copper"`
+	Silver        int                        `json:"silver"`
+	Electrum      int                        `json:"electrum"`
+	Gold          int                        `json:"gold"`
+	Platinum      int                        `json:"platinum"`
+	Gems          []loot                     `json:"gems"`
+	Jewellery     []loot                     `json:"jewellery"`
+	Combat        []loot                     `json:"combat"`
+	MagicItems    []incomingMagicItem        `json:"magic_items"`
+	Characters    []UpdateAdventureCharacter `json:"characters"`
+	Name          string                     `json:"name"`
+	AdventureDate time.Time                  `json:"adventure_date"`
+}
+
+func (r UpdateAdventureRequest) GenerateGemList() []Gem {
+	gems := make([]Gem, 0)
+	for _, gem := range r.Gems {
+		newGem := NewGem(gem.Name, gem.Description, gem.XPValueOfOne, gem.NumberOfItem, -1)
+		gems = append(gems, *newGem)
+	}
+	return gems
+}
+func (r UpdateAdventureRequest) GenerateJewelleryList() []Jewellery {
+	gems := make([]Jewellery, 0)
+	for _, gem := range r.Jewellery {
+		newGem := NewJewellery(gem.Name, gem.Description, gem.XPValueOfOne, gem.NumberOfItem, -1)
+		gems = append(gems, *newGem)
+	}
+	return gems
+}
+func (r UpdateAdventureRequest) GenerateMagicItemList() []MagicItem {
+	gems := make([]MagicItem, 0)
+	for _, gem := range r.MagicItems {
+		log.Print(gem)
+		newItem := NewMagicItem(gem.Name, gem.Description, float64(gem.ApparentValue), gem.ActualValue, -1)
+		gems = append(gems, *newItem)
+	}
+	return gems
+}
+func (r UpdateAdventureRequest) GenerateCombatList() []MonsterGroup {
+	gems := make([]MonsterGroup, 0)
+	for _, gem := range r.Combat {
+		newGem := NewMonsterGroup(gem.Name, gem.NumberOfItem, -1, gem.XPValueOfOne)
+		gems = append(gems, *newGem)
+	}
+	return gems
+}
+func (r UpdateAdventureRequest) GenerateCharacterList() []AdventureCharacter {
+	gems := make([]AdventureCharacter, 0)
+	for _, gem := range r.Characters {
+		newGem := NewAdventureCharacter(NewCharacterById(gem.ID), gem.Halfshare)
+		gems = append(gems, *newGem)
+	}
+	return gems
 }

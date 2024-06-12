@@ -1,12 +1,12 @@
 package types
 
 type Coins struct {
-	TotalXPAmount int      `json:"coin_xp"`
-	Copper        XPSource `json:"copper"`
-	Silver        XPSource `json:"silver"`
-	Electrum      XPSource `json:"electrum"`
-	Gold          XPSource `json:"gold"`
-	Platinum      XPSource `json:"platinum"`
+	TotalXPAmount int  `json:"coin_xp"`
+	Copper        loot `json:"copper"`
+	Silver        loot `json:"silver"`
+	Electrum      loot `json:"electrum"`
+	Gold          loot `json:"gold"`
+	Platinum      loot `json:"platinum"`
 }
 
 type CoinUpdateRequest struct {
@@ -48,5 +48,5 @@ func NewCoins(c, s, e, g, p int) *Coins {
 }
 
 func (c Coins) CalculateTotalXPValue() int {
-	return c.Copper.CalculateTotalXPValue() + c.Silver.CalculateTotalXPValue() + c.Electrum.CalculateTotalXPValue() + c.Gold.CalculateTotalXPValue() + c.Platinum.CalculateTotalXPValue()
+	return c.Copper.TotalXPAmount() + c.Silver.TotalXPAmount() + c.Electrum.TotalXPAmount() + c.Gold.TotalXPAmount() + c.Platinum.TotalXPAmount()
 }
