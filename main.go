@@ -35,47 +35,47 @@ func main() {
 	router := gin.Default()
 
 	//Campaign Endpoints
-	router.POST("/campaigns", campaignApi.CreateCampaign)
-	router.POST("/campaigns/:campaignId/adventures", adventureRecordApi.CreateAdventureRecord)
-	router.POST("/campaigns/:campaignId/characters", characterApi.CreateCharacterForCampaign)
+	router.POST("/api/campaigns", campaignApi.CreateCampaign)
+	router.POST("/api/campaigns/:campaignId/adventures", adventureRecordApi.CreateAdventureRecord)
+	router.POST("/api/campaigns/:campaignId/characters", characterApi.CreateCharacterForCampaign)
 
-	router.PATCH("campaigns/:campaignId", campaignApi.UpdateCampaign)
+	router.PATCH("/api/campaigns/:campaignId", campaignApi.UpdateCampaign)
 
-	router.GET("/campaigns", campaignApi.ListCampaigns)
-	router.GET("/campaigns/:campaignId", campaignApi.GetCampaign)
-	router.GET("/campaigns/:campaignId/adventures", adventureRecordApi.ListAdventureRecordsForCampaign)
+	router.GET("/api/campaigns", campaignApi.ListCampaigns)
+	router.GET("/api/campaigns/:campaignId", campaignApi.GetCampaign)
+	router.GET("/api/campaigns/:campaignId/adventures", adventureRecordApi.ListAdventureRecordsForCampaign)
 
-	router.DELETE("/campaigns/:campaignId", campaignApi.DeleteCampaign)
+	router.DELETE("/api/campaigns/:campaignId", campaignApi.DeleteCampaign)
 
-	router.OPTIONS("/campaigns", preflight)
-	router.OPTIONS("/campaigns/:campaignId", preflight)
+	router.OPTIONS("/api/campaigns", preflight)
+	router.OPTIONS("/api/campaigns/:campaignId", preflight)
 
 	//Adventure Endpoints
 	//router.POST("/adventures/:adventureId/loot", adventureRecordApi.AddLootToAdventure)
-	router.POST("/adventures/:adventureId/characters/:characterId", characterApi.ManageCharactersForAdventure)
+	router.POST("/api/adventures/:adventureId/characters/:characterId", characterApi.ManageCharactersForAdventure)
 
-	router.PATCH("/adventures/:adventureId", adventureRecordApi.UpdateAdventure)
+	router.PATCH("/api/adventures/:adventureId", adventureRecordApi.UpdateAdventure)
 
-	router.GET("/adventures/:adventureId", adventureRecordApi.GetAdventure)
+	router.GET("/api/adventures/:adventureId", adventureRecordApi.GetAdventure)
 	// router.GET("/adventures/:adventureId/experience", adventureRecordApi.GetAdventureExperience)
 
 	//	router.DELETE("/adventures/{adventureId}", adventureRecordApi.DeleteAdventure)
 
-	router.OPTIONS("/adventures", preflight)
-	router.OPTIONS("/adventures/:adventureId", preflight)
+	router.OPTIONS("/api/adventures", preflight)
+	router.OPTIONS("/api/adventures/:adventureId", preflight)
 	//router.OPTIONS("/adventures/:adventureId/loot/:type", preflight)
-	router.OPTIONS("/adventures/:adventureId/combat", preflight)
-	router.OPTIONS("/adventures/:adventureId/:characterId/:op", preflight)
+	router.OPTIONS("/api/adventures/:adventureId/combat", preflight)
+	router.OPTIONS("/api/adventures/:adventureId/:characterId/:op", preflight)
 
 	//Character Endpoints
-	router.GET("/characters/:characterId", characterApi.GetCharacterById)
+	router.GET("/api/characters/:characterId", characterApi.GetCharacterById)
 
 	//router.PATCH("/characters/:characterId", characterApi.UpdateCharacter)
 
 	//	router.DELETE("/characters/:characterId", characterApi.DeleteCharacter)
 
-	router.OPTIONS("/characters", preflight)
-	router.OPTIONS("/characters/:adventureId", preflight)
+	router.OPTIONS("/api/characters", preflight)
+	router.OPTIONS("/api/characters/:adventureId", preflight)
 
 	router.Run("localhost:9090")
 }
