@@ -69,7 +69,7 @@ func (ca *CampaignApi) ListCampaigns(ctx *gin.Context) {
 	var arr []*types.CampaignRecord
 	var err error
 	if clientId != "" {
-		arr, err = ca.campaignService.ListCampaignsForClient(clientId)
+
 	} else {
 		arr, err = ca.campaignService.ListCampaigns()
 	}

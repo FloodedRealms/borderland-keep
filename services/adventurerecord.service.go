@@ -42,6 +42,7 @@ func (a *AdventureServiceImpl) UpdateAdventureRecord(r *types.UpdateAdventureReq
 	magicItemsToUpdate := r.GenerateMagicItemList()
 	combatsToUpdate := r.GenerateCombatList()
 	charactersToUpdate := r.GenerateCharacterList()
+	fullShare, halfShare := adventureToUpdate.CalculateXPShares()
 	err := a.updateAdventureCoins(adventureToUpdate, coinsToAdd)
 	if err != nil {
 		return nil, util.UnableToUpdateAdventure("Coins", err.Error())
@@ -62,7 +63,7 @@ func (a *AdventureServiceImpl) UpdateAdventureRecord(r *types.UpdateAdventureReq
 	if err != nil {
 		return nil, util.UnableToUpdateAdventure("Combats", err.Error())
 	}
-	err = a.updateAdventureCharacters(adventureToUpdate, charactersToUpdate)
+	err = a.updateAdventureCharacters(adventureToUpdate, charactersToUpdate, fullShare, halfShare)
 	if err != nil {
 		return nil, util.UnableToUpdateAdventure("Characters", err.Error())
 	}
@@ -126,15 +127,22 @@ func (a AdventureServiceImpl) updateAdventureCombat(ad *types.AdventureRecord, g
 	}
 	return err
 }
-func (a AdventureServiceImpl) updateAdventureCharacters(ad *types.AdventureRecord, gems []types.AdventureCharacter) error {
+func (a AdventureServiceImpl) updateAdventureCharacters(ad *types.AdventureRecord, chars []types.AdventureCharacter, halfShareAmount, fullShareAmount int) error {
 	err := a.repo.DeleteCharactersForAdventure(ad)
 	if err != nil {
 		return err
 	}
-	for _, gem := range gems {
-		_, err := a.repo.AddCharacterToAdventure(ad, &gem)
-		if err != nil {
-			return err
+	for _, char := range chars {
+		if char.Halfshare {
+			_, err := a.repo.AddHalfshareCharacterToAdventure(ad, &char, halfShareAmount)
+			if err != nil {
+				return err
+			}
+		} else {
+			_, err := a.repo.AddFullshareCharacterToAdventure(ad, &char, fullShareAmount)
+			if err != nil {
+				return err
+			}
 		}
 	}
 	return err

@@ -1,5 +1,7 @@
 package types
 
+import "math"
+
 // comment
 type Character interface {
 	SQLLiteExportable
@@ -11,17 +13,17 @@ type Character interface {
 type CharacterRecord struct {
 	id              int
 	name            string
-	currentXP       int
-	primeReqPercent int
+	CurrentXP       int
+	PrimeReqPercent int
 	level           int
 	class           string
 }
 
 func (c CharacterRecord) GenerateInsertAttributes() (name string, currentXP int, primeReq int, level int, class string) {
-	return c.name, c.currentXP, c.primeReqPercent, c.level, c.class
+	return c.name, c.CurrentXP, c.PrimeReqPercent, c.level, c.class
 }
 func (c CharacterRecord) GenerateUpdateAttributes() (string, int, int, string) {
-	return c.name, c.primeReqPercent, c.level, c.class
+	return c.name, c.PrimeReqPercent, c.level, c.class
 }
 
 func (c CharacterRecord) GenerateUpdateStatement() string {
@@ -45,9 +47,9 @@ func (c *CharacterRecord) GenerateSuccessfulCreationJSON() APIResponse {
 	return characterAPIResponse{
 		Id:              c.id,
 		Name:            c.name,
-		CurrentXP:       c.currentXP,
+		CurrentXP:       c.CurrentXP,
 		Level:           c.level,
-		PrimeReqPercent: c.primeReqPercent,
+		PrimeReqPercent: c.PrimeReqPercent,
 		Class:           c.class,
 	}
 
@@ -56,8 +58,8 @@ func NewCharacter(id, currentXp, primeReq, level int, name, class string) *Chara
 	return &CharacterRecord{
 		id:              id,
 		name:            name,
-		currentXP:       currentXp,
-		primeReqPercent: primeReq,
+		CurrentXP:       currentXp,
+		PrimeReqPercent: primeReq,
 		level:           level,
 		class:           class,
 	}
@@ -108,4 +110,9 @@ func NewAdventureCharacter(details *CharacterRecord, halfshare bool) *AdventureC
 		Details:   *details,
 		Halfshare: halfshare,
 	}
+}
+
+func (c *CharacterRecord) AddXP(xpGained int) {
+	adjustedXPAmount := math.RoundToEven(float64(xpGained) + (float64(xpGained) * (float64(c.PrimeReqPercent) / 100)))
+	c.CurrentXP += int(adjustedXPAmount)
 }

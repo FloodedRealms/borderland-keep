@@ -1,11 +1,42 @@
 package repository
 
-import "github.com/floodedrealms/adventure-archivist/types"
+import (
+	"time"
 
-type Repository interface {
-	//PerformInsertStatement(*types.SQLLiteExportable) (*types.JSONExportable, error)
-	CreateCampaign(*types.CampaignRecord) (*types.CampaignRecord, error)
-	UpdateCampaign(*types.CampaignRecord) (*types.CampaignRecord, error)
+	"github.com/floodedrealms/adventure-archivist/types"
+)
+
+type MockDB struct {
+	throwError     bool
+	testCampaign   *types.CampaignRecord
+	testAdventure  *types.AdventureRecord
+	testCharacters []*types.CharacterRecord
+}
+
+func NewMockDatabase(shouldError bool) *MockDB {
+	testCampaign := types.NewCampaign(1)
+	testAdventure := types.NewAdventureRecord(1, 1, 5, *types.NewCoins(1000, 1000, 1000, 1000, 1000), []types.Gem, []types.Jewellery, []types.MonsterGroup, []types.MagicItem, []types.AdventureCharacter, "Test Adventure", time.Now(), time.Now(), time.Now())
+	character1 := types.NewCharacter(1, 0, 5, 1, "Billy the Test", "Figher")
+	character2 := types.NewCharacter(2, 0, 5, 1, "Willy the Test", "Figher")
+	character3 := types.NewCharacter(3, 0, 5, 1, "Chilly the Test", "Figher")
+	return &MockDB{
+		throwError:     shouldError,
+		testCampaign:   testCampaign,
+		testAdventure:  testAdventure,
+		testCharacters: []*types.CharacterRecord{character1, character2, character3},
+	}
+
+}
+
+// PerformInsertStatement(*types.SQLLiteExportable) (*types.JSONExportable, error)
+/*
+func (m *MockDB) CreateCampaign(*types.CampaignRecord) (*types.CampaignRecord, error) {
+	if m.throwError {
+		return error.N
+	}
+}*/
+
+/*	UpdateCampaign(*types.CampaignRecord) (*types.CampaignRecord, error)
 	GetCampaign(int) (*types.CampaignRecord, error)
 	DeleteCampaign(*types.CampaignRecord) (bool, error)
 	ListCampaigns() ([]*types.CampaignRecord, error)
@@ -39,5 +70,4 @@ type Repository interface {
 	GetCharacterById(types.CharacterRecord) *types.CharacterRecord
 
 	SaveApiUser(types.User, bool) error
-	GetApiUserById(providedClientId, providedAPIKey string) (*types.APIUser, error)
-}
+	GetApiUserById(providedClientId, providedAPIKey string) (*types.APIUser, error) */

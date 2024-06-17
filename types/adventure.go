@@ -59,7 +59,7 @@ func NewAdventureRecord(id, campId, duration int, c Coins, g []Gem, j []Jeweller
 	}
 	newAdventure.NumberOfShares = newAdventure.calculateNumberOfShares()
 	newAdventure.TotalXPAmount = newAdventure.calculateTotalXP()
-	newAdventure.FullShareXP, newAdventure.HalfShareXP = newAdventure.calculateXPShares()
+	newAdventure.FullShareXP, newAdventure.HalfShareXP = newAdventure.CalculateXPShares()
 	return &newAdventure
 }
 
@@ -77,7 +77,7 @@ func (a AdventureRecord) calculateTotalXP() int {
 	return totalXp
 }
 
-func (a AdventureRecord) calculateXPShares() (int, int) {
+func (a AdventureRecord) CalculateXPShares() (int, int) {
 	numberOfShares := a.calculateNumberOfShares()
 	totalXp := a.Coins.TotalXPAmount + a.totalGemXp() + a.totalJewelleryXp() + a.totalMagicItemXp() + a.totalCombatXp()
 	fullShareXP := math.RoundToEven(float64(totalXp) / numberOfShares)

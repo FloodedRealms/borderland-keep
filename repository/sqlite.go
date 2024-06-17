@@ -565,6 +565,10 @@ func (s SqliteRepo) CreateCharacterForCampaign(campaign *types.CampaignRecord, c
 	return s.selectCharacterById(id), nil
 }
 
+func (s SqliteRepo) GetCharacterById(char types.CharacterRecord) *types.CharacterRecord {
+	return s.selectCharacterById(char.Id())
+}
+
 func (s SqliteRepo) UpdateCharacter(character types.Character) (*types.CharacterRecord, error) {
 	err := s.updateCharacter(character)
 	if err != nil {
@@ -574,7 +578,7 @@ func (s SqliteRepo) UpdateCharacter(character types.Character) (*types.Character
 }
 func (s SqliteRepo) AddCharacterToAdventure(ad *types.AdventureRecord, char *types.AdventureCharacter) (bool, error) {
 	s.logger.Debug("tried to insert characer to adventure mapping")
-	stmtString := fmt.Sprintf("INSERT INTO %s(adventure_id, character_id, half_share) values(?, ?, ?) ;", characterToAdventureTable)
+	stmtString := fmt.Sprintf("INSERT INTO %s(adventure_id, character_id, half_share) values(?, ?, ?, ?) ;", characterToAdventureTable)
 	s.logger.Debug("String is:")
 	s.logger.Debug(stmtString)
 	stmt, err := s.db.Prepare(stmtString)
@@ -590,6 +594,37 @@ func (s SqliteRepo) AddCharacterToAdventure(ad *types.AdventureRecord, char *typ
 		if err != nil {
 			return false, err
 		}
+	}
+	return true, nil
+
+}
+func (s SqliteRepo) AddHalfshareCharacterToAdventure(ad *types.AdventureRecord, char *types.AdventureCharacter, shareAmount int) (bool, error) {
+	s.logger.Debug("tried to insert characer to adventure mapping")
+	stmtString := fmt.Sprintf("INSERT INTO %s(adventure_id, character_id, half_share) values(?, ?, ?, ?) ;", characterToAdventureTable)
+	s.logger.Debug("String is:")
+	s.logger.Debug(stmtString)
+	stmt, err := s.db.Prepare(stmtString)
+	util.CheckErr(err)
+	s.logger.Debug("statement successully prepared.")
+	_, err = stmt.Exec(ad.ID, char.Details.Id(), 1, shareAmount)
+	if err != nil {
+		return false, err
+	}
+	return true, nil
+
+}
+
+func (s SqliteRepo) AddFullshareCharacterToAdventure(ad *types.AdventureRecord, char *types.AdventureCharacter, shareAmount int) (bool, error) {
+	s.logger.Debug("tried to insert characer to adventure mapping")
+	stmtString := fmt.Sprintf("INSERT INTO %s(adventure_id, character_id, half_share) values(?, ?, ?, ?) ;", characterToAdventureTable)
+	s.logger.Debug("String is:")
+	s.logger.Debug(stmtString)
+	stmt, err := s.db.Prepare(stmtString)
+	util.CheckErr(err)
+	s.logger.Debug("statement successully prepared.")
+	_, err = stmt.Exec(ad.ID, char.Details.Id(), 0, shareAmount)
+	if err != nil {
+		return false, err
 	}
 	return true, nil
 

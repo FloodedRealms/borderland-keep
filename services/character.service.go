@@ -64,3 +64,10 @@ func (s CharacterServiceImpl) GetCharactersForCampaign(campaign *types.CampaignR
 	}
 	return characterList, nil
 }
+
+func (s CharacterServiceImpl) UpdateTotalCharacterXP(char types.CharacterRecord, xpGained int) error {
+	currentChar := s.repo.GetCharacterById(char)
+	currentChar.AddXP(xpGained)
+	_, err := s.repo.UpdateCharacter(&char)
+	return err
+}
