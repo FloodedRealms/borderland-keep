@@ -203,6 +203,9 @@ func (s SqliteRepo) selectAdventureById(id int) *types.AdventureRecord {
 
 	results := s.processAdventureRows(rows)
 
+	if len(results) == 0 {
+		return nil
+	}
 	return results[0]
 }
 func (s SqliteRepo) selectAdventureByCampaignId(c *types.CampaignRecord) ([]*types.AdventureRecord, error) {

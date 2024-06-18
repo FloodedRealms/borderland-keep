@@ -49,6 +49,7 @@ id INTEGER NOT NULL PRIMARY KEY,
 adventure_id INTEGER,
 character_id INTEGER,
 half_share INTEGER NOT NULL CHECK (half_share IN (0,1)),
+xp_gained INTEGER NOT NULL DEFAULT 0,
 FOREIGN KEY(adventure_id) REFERENCES adventures(id),
 FOREIGN KEY(character_id) REFERENCES characters(id),
 UNIQUE(adventure_id, character_id)
