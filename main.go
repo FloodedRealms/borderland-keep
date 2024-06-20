@@ -6,8 +6,6 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/gin-gonic/gin"
-
 	"github.com/floodedrealms/adventure-archivist/api"
 	"github.com/floodedrealms/adventure-archivist/commands"
 	"github.com/floodedrealms/adventure-archivist/repository"
@@ -47,72 +45,72 @@ func main() {
 
 		campaignService := services.NewCampaignService(sqlRepo, logger, context.TODO())
 		characterService := services.NewCharacterService(sqlRepo, logger, context.TODO())
-		adventureRecordService := services.NewAdventureRecordService(sqlRepo, context.TODO())
-		userService := services.NewUserService(sqlRepo, *logger)
+		//adventureRecordService := services.NewAdventureRecordService(sqlRepo, context.TODO())
+		//userService := services.NewUserService(sqlRepo, *logger)
 
 		campaignApi := api.NewCampaignApi(campaignService, characterService)
-		adventureRecordApi := api.NewAdventureRecordApi(adventureRecordService)
-		characterApi := api.NewCharacterApi(characterService)
-		userApi := api.NewUserApi(userService)
+		//adventureRecordApi := api.NewAdventureRecordApi(adventureRecordService)
+		//characterApi := api.NewCharacterApi(characterService)
+		//userApi := api.NewUserApi(userService)
 
 		//characterService := services.NewCharacterService(memRepo, context.TODO())
 		//characterApi := api.NewCharacterApi(characterService)
 
-		router := gin.Default()
+		router := http.NewServeMux()
 
 		//Campaign Endpoints
-		router.POST("/api/campaigns", userApi.RequireUserValidation(), campaignApi.CreateCampaign)
-		router.POST("/api/campaigns/:campaignId/adventures", adventureRecordApi.CreateAdventureRecord)
-		router.POST("/api/campaigns/:campaignId/characters", characterApi.CreateCharacterForCampaign)
+		router.HandleFunc("POST /api/campaigns", campaignApi.CreateCampaign)
+		//	router.HandleFunc("POST /api/campaigns/:campaignId/adventures", adventureRecordApi.CreateAdventureRecord)
+		//	router.HandleFunc("POST /api/campaigns/:campaignId/characters", characterApi.CreateCharacterForCampaign)
 
-		router.PATCH("/api/campaigns/:campaignId", campaignApi.UpdateCampaign)
+		router.HandleFunc("PATCH /api/campaigns/{campaignId}", campaignApi.UpdateCampaign)
 
-		router.GET("/api/campaigns", campaignApi.ListCampaigns)
-		router.GET("/api/campaigns/:campaignId", campaignApi.GetCampaign)
-		router.GET("/api/campaigns/:campaignId/adventures", adventureRecordApi.ListAdventureRecordsForCampaign)
+		router.HandleFunc("GET /api/campaigns", campaignApi.ListCampaigns)
+		router.HandleFunc("GET /api/campaigns/{campaignId}", campaignApi.GetCampaign)
+		//	router.HandleFunc(" GET /api/campaigns/:campaignId/adventures", adventureRecordApi.ListAdventureRecordsForCampaign)
 
-		router.DELETE("/api/campaigns/:campaignId", campaignApi.DeleteCampaign)
+		router.HandleFunc("DELETE /api/campaigns/{campaignId}", campaignApi.DeleteCampaign)
 
-		router.OPTIONS("/api/campaigns", preflight)
-		router.OPTIONS("/api/campaigns/:campaignId", preflight)
+		//	router.HandleFunc(" OPTIONS /api/campaigns", preflight)
+		//	router.HandleFunc(" OPTIONS /api/campaigns/:campaignId", preflight)
+		/*
+			//Adventure Endpoints
+			router.HandleFunc(" POST/api/adventures/:adventureId/characters/:characterId", characterApi.ManageCharactersForAdventure)
 
-		//Adventure Endpoints
-		//router.POST("/adventures/:adventureId/loot", adventureRecordApi.AddLootToAdventure)
-		router.POST("/api/adventures/:adventureId/characters/:characterId", characterApi.ManageCharactersForAdventure)
+			router.HandleFunc(" PATCH /api/adventures/:adventureId", adventureRecordApi.UpdateAdventure)
 
-		router.PATCH("/api/adventures/:adventureId", adventureRecordApi.UpdateAdventure)
+			router.HandleFunc(" GET /api/adventures/:adventureId", adventureRecordApi.GetAdventure)
 
-		router.GET("/api/adventures/:adventureId", adventureRecordApi.GetAdventure)
-		// router.GET("/adventures/:adventureId/experience", adventureRecordApi.GetAdventureExperience)
+			router.HandleFunc(" OPTIONS /api/adventures", preflight)
+			router.HandleFunc(" OPTIONS /api/adventures/:adventureId", preflight)
+			//router.HandleFunc(" OPTIONS /adventures/:adventureId/loot/:type", preflight)
+			router.HandleFunc(" OPTIONS /api/adventures/:adventureId/combat", preflight)
+			router.HandleFunc(" OPTIONS /api/adventures/:adventureId/:characterId/:op", preflight)
 
-		//	router.DELETE("/adventures/{adventureId}", adventureRecordApi.DeleteAdventure)
+			//Character Endpoints
+			router.HandleFunc(" GET /api/characters/:characterId", characterApi.GetCharacterById)
 
-		router.OPTIONS("/api/adventures", preflight)
-		router.OPTIONS("/api/adventures/:adventureId", preflight)
-		//router.OPTIONS("/adventures/:adventureId/loot/:type", preflight)
-		router.OPTIONS("/api/adventures/:adventureId/combat", preflight)
-		router.OPTIONS("/api/adventures/:adventureId/:characterId/:op", preflight)
+			// USER
+			router.HandleFunc(" GET /api/user/validate", userApi.ValidateApiUser)
 
-		//Character Endpoints
-		router.GET("/api/characters/:characterId", characterApi.GetCharacterById)
+			router.HandleFunc(" OPTIONS /api/characters", preflight)
+			router.HandleFunc(" OPTIONS /api/characters/:adventureId", preflight)
+		*/
+		server := &http.Server{
+			Addr:    ":9090",
+			Handler: router,
+		}
+		logger.Print("Listening on 9090")
+		server.ListenAndServe()
 
-		//router.PATCH("/characters/:characterId", characterApi.UpdateCharacter)
-
-		//	router.DELETE("/characters/:characterId", characterApi.DeleteCharacter)
-
-		// USER
-		router.GET("/api/user/validate", userApi.ValidateApiUser)
-
-		router.OPTIONS("/api/characters", preflight)
-		router.OPTIONS("/api/characters/:adventureId", preflight)
-
-		router.Run("localhost:9090")
 	}
 
 }
 
-func preflight(c *gin.Context) {
-	c.Header("Access-Control-Allow-Origin", "*")
-	c.Header("Access-Control-Allow-Headers", "access-control-allow-origin, access-control-allow-headers, content-type")
-	c.JSON(http.StatusOK, struct{}{})
-}
+/*
+func preflight(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader()
+	w.Header("Access-Control-Allow-Origin", "*")
+	w.Header("Access-Control-Allow-Headers", "access-control-allow-origin, access-control-allow-headers, content-type")
+	w.JSON(http.StatusOK, struct{}{})
+}*/

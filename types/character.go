@@ -43,7 +43,7 @@ type characterAPIResponse struct {
 	Class           string `json:"class"`
 }
 
-func (c *CharacterRecord) GenerateSuccessfulCreationJSON() APIResponse {
+func (c CharacterRecord) GenerateSuccessfulCreationJSON() APIResponse {
 	return characterAPIResponse{
 		Id:              c.id,
 		Name:            c.name,

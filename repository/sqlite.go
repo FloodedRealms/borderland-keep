@@ -523,10 +523,11 @@ func (s SqliteRepo) updateCharacter(char types.Character) error {
 }
 
 func (s SqliteRepo) getCampaignCharacters(campaignId int) ([]types.CharacterRecord, error) {
-	tableq := fmt.Sprintf("SELECT * FROM %s c where c.id = ?", characterTable)
+	tableq := fmt.Sprintf("SELECT * FROM %s c where c.campaign_id = ?", characterTable)
+
 	rows, err := s.runQuery(tableq, campaignId)
-	defer rows.Close()
 	util.CheckErr(err)
+	defer rows.Close()
 
 	results := s.processCharacterRowsForCampaign(rows)
 
