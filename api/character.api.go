@@ -76,7 +76,7 @@ func (c CharacterApi) ManageCharactersForAdventure(ctx *gin.Context) {
 
 	adventure := types.NewAdventureRecordById(adventureId)
 	character := types.NewCharacterById(characterId)
-	status, err := c.characterService.ManageCharactersForAdventure(adventure, character, operation, halfshare)
+	status, err := c.characterService.ManageCharactersForAdventure(*adventure, character, operation, halfshare)
 	if util.CheckApiErr(err, ctx) {
 		return
 	}

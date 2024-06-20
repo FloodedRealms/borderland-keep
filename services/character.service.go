@@ -11,7 +11,7 @@ import (
 type CharacterService interface {
 	CreateCharacterForCampaign(*types.CampaignRecord, *types.CreateCharacterRecordRequest) (*types.CharacterRecord, error)
 	UpdateCharacter(int, *types.UpdateCharacterRecordRequest) (*types.CharacterRecord, error)
-	ManageCharactersForAdventure(adventure *types.AdventureRecord, character *types.CharacterRecord, operation, halfshare string) (bool, error)
+	ManageCharactersForAdventure(adventure types.AdventureRecord, character *types.CharacterRecord, operation, halfshare string) (bool, error)
 	GetCharactersForCampaign(campaign *types.CampaignRecord) ([]types.CharacterRecord, error)
 }
 
@@ -39,19 +39,25 @@ func (s CharacterServiceImpl) UpdateCharacter(id int, updateReq *types.UpdateCha
 	return s.repo.UpdateCharacter(characterToUpdate)
 }
 
-func (s CharacterServiceImpl) ManageCharactersForAdventure(ad *types.AdventureRecord, char *types.CharacterRecord, operation, halfshare string) (bool, error) {
+func (s CharacterServiceImpl) ManageCharactersForAdventure(ad types.AdventureRecord, char *types.CharacterRecord, operation, halfshare string) (bool, error) {
 	isGettingHalfshare := false
 	if halfshare != "false" {
 		isGettingHalfshare = true
 	}
+	fullShareXP, halfShareXP := ad.CalculateXPShares()
 	switch operation {
 	case "add":
-		adventureCharacter := types.NewAdventureCharacter(char, isGettingHalfshare)
-		return s.repo.AddCharacterToAdventure(ad, adventureCharacter)
+		var adventureCharacter *types.AdventureCharacter
+		if isGettingHalfshare {
+			adventureCharacter = types.NewAdventureCharacter(char, isGettingHalfshare, halfShareXP)
+		} else {
+			adventureCharacter = types.NewAdventureCharacter(char, isGettingHalfshare, fullShareXP)
+		}
+		return s.repo.AddCharacterToAdventure(&ad, adventureCharacter)
 	case "remove":
-		return s.repo.RemoveCharacterFromAdventure(ad, char)
+		return s.repo.RemoveCharacterFromAdventure(&ad, char)
 	case "change-shares":
-		return s.repo.ChangeCharacterShares(ad, char, isGettingHalfshare)
+		return s.repo.ChangeCharacterShares(&ad, char, isGettingHalfshare)
 	default:
 		return false, util.UnknownCharacterOperation(operation)
 	}

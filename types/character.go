@@ -93,22 +93,26 @@ type UpdateCharacterRecordRequest struct {
 	PrimeReqPercent int    `json:"percent"`
 	Level           int    `json:"level"`
 	Class           string `json:"class"`
+	XpGained        int    `json:"xp_gained"`
 }
 
 type AdventureCharacter struct {
 	Details   CharacterRecord
 	Halfshare bool `json:"halfshare"`
+	XpGained  int  `json:"xp_gained"`
 }
 
 type UpdateAdventureCharacter struct {
 	ID        int  `json:"id"`
 	Halfshare bool `json:"halfshare"`
+	XpGained  int  `json:"xp_gained"`
 }
 
-func NewAdventureCharacter(details *CharacterRecord, halfshare bool) *AdventureCharacter {
+func NewAdventureCharacter(details *CharacterRecord, halfshare bool, xp int) *AdventureCharacter {
 	return &AdventureCharacter{
 		Details:   *details,
 		Halfshare: halfshare,
+		XpGained:  xp,
 	}
 }
 

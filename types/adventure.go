@@ -77,9 +77,12 @@ func (a AdventureRecord) calculateTotalXP() int {
 	return totalXp
 }
 
-func (a AdventureRecord) CalculateXPShares() (int, int) {
+func (a AdventureRecord) CalculateXPShares() (fullshare, halfsare int) {
 	numberOfShares := a.calculateNumberOfShares()
 	totalXp := a.Coins.TotalXPAmount + a.totalGemXp() + a.totalJewelleryXp() + a.totalMagicItemXp() + a.totalCombatXp()
+	if totalXp == 0 {
+		return 0, 0
+	}
 	fullShareXP := math.RoundToEven(float64(totalXp) / numberOfShares)
 	halfShareXP := math.RoundToEven(fullShareXP / 2.0)
 	return int(fullShareXP), int(halfShareXP)
@@ -183,10 +186,10 @@ func (r UpdateAdventureRequest) GenerateCombatList() []MonsterGroup {
 	return gems
 }
 func (r UpdateAdventureRequest) GenerateCharacterList() []AdventureCharacter {
-	gems := make([]AdventureCharacter, 0)
-	for _, gem := range r.Characters {
-		newGem := NewAdventureCharacter(NewCharacterById(gem.ID), gem.Halfshare)
-		gems = append(gems, *newGem)
+	characters := make([]AdventureCharacter, 0)
+	for _, char := range r.Characters {
+		newChar := NewAdventureCharacter(NewCharacterById(char.ID), char.Halfshare, char.XpGained)
+		characters = append(characters, *newChar)
 	}
-	return gems
+	return characters
 }

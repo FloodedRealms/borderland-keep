@@ -45,11 +45,11 @@ func main() {
 
 		campaignService := services.NewCampaignService(sqlRepo, logger, context.TODO())
 		characterService := services.NewCharacterService(sqlRepo, logger, context.TODO())
-		//adventureRecordService := services.NewAdventureRecordService(sqlRepo, context.TODO())
+		adventureRecordService := services.NewAdventureRecordService(sqlRepo, context.TODO())
 		//userService := services.NewUserService(sqlRepo, *logger)
 
 		campaignApi := api.NewCampaignApi(campaignService, characterService)
-		//adventureRecordApi := api.NewAdventureRecordApi(adventureRecordService)
+		adventureRecordApi := api.NewAdventureRecordApi(adventureRecordService)
 		//characterApi := api.NewCharacterApi(characterService)
 		//userApi := api.NewUserApi(userService)
 
@@ -60,48 +60,39 @@ func main() {
 
 		//Campaign Endpoints
 		router.HandleFunc("POST /api/campaigns", campaignApi.CreateCampaign)
-		//	router.HandleFunc("POST /api/campaigns/:campaignId/adventures", adventureRecordApi.CreateAdventureRecord)
+		router.HandleFunc("POST /api/campaigns/{campaignId}/adventures", adventureRecordApi.CreateAdventureRecord)
 		//	router.HandleFunc("POST /api/campaigns/:campaignId/characters", characterApi.CreateCharacterForCampaign)
 
 		router.HandleFunc("PATCH /api/campaigns/{campaignId}", campaignApi.UpdateCampaign)
 
 		router.HandleFunc("GET /api/campaigns", campaignApi.ListCampaigns)
 		router.HandleFunc("GET /api/campaigns/{campaignId}", campaignApi.GetCampaign)
-		//	router.HandleFunc(" GET /api/campaigns/:campaignId/adventures", adventureRecordApi.ListAdventureRecordsForCampaign)
+		router.HandleFunc("GET /api/campaigns/{campaignId}/adventures", adventureRecordApi.ListAdventureRecordsForCampaign)
 
 		router.HandleFunc("DELETE /api/campaigns/{campaignId}", campaignApi.DeleteCampaign)
 
-		//	router.HandleFunc(" OPTIONS /api/campaigns", preflight)
-		//	router.HandleFunc(" OPTIONS /api/campaigns/:campaignId", preflight)
-		/*
-			//Adventure Endpoints
-			router.HandleFunc(" POST/api/adventures/:adventureId/characters/:characterId", characterApi.ManageCharactersForAdventure)
+		//Adventure Endpoints
+		//		router.HandleFunc(" POST/api/adventures/:adventureId/characters/:characterId", characterApi.ManageCharactersForAdventure)
 
-			router.HandleFunc(" PATCH /api/adventures/:adventureId", adventureRecordApi.UpdateAdventure)
+		router.HandleFunc("PATCH /api/adventures/{adventureId}", adventureRecordApi.UpdateAdventure)
 
-			router.HandleFunc(" GET /api/adventures/:adventureId", adventureRecordApi.GetAdventure)
+		router.HandleFunc("GET /api/adventures/{adventureId}", adventureRecordApi.GetAdventure)
 
-			router.HandleFunc(" OPTIONS /api/adventures", preflight)
-			router.HandleFunc(" OPTIONS /api/adventures/:adventureId", preflight)
-			//router.HandleFunc(" OPTIONS /adventures/:adventureId/loot/:type", preflight)
-			router.HandleFunc(" OPTIONS /api/adventures/:adventureId/combat", preflight)
-			router.HandleFunc(" OPTIONS /api/adventures/:adventureId/:characterId/:op", preflight)
+		//Character Endpoints
+		//		router.HandleFunc(" GET /api/characters/:characterId", characterApi.GetCharacterById)
 
-			//Character Endpoints
-			router.HandleFunc(" GET /api/characters/:characterId", characterApi.GetCharacterById)
+		// USER
+		//		router.HandleFunc(" GET /api/user/validate", userApi.ValidateApiUser)
 
-			// USER
-			router.HandleFunc(" GET /api/user/validate", userApi.ValidateApiUser)
-
-			router.HandleFunc(" OPTIONS /api/characters", preflight)
-			router.HandleFunc(" OPTIONS /api/characters/:adventureId", preflight)
-		*/
 		server := &http.Server{
 			Addr:    ":9090",
 			Handler: router,
 		}
 		logger.Print("Listening on 9090")
-		server.ListenAndServe()
+		for true {
+			server.ListenAndServe()
+			logger.Print("Server crash... attempting restart")
+		}
 
 	}
 

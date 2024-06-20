@@ -332,14 +332,15 @@ func (s SqliteRepo) getCharactersForAdventure(id int) []types.AdventureCharacter
 		var adventureId int
 		var characterId int
 		var halfStatus int
-		err := rows.Scan(&rowId, &adventureId, &characterId, &halfStatus)
+		var xp int
+		err := rows.Scan(&rowId, &adventureId, &characterId, &halfStatus, &xp)
 		util.CheckErr(err)
 		halfshare := false
 		if halfStatus == 1 {
 			halfshare = true
 		}
 		currentDetails := s.selectCharacterById(characterId)
-		adventureCharacter := types.NewAdventureCharacter(currentDetails, halfshare)
+		adventureCharacter := types.NewAdventureCharacter(currentDetails, halfshare, xp)
 		characters = append(characters, *adventureCharacter)
 	}
 	return characters
@@ -582,7 +583,7 @@ func (s SqliteRepo) UpdateCharacter(character types.Character) (*types.Character
 }
 func (s SqliteRepo) AddCharacterToAdventure(ad *types.AdventureRecord, char *types.AdventureCharacter) (bool, error) {
 	s.logger.Debug("tried to insert characer to adventure mapping")
-	stmtString := fmt.Sprintf("INSERT INTO %s(adventure_id, character_id, half_share) values(?, ?, ?, ?) ;", characterToAdventureTable)
+	stmtString := fmt.Sprintf("INSERT INTO %s(adventure_id, character_id, half_share, xp_gained) values(?, ?, ?, ?) ;", characterToAdventureTable)
 	s.logger.Debug("String is:")
 	s.logger.Debug(stmtString)
 	stmt, err := s.db.Prepare(stmtString)
@@ -604,7 +605,7 @@ func (s SqliteRepo) AddCharacterToAdventure(ad *types.AdventureRecord, char *typ
 }
 func (s SqliteRepo) AddHalfshareCharacterToAdventure(ad *types.AdventureRecord, char *types.AdventureCharacter, shareAmount int) (bool, error) {
 	s.logger.Debug("tried to insert characer to adventure mapping")
-	stmtString := fmt.Sprintf("INSERT INTO %s(adventure_id, character_id, half_share) values(?, ?, ?, ?) ;", characterToAdventureTable)
+	stmtString := fmt.Sprintf("INSERT INTO %s(adventure_id, character_id, half_share, xp_gained) values(?, ?, ?, ?) ;", characterToAdventureTable)
 	s.logger.Debug("String is:")
 	s.logger.Debug(stmtString)
 	stmt, err := s.db.Prepare(stmtString)
@@ -620,7 +621,7 @@ func (s SqliteRepo) AddHalfshareCharacterToAdventure(ad *types.AdventureRecord, 
 
 func (s SqliteRepo) AddFullshareCharacterToAdventure(ad *types.AdventureRecord, char *types.AdventureCharacter, shareAmount int) (bool, error) {
 	s.logger.Debug("tried to insert characer to adventure mapping")
-	stmtString := fmt.Sprintf("INSERT INTO %s(adventure_id, character_id, half_share) values(?, ?, ?, ?) ;", characterToAdventureTable)
+	stmtString := fmt.Sprintf("INSERT INTO %s(adventure_id, character_id, half_share, xp_gained) values(?, ?, ?, ?) ;", characterToAdventureTable)
 	s.logger.Debug("String is:")
 	s.logger.Debug(stmtString)
 	stmt, err := s.db.Prepare(stmtString)

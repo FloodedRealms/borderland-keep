@@ -1,13 +1,11 @@
 package api
 
 import (
+	"errors"
 	"net/http"
-	"strings"
 
 	"github.com/floodedrealms/adventure-archivist/services"
 	"github.com/floodedrealms/adventure-archivist/types"
-	"github.com/floodedrealms/adventure-archivist/util"
-	"github.com/gin-gonic/gin"
 )
 
 type AdventureApi struct {
@@ -18,87 +16,65 @@ func NewAdventureRecordApi(as services.AdventureService) *AdventureApi {
 	return &AdventureApi{adventureRecordService: as}
 }
 
-func (ara AdventureApi) CreateAdventureRecord(ctx *gin.Context) {
-	util.ApplyCorsHeaders(ctx)
-	var cr *types.CreateAdventureRequest
-
-	if err := ctx.ShouldBindJSON(&cr); err != nil {
-		ctx.JSON(http.StatusBadRequest, err.Error())
-		return
-	}
-	nc, err := ara.adventureRecordService.CreateAdventureRecordForCampaign(cr)
+func (ara AdventureApi) CreateAdventureRecord(w http.ResponseWriter, r *http.Request) {
+	var cr types.CreateAdventureRequest
+	err := decodeJSONBody(w, r, &cr)
 	if err != nil {
-		if strings.Contains(err.Error(), "Index already exists") {
-			ctx.JSON(http.StatusConflict, gin.H{"status": "fail", "message": err.Error()})
-			return
-		}
-		ctx.JSON(http.StatusBadGateway, gin.H{"status": "fail", "message": err.Error()})
+		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
-	ctx.JSON(http.StatusCreated, gin.H{"status": "success", "data": nc})
 
+	nc, err := ara.adventureRecordService.CreateAdventureRecordForCampaign(&cr)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	sendGoodResponseWithObject(w, nc)
 }
 
-func (ara AdventureApi) ListAdventureRecordsForCampaign(ctx *gin.Context) {
-	util.ApplyCorsHeaders(ctx)
-
-	id := ctx.Param("campaignId")
+// TODO: Fix the N+1 selection here
+func (ara AdventureApi) ListAdventureRecordsForCampaign(w http.ResponseWriter, r *http.Request) {
+	id := r.PathValue("adventureId")
 	arr, err := ara.adventureRecordService.ListAdventureRecordsForCampaign(id)
 
 	if err != nil {
-		if strings.Contains(err.Error(), "Index already exists") {
-			ctx.JSON(http.StatusNotFound, gin.H{"status": "fail", "message": err.Error()})
-			return
-		}
-		ctx.JSON(http.StatusBadGateway, gin.H{"status": "fail", "message": err.Error()})
+
+		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	ctx.JSON(http.StatusOK, gin.H{"status": "success", "data": arr})
+	sendGoodResponseWithObject(w, arr)
 }
 
-func (ara AdventureApi) GetAdventure(ctx *gin.Context) {
-	util.ApplyCorsHeaders(ctx)
-	id := ctx.Param("adventureId")
+func (ara AdventureApi) GetAdventure(w http.ResponseWriter, r *http.Request) {
+	id := r.PathValue("adventureId")
+
 	arr, err := ara.adventureRecordService.GetAdventureRecordById(id)
 
 	if err != nil {
-		if strings.Contains(err.Error(), "Index already exists") {
-			ctx.JSON(http.StatusNotFound, gin.H{"status": "fail", "message": err.Error()})
-			return
-		}
-		ctx.JSON(http.StatusBadGateway, gin.H{"status": "fail", "message": err.Error()})
+		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	ctx.JSON(http.StatusOK, gin.H{"status": "success", "data": arr})
-
+	sendGoodResponseWithObject(w, arr)
 }
 
-func (ara AdventureApi) UpdateAdventure(ctx *gin.Context) {
-	util.ApplyCorsHeaders(ctx)
-	var ur *types.UpdateAdventureRequest
+func (ara AdventureApi) UpdateAdventure(w http.ResponseWriter, r *http.Request) {
+	var ur types.UpdateAdventureRequest
 
-	if err := ctx.ShouldBindJSON(&ur); err != nil {
-		ctx.JSON(http.StatusBadRequest, err.Error())
-		return
-	}
-	uAdventure, err := ara.adventureRecordService.UpdateAdventureRecord(ur)
+	err := decodeJSONBody(w, r, &ur)
 	if err != nil {
-		if strings.Contains(err.Error(), "Index already exists") {
-			ctx.JSON(http.StatusConflict, gin.H{"status": "fail", "message": err.Error()})
-			return
-		}
-		if strings.Contains(err.Error(), "not yet implemented") {
-			ctx.JSON(http.StatusNotImplemented, gin.H{"status": "fail", "message": ur})
-			return
-		}
-		ctx.JSON(http.StatusBadGateway, gin.H{"status": "fail", "message": err.Error()})
+		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
-	ctx.JSON(http.StatusOK, gin.H{"status": "success", "data": uAdventure})
+	uAdventure, err := ara.adventureRecordService.UpdateAdventureRecord(&ur)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	sendGoodResponseWithObject(w, uAdventure)
 
 }
 
-/* func (ara AdventureRecordApi) AddLootToAdventure(ctx *gin.Context) {
+/* func (ara AdventureRecordApi) AddLootToAdventure(w http.ResponseWriter, r *http.Request) {
 	log.Print("hit")
 	util.ApplyCorsHeaders(ctx)
 	adventureId, err := strconv.Atoi(ctx.Param("adventureId"))
@@ -168,15 +144,15 @@ func (ara AdventureApi) UpdateAdventure(ctx *gin.Context) {
 	}
 } */
 
-func (ara AdventureApi) makeBoolResponse(status bool, err error, ctx *gin.Context) {
+func (ara AdventureApi) makeBoolResponse(status bool, err error, w http.ResponseWriter, r *http.Request) {
 	if err != nil {
-		ctx.JSON(http.StatusBadGateway, gin.H{"status": "fail", "message": err.Error()})
+		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 	if status != true {
-		ctx.JSON(http.StatusExpectationFailed, gin.H{"status": "fail", "message": "The requested action failed to complete, but no error was report"})
+		http.Error(w, errors.New("operation failed").Error(), http.StatusExpectationFailed)
 		return
 	}
-	ctx.JSON(http.StatusOK, gin.H{"status": "success", "message": "The requested action succeeded"})
+	sendSuccessResponse(w, "Operation Succeeded")
 
 }
