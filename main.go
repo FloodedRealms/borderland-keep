@@ -46,22 +46,19 @@ func main() {
 		campaignService := services.NewCampaignService(sqlRepo, logger, context.TODO())
 		characterService := services.NewCharacterService(sqlRepo, logger, context.TODO())
 		adventureRecordService := services.NewAdventureRecordService(sqlRepo, context.TODO())
-		//userService := services.NewUserService(sqlRepo, *logger)
+		// userService := services.NewUserService(sqlRepo, *logger)
 
 		campaignApi := api.NewCampaignApi(campaignService, characterService)
 		adventureRecordApi := api.NewAdventureRecordApi(adventureRecordService)
-		//characterApi := api.NewCharacterApi(characterService)
-		//userApi := api.NewUserApi(userService)
-
-		//characterService := services.NewCharacterService(memRepo, context.TODO())
-		//characterApi := api.NewCharacterApi(characterService)
+		characterApi := api.NewCharacterApi(characterService)
+		// userApi := api.NewUserApi(userService)
 
 		router := http.NewServeMux()
 
 		//Campaign Endpoints
 		router.HandleFunc("POST /api/campaigns", campaignApi.CreateCampaign)
 		router.HandleFunc("POST /api/campaigns/{campaignId}/adventures", adventureRecordApi.CreateAdventureRecord)
-		//	router.HandleFunc("POST /api/campaigns/:campaignId/characters", characterApi.CreateCharacterForCampaign)
+		router.HandleFunc("POST /api/campaigns/:campaignId/characters", characterApi.CreateCharacterForCampaign)
 
 		router.HandleFunc("PATCH /api/campaigns/{campaignId}", campaignApi.UpdateCampaign)
 
@@ -72,17 +69,17 @@ func main() {
 		router.HandleFunc("DELETE /api/campaigns/{campaignId}", campaignApi.DeleteCampaign)
 
 		//Adventure Endpoints
-		//		router.HandleFunc(" POST/api/adventures/:adventureId/characters/:characterId", characterApi.ManageCharactersForAdventure)
+		router.HandleFunc(" POST/api/adventures/:adventureId/characters/:characterId", characterApi.ManageCharactersForAdventure)
 
 		router.HandleFunc("PATCH /api/adventures/{adventureId}", adventureRecordApi.UpdateAdventure)
 
 		router.HandleFunc("GET /api/adventures/{adventureId}", adventureRecordApi.GetAdventure)
 
 		//Character Endpoints
-		//		router.HandleFunc(" GET /api/characters/:characterId", characterApi.GetCharacterById)
+		router.HandleFunc(" GET /api/characters/:characterId", characterApi.GetCharacterById)
 
 		// USER
-		//		router.HandleFunc(" GET /api/user/validate", userApi.ValidateApiUser)
+		router.HandleFunc(" GET /api/user/validate", userApi.ValidateApiUser)
 
 		server := &http.Server{
 			Addr:    ":9090",

@@ -105,6 +105,10 @@ func (ca *CampaignApi) DeleteCampaign(w http.ResponseWriter, r *http.Request) {
 	sendGoodResponseWithObject(w, campaign)
 }
 
+func CampaignHander(w http.ResponseWriter, r *http.Request) {
+
+}
+
 /*func applyCorsHeaders(ctx *gin.Context) {
 	ctx.Header("Access-Control-Allow-Origin", "*")
 	ctx.Header("Access-Control-Allow-Headers", "access-control-allow-origin, access-control-allow-headers")

@@ -1,11 +1,11 @@
 package api
 
 import (
+	"errors"
 	"net/http"
 
 	"github.com/floodedrealms/adventure-archivist/services"
 	"github.com/floodedrealms/adventure-archivist/types"
-	"github.com/gin-gonic/gin"
 )
 
 type UserApi struct {
@@ -16,31 +16,38 @@ func NewUserApi(userService services.UserService) *UserApi {
 	return &UserApi{userService: userService}
 }
 
-func (ua *UserApi) ValidateApiUser(ctx *gin.Context) {
+func (ua UserApi) ValidateApiUser(w http.ResponseWriter, r *http.Request) {
 	var incomingUser *types.APIRequest
-	if err := ctx.ShouldBindJSON(&incomingUser); err != nil {
-		ctx.JSON(http.StatusBadRequest, err.Error())
+	err := decodeJSONBody(w, r, incomingUser)
+	if err != nil {
 		return
 	}
+
 	isValid, err := ua.userService.ValidateApiUser(incomingUser.Auth.ProvidedClientId, incomingUser.Auth.ProvidedAPIKey)
 	if !isValid {
-		ctx.JSON(http.StatusForbidden, gin.H{"status": "access-denied", "message": err})
+		http.Error(w, errors.New("user not valid").Error(), http.StatusForbidden)
 		return
 	}
-	ctx.JSON(http.StatusOK, gin.H{"status": "valid", "message": "User is valid"})
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+	}
+	w.WriteHeader(http.StatusOK)
 }
 
-func (ua *UserApi) RequireUserValidation() gin.HandlerFunc {
-	return func(ctx *gin.Context) {
-		givenClientId := ctx.Request.Header.Get("X-Archivist-Client-Id")
-		givenAPIKey := ctx.Request.Header.Get("X-Archivist-API-Key")
+func (ua UserApi) RequireUserValidation(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		givenClientId := r.Header[http.CanonicalHeaderKey("X-Archivist-Client-Id")][0]
+		givenAPIKey := r.Header[http.CanonicalHeaderKey("X-Archivist-API-Key")][0]
 
 		isValid, err := ua.userService.ValidateApiUser(givenClientId, givenAPIKey)
 		if !isValid {
-			ctx.JSON(http.StatusForbidden, gin.H{"status": "access-denied", "message": err})
+			http.Error(w, errors.New("user not valid").Error(), http.StatusForbidden)
 			return
 		}
-		ctx.Next()
-	}
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusBadRequest)
+		}
+		next.ServeHTTP(w, r)
+	})
 
 }

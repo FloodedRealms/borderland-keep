@@ -7,7 +7,6 @@ import (
 	"github.com/floodedrealms/adventure-archivist/services"
 	"github.com/floodedrealms/adventure-archivist/types"
 	"github.com/floodedrealms/adventure-archivist/util"
-	"github.com/gin-gonic/gin"
 )
 
 type CharacterApi struct {
@@ -18,74 +17,59 @@ func NewCharacterApi(as services.CharacterService) *CharacterApi {
 	return &CharacterApi{characterService: as}
 }
 
-func (c CharacterApi) CreateCharacterForCampaign(ctx *gin.Context) {
-	campaignId, err := strconv.Atoi(ctx.Param("campaignId"))
-	campaign := types.NewCampaign(campaignId)
-	if util.CheckApiErr(err, ctx) {
-		return
+func (c CharacterApi) CreateCharacterForCampaign(w http.ResponseWriter, r *http.Request) {
+	campaignId, err := strconv.Atoi(r.PathValue("campaignId"))
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
 	}
+	campaign := types.NewCampaign(campaignId)
 
 	var characterToInsert *types.CreateCharacterRecordRequest
-	if err := ctx.ShouldBind(&characterToInsert); err != nil {
-		ctx.JSON(http.StatusBadRequest, err.Error())
-		return
+	decodeJSONBody(w, r, characterToInsert)
 
-	}
 	created, err := c.characterService.CreateCharacterForCampaign(campaign, characterToInsert)
-	if util.CheckApiErr(err, ctx) {
-		return
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
 	}
-	ctx.JSON(http.StatusCreated, gin.H{"status": "success", "data": created.GenerateSuccessfulCreationJSON()})
+	sendGoodResponseWithObject(w, created)
 }
 
-func (c CharacterApi) UpdateCharacter(ctx *gin.Context) {
-	id, err := strconv.Atoi(ctx.Param("characterId"))
-	if util.CheckApiErr(err, ctx) {
-		return
+func (c CharacterApi) UpdateCharacter(w http.ResponseWriter, r *http.Request) {
+	id, err := strconv.Atoi(r.PathValue("characterId"))
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
 	}
 
 	var characterToUpdate *types.UpdateCharacterRecordRequest
-	if err := ctx.ShouldBind(&characterToUpdate); err != nil {
-		ctx.JSON(http.StatusBadRequest, err.Error())
-		return
-
-	}
 	created, err := c.characterService.UpdateCharacter(id, characterToUpdate)
-	if util.CheckApiErr(err, ctx) {
-		return
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
 	}
-	ctx.JSON(http.StatusOK, gin.H{"status": "success", "data": created})
+	sendGoodResponseWithObject(w, created)
 }
-func (c CharacterApi) ManageCharactersForAdventure(ctx *gin.Context) {
-	util.ApplyCorsHeaders(ctx)
-	adventureId, err := strconv.Atoi(ctx.Param("adventureId"))
-	if util.CheckApiErr(err, ctx) {
-		return
+func (c CharacterApi) ManageCharactersForAdventure(w http.ResponseWriter, r *http.Request) {
+	adventureId, err := strconv.Atoi(r.PathValue("advnetureId"))
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
 	}
-	characterId, err := strconv.Atoi(ctx.Param("characterId"))
-	if util.CheckApiErr(err, ctx) {
-		return
+	characterId, err := strconv.Atoi(r.PathValue("characterId"))
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
 	}
+	params := r.URL.Query()
 
-	operation, ok := ctx.GetQuery("operation")
-	if !ok {
-		ctx.JSON(http.StatusBadRequest, util.NamedParameterNotProvided("operation"))
-		return
-	}
-	halfshare := ctx.DefaultQuery("halfshare", "false")
+	operation := params.Get("operation")
+	halfshare := params.Get("halfshare")
 
 	adventure := types.NewAdventureRecordById(adventureId)
 	character := types.NewCharacterById(characterId)
 	status, err := c.characterService.ManageCharactersForAdventure(*adventure, character, operation, halfshare)
-	if util.CheckApiErr(err, ctx) {
-		return
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
 	}
-	if !status {
-		ctx.JSON(http.StatusOK, gin.H{"status": "fail", "data": status})
-	}
-	ctx.JSON(http.StatusOK, gin.H{"status": "success", "data": status})
+	sendGoodResponseWithObject(w, status)
 }
 
-func (c CharacterApi) GetCharacterById(ctx *gin.Context) {
-	ctx.JSON(http.StatusNotImplemented, gin.H{"status": "success", "data": util.NotYetImplmented()})
+func (c CharacterApi) GetCharacterById(w http.ResponseWriter, r *http.Request) {
+	http.Error(w, util.NotYetImplmented().Error(), http.StatusNotImplemented)
 }
