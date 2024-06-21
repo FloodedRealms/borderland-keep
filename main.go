@@ -19,6 +19,7 @@ func main() {
 
 	if len(flags) == 0 {
 		fmt.Print("usage: archivist [operation] <args>")
+		return
 	}
 	operation := flag.Arg(0)
 	switch operation {
@@ -34,11 +35,17 @@ func main() {
 		} else {
 			commands.CreateUser("api", friendlyName, true)
 		}
-	default:
+	case "server":
 		//	memRepo, err := repository.NewMemoryRepo()
 		//	util.CheckErr(err)
+		debug := false
+		if len(flags) == 2 {
+			if flag.Arg(1) == "true" {
+				debug = true
+			}
+		}
 
-		logger := util.NewLogger(true)
+		logger := util.NewLogger(debug)
 
 		sqlRepo, err := repository.NewSqliteRepo("archivist.db", logger)
 		util.CheckErr(err)
@@ -51,42 +58,51 @@ func main() {
 		campaignApi := api.NewCampaignApi(campaignService, characterService)
 		adventureRecordApi := api.NewAdventureRecordApi(adventureRecordService)
 		characterApi := api.NewCharacterApi(characterService)
-		userApi := api.NewUserApi(userService)
+		userApi := api.NewClientAPI(userService)
 
 		router := http.NewServeMux()
 
+		// Wrap functions
+		createCampaign := userApi.RequireValidClient(http.HandlerFunc(campaignApi.CreateCampaign))
+		updateCampaign := userApi.RequireValidClient(http.HandlerFunc(campaignApi.UpdateCampaign))
+		deleteCampaign := userApi.RequireValidClient(http.HandlerFunc(campaignApi.DeleteCampaign))
+		addAdventureToCampaign := userApi.RequireValidClient(http.HandlerFunc(adventureRecordApi.CreateAdventureRecord))
+		addCharacterToCampaign := userApi.RequireValidClient(http.HandlerFunc(characterApi.CreateCharacterForCampaign))
+
+		updateAdveture := userApi.RequireValidClient(http.HandlerFunc(adventureRecordApi.UpdateAdventure))
+
 		//Campaign Endpoints
-		router.HandleFunc("POST /api/campaigns", campaignApi.CreateCampaign)
-		router.HandleFunc("POST /api/campaigns/{campaignId}/adventures", adventureRecordApi.CreateAdventureRecord)
-		router.HandleFunc("POST /api/campaigns/:campaignId/characters", characterApi.CreateCharacterForCampaign)
+		router.Handle("POST /campaigns", createCampaign)
+		router.Handle("POST /campaigns/{campaignId}/adventures", addAdventureToCampaign)
+		router.Handle("POST /campaigns/:campaignId/characters", addCharacterToCampaign)
 
-		router.HandleFunc("PATCH /api/campaigns/{campaignId}", campaignApi.UpdateCampaign)
+		router.Handle("PATCH /campaigns/{campaignId}", updateCampaign)
 
-		router.HandleFunc("GET /api/campaigns", campaignApi.ListCampaigns)
-		router.HandleFunc("GET /api/campaigns/{campaignId}", campaignApi.GetCampaign)
-		router.HandleFunc("GET /api/campaigns/{campaignId}/adventures", adventureRecordApi.ListAdventureRecordsForCampaign)
+		router.HandleFunc("GET /campaigns", campaignApi.ListCampaigns)
+		router.HandleFunc("GET /campaigns/{campaignId}", campaignApi.GetCampaign)
+		router.HandleFunc("GET /campaigns/{campaignId}/adventures", adventureRecordApi.ListAdventureRecordsForCampaign)
 
-		router.HandleFunc("DELETE /api/campaigns/{campaignId}", campaignApi.DeleteCampaign)
+		router.Handle("DELETE /campaigns/{campaignId}", deleteCampaign)
 
 		//Adventure Endpoints
-		router.HandleFunc(" POST/api/adventures/:adventureId/characters/:characterId", characterApi.ManageCharactersForAdventure)
+		//router.HandleFunc("POST/adventures/:adventureId/characters/:characterId", characterApi.ManageCharactersForAdventure)
 
-		router.HandleFunc("PATCH /api/adventures/{adventureId}", adventureRecordApi.UpdateAdventure)
+		router.Handle("PATCH /adventures/{adventureId}", updateAdveture)
 
-		router.HandleFunc("GET /api/adventures/{adventureId}", adventureRecordApi.GetAdventure)
+		router.HandleFunc("GET /adventures/{adventureId}", adventureRecordApi.GetAdventure)
 
 		//Character Endpoints
-		router.HandleFunc(" GET /api/characters/:characterId", characterApi.GetCharacterById)
+		router.HandleFunc(" GET /characters/:characterId", characterApi.GetCharacterById)
 
 		// USER
-		router.HandleFunc(" GET /api/user/validate", userApi.ValidateApiUser)
+		router.HandleFunc(" GET /user/validate", userApi.ValidateClient)
 
 		server := &http.Server{
 			Addr:    ":9090",
 			Handler: router,
 		}
 		logger.Print("Listening on 9090")
-		for true {
+		for {
 			server.ListenAndServe()
 			logger.Print("Server crash... attempting restart")
 		}

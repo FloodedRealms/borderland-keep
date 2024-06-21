@@ -8,24 +8,24 @@ import (
 	"github.com/floodedrealms/adventure-archivist/types"
 )
 
-type UserApi struct {
+type Client struct {
 	userService services.UserService
 }
 
-func NewUserApi(userService services.UserService) *UserApi {
-	return &UserApi{userService: userService}
+func NewClientAPI(userService services.UserService) *Client {
+	return &Client{userService: userService}
 }
 
-func (ua UserApi) ValidateApiUser(w http.ResponseWriter, r *http.Request) {
-	var incomingUser *types.APIRequest
-	err := decodeJSONBody(w, r, incomingUser)
+func (ua Client) ValidateClient(w http.ResponseWriter, r *http.Request) {
+	var incomingReques *types.APIRequest
+	err := decodeJSONBody(w, r, incomingReques)
 	if err != nil {
 		return
 	}
 
-	isValid, err := ua.userService.ValidateApiUser(incomingUser.Auth.ProvidedClientId, incomingUser.Auth.ProvidedAPIKey)
+	isValid, err := ua.userService.ValidateApiUser(incomingReques.Auth.ProvidedClientId, incomingReques.Auth.ProvidedAPIKey)
 	if !isValid {
-		http.Error(w, errors.New("user not valid").Error(), http.StatusForbidden)
+		http.Error(w, errors.New("client not valid").Error(), http.StatusForbidden)
 		return
 	}
 	if err != nil {
@@ -34,7 +34,7 @@ func (ua UserApi) ValidateApiUser(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 }
 
-func (ua UserApi) RequireUserValidation(next http.Handler) http.Handler {
+func (ua Client) RequireValidClient(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		givenClientId := r.Header[http.CanonicalHeaderKey("X-Archivist-Client-Id")][0]
 		givenAPIKey := r.Header[http.CanonicalHeaderKey("X-Archivist-API-Key")][0]
