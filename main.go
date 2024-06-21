@@ -46,12 +46,12 @@ func main() {
 		campaignService := services.NewCampaignService(sqlRepo, logger, context.TODO())
 		characterService := services.NewCharacterService(sqlRepo, logger, context.TODO())
 		adventureRecordService := services.NewAdventureRecordService(sqlRepo, context.TODO())
-		// userService := services.NewUserService(sqlRepo, *logger)
+		userService := services.NewUserService(sqlRepo, *logger)
 
 		campaignApi := api.NewCampaignApi(campaignService, characterService)
 		adventureRecordApi := api.NewAdventureRecordApi(adventureRecordService)
 		characterApi := api.NewCharacterApi(characterService)
-		// userApi := api.NewUserApi(userService)
+		userApi := api.NewUserApi(userService)
 
 		router := http.NewServeMux()
 

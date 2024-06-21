@@ -46,6 +46,7 @@ func NewAdventureRecord(id, campId, duration int, c Coins, g []Gem, j []Jeweller
 	newAdventure := AdventureRecord{
 		ID:            id,
 		CampaignId:    campId,
+		Name:          name,
 		Coins:         c,
 		Gems:          g,
 		Jewellery:     j,

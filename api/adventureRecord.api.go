@@ -34,7 +34,8 @@ func (ara AdventureApi) CreateAdventureRecord(w http.ResponseWriter, r *http.Req
 
 // TODO: Fix the N+1 selection here
 func (ara AdventureApi) ListAdventureRecordsForCampaign(w http.ResponseWriter, r *http.Request) {
-	id := r.PathValue("adventureId")
+	applyCorsHeaders(w)
+	id := r.PathValue("campaignId")
 	arr, err := ara.adventureRecordService.ListAdventureRecordsForCampaign(id)
 
 	if err != nil {

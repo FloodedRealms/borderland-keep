@@ -78,8 +78,20 @@ func decodeJSONBody(w http.ResponseWriter, r *http.Request, dst interface{}) err
 	return nil
 }
 
+type apiResponse struct {
+	Status string      `json:"status"`
+	Data   interface{} `json:"data"`
+}
+
+func newGoodApiResonse(payload interface{}) apiResponse {
+	return apiResponse{
+		Status: "good",
+		Data:   payload,
+	}
+}
+
 func sendGoodResponseWithObject(w http.ResponseWriter, o interface{}) {
-	payload, payloadErr := json.Marshal(o)
+	payload, payloadErr := json.Marshal(newGoodApiResonse(o))
 	println(payload)
 	if payloadErr != nil {
 		http.Error(w, payloadErr.Error(), http.StatusInternalServerError)
@@ -89,4 +101,12 @@ func sendGoodResponseWithObject(w http.ResponseWriter, o interface{}) {
 }
 func sendSuccessResponse(w http.ResponseWriter, o string) {
 	w.WriteHeader(http.StatusOK)
+}
+
+func applyCorsHeaders(w http.ResponseWriter) {
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE")
+	w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
+	w.Header().Set("Access-Control-Allow-Credentials", "true")
+
 }

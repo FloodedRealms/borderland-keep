@@ -11,19 +11,19 @@ type Character interface {
 }
 
 type CharacterRecord struct {
-	id              int
-	name            string
-	CurrentXP       int
-	PrimeReqPercent int
-	level           int
-	class           string
+	ID              int    `json:"id"`
+	Name            string `json:"name"`
+	CurrentXP       int    `json:"current_xp"`
+	PrimeReqPercent int    `json:"prime_req"`
+	Level           int    `json:"level"`
+	Class           string `json:"class"`
 }
 
 func (c CharacterRecord) GenerateInsertAttributes() (name string, currentXP int, primeReq int, level int, class string) {
-	return c.name, c.CurrentXP, c.PrimeReqPercent, c.level, c.class
+	return c.Name, c.CurrentXP, c.PrimeReqPercent, c.Level, c.Class
 }
 func (c CharacterRecord) GenerateUpdateAttributes() (string, int, int, string) {
-	return c.name, c.PrimeReqPercent, c.level, c.class
+	return c.Name, c.PrimeReqPercent, c.Level, c.Class
 }
 
 func (c CharacterRecord) GenerateUpdateStatement() string {
@@ -31,7 +31,7 @@ func (c CharacterRecord) GenerateUpdateStatement() string {
 }
 
 func (c CharacterRecord) Id() int {
-	return c.id
+	return c.ID
 }
 
 type characterAPIResponse struct {
@@ -45,23 +45,23 @@ type characterAPIResponse struct {
 
 func (c CharacterRecord) GenerateSuccessfulCreationJSON() APIResponse {
 	return characterAPIResponse{
-		Id:              c.id,
-		Name:            c.name,
+		Id:              c.ID,
+		Name:            c.Name,
 		CurrentXP:       c.CurrentXP,
-		Level:           c.level,
+		Level:           c.Level,
 		PrimeReqPercent: c.PrimeReqPercent,
-		Class:           c.class,
+		Class:           c.Class,
 	}
 
 }
 func NewCharacter(id, currentXp, primeReq, level int, name, class string) *CharacterRecord {
 	return &CharacterRecord{
-		id:              id,
-		name:            name,
+		ID:              id,
+		Name:            name,
 		CurrentXP:       currentXp,
 		PrimeReqPercent: primeReq,
-		level:           level,
-		class:           class,
+		Level:           level,
+		Class:           class,
 	}
 }
 
@@ -71,7 +71,7 @@ func BlankCharacter() *CharacterRecord {
 
 func NewCharacterById(id int) *CharacterRecord {
 	char := BlankCharacter()
-	char.id = id
+	char.ID = id
 	return char
 }
 

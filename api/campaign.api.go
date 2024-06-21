@@ -63,7 +63,7 @@ func (ca *CampaignApi) UpdateCampaign(w http.ResponseWriter, r *http.Request) {
 }
 
 func (ca *CampaignApi) ListCampaigns(w http.ResponseWriter, r *http.Request) {
-
+	applyCorsHeaders(w)
 	var arr []*types.CampaignRecord
 	var err error
 	arr, err = ca.campaignService.ListCampaigns()
@@ -104,16 +104,4 @@ func (ca *CampaignApi) DeleteCampaign(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	sendGoodResponseWithObject(w, campaign)
-}
-
-func CampaignHander(w http.ResponseWriter, r *http.Request) {
-
-}
-
-func applyCorsHeaders(w http.ResponseWriter) {
-	w.Header().Set("Access-Control-Allow-Origin", "*")
-	w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE")
-	w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
-	w.Header().Set("Access-Control-Allow-Credentials", "true")
-
 }
