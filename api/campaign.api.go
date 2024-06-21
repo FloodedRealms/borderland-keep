@@ -76,6 +76,7 @@ func (ca *CampaignApi) ListCampaigns(w http.ResponseWriter, r *http.Request) {
 }
 
 func (ca *CampaignApi) GetCampaign(w http.ResponseWriter, r *http.Request) {
+	applyCorsHeaders(w)
 	id := r.PathValue("campaignId")
 
 	campaign, err := ca.campaignService.GetCampaign(id)
@@ -109,11 +110,10 @@ func CampaignHander(w http.ResponseWriter, r *http.Request) {
 
 }
 
-/*func applyCorsHeaders(ctx *gin.Context) {
-	ctx.Header("Access-Control-Allow-Origin", "*")
-	ctx.Header("Access-Control-Allow-Headers", "access-control-allow-origin, access-control-allow-headers")
+func applyCorsHeaders(w http.ResponseWriter) {
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE")
+	w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
+	w.Header().Set("Access-Control-Allow-Credentials", "true")
+
 }
-
-func decodeCampaignRequest() {
-
-}*/
