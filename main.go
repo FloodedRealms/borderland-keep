@@ -74,7 +74,7 @@ func main() {
 		//Campaign Endpoints
 		router.Handle("POST /campaigns", createCampaign)
 		router.Handle("POST /campaigns/{campaignId}/adventures", addAdventureToCampaign)
-		router.Handle("POST /campaigns/:campaignId/characters", addCharacterToCampaign)
+		router.Handle("POST /campaigns/{campaignId}/characters", addCharacterToCampaign)
 
 		router.Handle("PATCH /campaigns/{campaignId}", updateCampaign)
 
@@ -92,7 +92,7 @@ func main() {
 		router.HandleFunc("GET /adventures/{adventureId}", adventureRecordApi.GetAdventure)
 
 		//Character Endpoints
-		router.HandleFunc(" GET /characters/:characterId", characterApi.GetCharacterById)
+		router.HandleFunc(" GET /characters/{characterId}", characterApi.GetCharacterById)
 
 		// USER
 		router.HandleFunc(" GET /user/validate", userApi.ValidateClient)
