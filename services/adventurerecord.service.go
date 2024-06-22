@@ -35,14 +35,28 @@ func (a *AdventureServiceImpl) CreateAdventureRecordForCampaign(r *types.CreateA
 }
 
 func (a *AdventureServiceImpl) UpdateAdventureRecord(r *types.UpdateAdventureRequest) (*types.AdventureRecord, error) {
-	adventureToUpdate := types.NewAdventureRecordById(r.ID)
+	adventureToUpdate, _ := a.repo.GetAdventureRecordById(types.NewAdventureRecordById(r.ID))
+	charactersInCampaign, _ := a.repo.GetCharactersForCampaign(types.NewCampaign(adventureToUpdate.CampaignId))
 	coinsToAdd := types.NewCoins(r.Copper, r.Silver, r.Electrum, r.Gold, r.Platinum)
 	gemsToUpdate := r.GenerateGemList()
 	jewelleryToUpdate := r.GenerateJewelleryList()
 	magicItemsToUpdate := r.GenerateMagicItemList()
 	combatsToUpdate := r.GenerateCombatList()
 	charactersToUpdate := r.GenerateCharacterList()
-	fullShare, halfShare := adventureToUpdate.CalculateXPShares()
+	updatedAdventure := types.NewAdventureRecord(r.ID, r.CampaignID, 0, *coinsToAdd, gemsToUpdate, jewelleryToUpdate, combatsToUpdate, magicItemsToUpdate, charactersToUpdate, r.Name, adventureToUpdate.CreatedAt, adventureToUpdate.UpdatedAt, types.ArcvhistDate(r.AdventureDate))
+	//fullShare, halfShare := updatedAdventure.CalculateXPShares()
+	if updatedAdventure.Name != "" && updatedAdventure.Name != adventureToUpdate.Name {
+		err := a.repo.UpdateAdventureName(adventureToUpdate, updatedAdventure.Name)
+		if err != nil {
+			return nil, util.UnableToUpdateAdventure("Name", err.Error())
+		}
+	}
+	if updatedAdventure.AdventureDate != types.NewAdventureRecordById(r.ID).AdventureDate && updatedAdventure.AdventureDate != adventureToUpdate.AdventureDate {
+		err := a.repo.UpdateAdventureDate(adventureToUpdate, r.AdventureDate)
+		if err != nil {
+			return nil, util.UnableToUpdateAdventure("DATE", err.Error())
+		}
+	}
 	err := a.updateAdventureCoins(adventureToUpdate, coinsToAdd)
 	if err != nil {
 		return nil, util.UnableToUpdateAdventure("Coins", err.Error())
@@ -63,10 +77,11 @@ func (a *AdventureServiceImpl) UpdateAdventureRecord(r *types.UpdateAdventureReq
 	if err != nil {
 		return nil, util.UnableToUpdateAdventure("Combats", err.Error())
 	}
-	err = a.updateAdventureCharacters(adventureToUpdate, charactersToUpdate, fullShare, halfShare)
+	err = a.updateAdventureCharacters(adventureToUpdate, charactersToUpdate, updatedAdventure.FullShareXP, updatedAdventure.HalfShareXP, charactersInCampaign)
 	if err != nil {
 		return nil, util.UnableToUpdateAdventure("Characters", err.Error())
 	}
+
 	updatedRecorded, err := a.repo.GetAdventureRecordById(adventureToUpdate)
 	return updatedRecorded, err
 }
@@ -127,19 +142,30 @@ func (a AdventureServiceImpl) updateAdventureCombat(ad *types.AdventureRecord, g
 	}
 	return err
 }
-func (a AdventureServiceImpl) updateAdventureCharacters(ad *types.AdventureRecord, chars []types.AdventureCharacter, halfShareAmount, fullShareAmount int) error {
+func (a AdventureServiceImpl) updateAdventureCharacters(ad *types.AdventureRecord, chars []types.AdventureCharacter, fullShareAmount, halfShareAmount int, campChars []types.CharacterRecord) error {
+	charMap := map[int]types.CharacterRecord{}
+	for _, c := range campChars {
+		charMap[c.ID] = c
+	}
 	err := a.repo.DeleteCharactersForAdventure(ad)
 	if err != nil {
 		return err
 	}
 	for _, char := range chars {
+		xpToGain := fullShareAmount
 		if char.Halfshare {
-			_, err := a.repo.AddHalfshareCharacterToAdventure(ad, &char, halfShareAmount)
+			xpToGain = halfShareAmount
+		}
+		c := charMap[char.Details.ID]
+		adjustedAmount := c.ApplyPrimeReq(xpToGain)
+		if char.Halfshare {
+			_, err := a.repo.AddHalfshareCharacterToAdventure(ad, &char, adjustedAmount)
 			if err != nil {
 				return err
 			}
 		} else {
-			_, err := a.repo.AddFullshareCharacterToAdventure(ad, &char, fullShareAmount)
+			_, err := a.repo.AddHalfshareCharacterToAdventure(ad, &char, adjustedAmount)
+
 			if err != nil {
 				return err
 			}

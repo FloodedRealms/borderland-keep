@@ -1,6 +1,8 @@
 package repository
 
-import "github.com/floodedrealms/adventure-archivist/types"
+import (
+	"github.com/floodedrealms/adventure-archivist/types"
+)
 
 type Repository interface {
 	//PerformInsertStatement(*types.SQLLiteExportable) (*types.JSONExportable, error)
@@ -15,6 +17,8 @@ type Repository interface {
 	CreateAdventureRecordForCampaign(*types.CreateAdventureRequest) (*types.AdventureRecord, error)
 	GetAdventureRecordById(*types.AdventureRecord) (*types.AdventureRecord, error)
 	UpdateCoinsForAdventure(a *types.AdventureRecord, c *types.Coins) (bool, error)
+	UpdateAdventureName(*types.AdventureRecord, string) error
+	UpdateAdventureDate(*types.AdventureRecord, types.ArcvhistDate) error
 
 	DeleteGemsForAdventure(a *types.AdventureRecord) error
 	DeleteJewelleryForAdventure(a *types.AdventureRecord) error
@@ -29,6 +33,7 @@ type Repository interface {
 
 	CreateCharacterForCampaign(*types.CampaignRecord, types.Character) (*types.CharacterRecord, error)
 	GetCharactersForCampaign(*types.CampaignRecord) ([]types.CharacterRecord, error)
+	//GetCharactersForAdventure(types.AdventureRecord) ([]types.CharacterRecord, error)
 	UpdateCharacter(types.Character) (*types.CharacterRecord, error)
 	AddCharacterToAdventure(*types.AdventureRecord, *types.AdventureCharacter) (bool, error)
 	AddHalfshareCharacterToAdventure(*types.AdventureRecord, *types.AdventureCharacter, int) (bool, error)
@@ -37,6 +42,8 @@ type Repository interface {
 	RemoveCharacterFromAdventure(*types.AdventureRecord, *types.CharacterRecord) (bool, error)
 	ChangeCharacterShares(*types.AdventureRecord, *types.CharacterRecord, bool) (bool, error)
 	GetCharacterById(types.CharacterRecord) *types.CharacterRecord
+	UpdateCharacterTotalXP(types.CharacterRecord) error
+	GetCharacterXPGains(types.CharacterRecord) ([]int, error)
 
 	SaveApiUser(types.User, bool) error
 	GetApiUserById(providedClientId, providedAPIKey string) (*types.APIUser, error)

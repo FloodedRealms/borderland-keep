@@ -56,7 +56,7 @@ func main() {
 		userService := services.NewUserService(sqlRepo, *logger)
 
 		campaignApi := api.NewCampaignApi(campaignService, characterService)
-		adventureRecordApi := api.NewAdventureRecordApi(adventureRecordService)
+		adventureRecordApi := api.NewAdventureRecordApi(adventureRecordService, characterService)
 		characterApi := api.NewCharacterApi(characterService)
 		userApi := api.NewClientAPI(userService)
 

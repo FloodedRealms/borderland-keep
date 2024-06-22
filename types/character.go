@@ -74,6 +74,14 @@ func NewCharacterById(id int) *CharacterRecord {
 	char.ID = id
 	return char
 }
+func (c *CharacterRecord) AddXP(xpGained int) {
+	adjustedXPAmount := math.RoundToEven(float64(xpGained) + (float64(xpGained) * (float64(c.PrimeReqPercent) / 100)))
+	c.CurrentXP += int(adjustedXPAmount)
+}
+func (c CharacterRecord) ApplyPrimeReq(xpGained int) int {
+	adjustedXPAmount := math.RoundToEven(float64(xpGained) + (float64(xpGained) * (float64(c.PrimeReqPercent) / 100)))
+	return int(adjustedXPAmount)
+}
 
 func NewCharacterFromCreateRequest(id int, req CreateCharacterRecordRequest) *CharacterRecord {
 	return NewCharacter(-1, 0, req.PrimeReqPercent, req.Level, req.Name, req.Class)
@@ -114,9 +122,4 @@ func NewAdventureCharacter(details *CharacterRecord, halfshare bool, xp int) *Ad
 		Halfshare: halfshare,
 		XpGained:  xp,
 	}
-}
-
-func (c *CharacterRecord) AddXP(xpGained int) {
-	adjustedXPAmount := math.RoundToEven(float64(xpGained) + (float64(xpGained) * (float64(c.PrimeReqPercent) / 100)))
-	c.CurrentXP += int(adjustedXPAmount)
 }

@@ -3,6 +3,7 @@ package api
 import (
 	"errors"
 	"net/http"
+	"strconv"
 
 	"github.com/floodedrealms/adventure-archivist/services"
 	"github.com/floodedrealms/adventure-archivist/types"
@@ -10,10 +11,11 @@ import (
 
 type AdventureApi struct {
 	adventureRecordService services.AdventureService
+	characterRecordService services.CharacterService
 }
 
-func NewAdventureRecordApi(as services.AdventureService) *AdventureApi {
-	return &AdventureApi{adventureRecordService: as}
+func NewAdventureRecordApi(as services.AdventureService, cs services.CharacterService) *AdventureApi {
+	return &AdventureApi{adventureRecordService: as, characterRecordService: cs}
 }
 
 func (ara AdventureApi) CreateAdventureRecord(w http.ResponseWriter, r *http.Request) {
@@ -59,13 +61,18 @@ func (ara AdventureApi) GetAdventure(w http.ResponseWriter, r *http.Request) {
 }
 
 func (ara AdventureApi) UpdateAdventure(w http.ResponseWriter, r *http.Request) {
-	var ur types.UpdateAdventureRequest
-
-	err := decodeJSONBody(w, r, &ur)
+	id, err := strconv.Atoi(r.PathValue("adventureId"))
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
+	var ur types.UpdateAdventureRequest
+	err = decodeJSONBody(w, r, &ur)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+	ur.ID = id
 	uAdventure, err := ara.adventureRecordService.UpdateAdventureRecord(&ur)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)

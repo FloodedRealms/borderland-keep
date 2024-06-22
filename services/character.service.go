@@ -13,6 +13,7 @@ type CharacterService interface {
 	UpdateCharacter(int, *types.UpdateCharacterRecordRequest) (*types.CharacterRecord, error)
 	ManageCharactersForAdventure(adventure types.AdventureRecord, character *types.CharacterRecord, operation, halfshare string) (bool, error)
 	GetCharactersForCampaign(campaign *types.CampaignRecord) ([]types.CharacterRecord, error)
+	//AddAdventureXPToCharacters(types.AdventureRecord) ([]types.CharacterRecord, error)
 }
 
 type CharacterServiceImpl struct {
@@ -68,6 +69,13 @@ func (s CharacterServiceImpl) GetCharactersForCampaign(campaign *types.CampaignR
 	if err != nil {
 		return nil, err
 	}
+	for i, c := range characterList {
+		allAdventures, err := s.repo.GetCharacterXPGains(c)
+		if err != nil {
+			return nil, err
+		}
+		characterList[i].CurrentXP = s.sumXP(allAdventures)
+	}
 	return characterList, nil
 }
 
@@ -76,4 +84,12 @@ func (s CharacterServiceImpl) UpdateTotalCharacterXP(char types.CharacterRecord,
 	currentChar.AddXP(xpGained)
 	_, err := s.repo.UpdateCharacter(char)
 	return err
+}
+
+func (s CharacterServiceImpl) sumXP(a []int) int {
+	xp := 0
+	for _, x := range a {
+		xp += x
+	}
+	return xp
 }

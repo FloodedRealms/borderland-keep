@@ -1,10 +1,10 @@
 package types
 
 type MagicItem struct {
-	Id            int `json:"id"`
-	TotalXPAmount int `json:"magic_item_xp"`
-	Loot          loot
-	ActualValue   int `json:"actual_value"`
+	Id          int `json:"id"`
+	XPEarned    int `json:"magic_item_xp"`
+	Loot        loot
+	ActualValue int `json:"actual_value"`
 }
 
 type MagicItemRequest struct {
@@ -15,11 +15,13 @@ type MagicItemRequest struct {
 }
 
 func NewMagicItem(n, d string, v float64, av, id int) *MagicItem {
-	return &MagicItem{
+	mi := &MagicItem{
 		Id:          id,
 		Loot:        *NewLoot(n, d, v, 1),
 		ActualValue: av,
 	}
+	mi.XPEarned = mi.Loot.TotalXPAmount()
+	return mi
 }
 
 func (m *MagicItem) ApparentValue() int {

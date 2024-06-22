@@ -238,7 +238,7 @@ func (s SqliteRepo) processAdventureRows(r *sql.Rows) []*types.AdventureRecord {
 		currentMagicItems := s.getMagicItemsForAdventure(id)
 		currentCombat := s.getCombatForAdventure(id)
 		currentCharacters := s.getCharactersForAdventure(id)
-		current := types.NewAdventureRecord(id, campaignId, duration, *currentCoins, currentGems, currentJewellery, currentCombat, currentMagicItems, currentCharacters, name, createdDate, updatedDate, adventureDate)
+		current := types.NewAdventureRecord(id, campaignId, duration, *currentCoins, currentGems, currentJewellery, currentCombat, currentMagicItems, currentCharacters, name, createdDate, updatedDate, types.ArcvhistDate(adventureDate))
 		util.CheckErr(err)
 		adventures = append(adventures, current)
 	}
@@ -373,6 +373,39 @@ func (s SqliteRepo) UpdateCoinsForAdventure(a *types.AdventureRecord, c *types.C
 	return true, nil
 
 }
+func (s SqliteRepo) UpdateAdventureName(a *types.AdventureRecord, n string) error {
+	stmt_string := fmt.Sprintf("UPDATE %s SET name = ? WHERE id=?;", adventureTable)
+	s.logger.Debug(stmt_string)
+	stmt, err := s.db.Prepare(stmt_string)
+	util.CheckErr(err)
+	_, resErr := stmt.Exec(n, a.ID)
+	if resErr != nil {
+		return resErr
+	}
+	return nil
+}
+func (s SqliteRepo) UpdateCharacterTotalXP(c types.CharacterRecord) error {
+	stmt_string := fmt.Sprintf("UPDATE %s SET total_xp = ? WHERE id=?;", characterTable)
+	s.logger.Debug(stmt_string)
+	stmt, err := s.db.Prepare(stmt_string)
+	util.CheckErr(err)
+	_, resErr := stmt.Exec(c.CurrentXP, c.ID)
+	if resErr != nil {
+		return resErr
+	}
+	return nil
+}
+func (s SqliteRepo) UpdateAdventureDate(a *types.AdventureRecord, d types.ArcvhistDate) error {
+	stmt_string := fmt.Sprintf("UPDATE %s SET adventure_date = ? WHERE id=?;", adventureTable)
+	s.logger.Debug(stmt_string)
+	stmt, err := s.db.Prepare(stmt_string)
+	util.CheckErr(err)
+	_, resErr := stmt.Exec(d.Date(), a.ID)
+	if resErr != nil {
+		return resErr
+	}
+	return nil
+}
 
 func (s SqliteRepo) DeleteGemsForAdventure(a *types.AdventureRecord) error {
 	stmt_string := fmt.Sprintf("DELETE FROM %s WHERE adventure_id=?;", gemTable)
@@ -471,7 +504,7 @@ func (s SqliteRepo) AddCombatToAdventure(a *types.AdventureRecord, g *types.Mons
 	s.logger.Debug(stmt_string)
 	stmt, err := s.db.Prepare(stmt_string)
 	util.CheckErr(err)
-	_, resErr := stmt.Exec(a.ID, g.XP.Name, g.XP.XPValueOfOne, g.XP.XPValueOfOne, g.XP.TotalXPAmount())
+	_, resErr := stmt.Exec(a.ID, g.XP.Name, g.XP.NumberOfItem, g.XP.XPValueOfOne, g.XP.TotalXPAmount())
 	if resErr != nil {
 		return false, resErr
 	}
@@ -718,4 +751,24 @@ func (s SqliteRepo) SaveApiUser(user types.User, campaignNumberLimited bool) err
 		}
 	}
 	return nil
+}
+
+func (s SqliteRepo) GetCharacterXPGains(c types.CharacterRecord) ([]int, error) {
+	tableq := fmt.Sprintf("SELECT u.xp_gained FROM %s u where u.character_id = ?", characterToAdventureTable)
+	s.logger.Debug(tableq)
+	rows, err := s.runQuery(tableq, c.ID)
+	util.CheckErr(err)
+	defer rows.Close()
+	xpGains := make([]int, 0)
+	for rows.Next() {
+		xp := 0
+		err := rows.Scan(&xp)
+		util.CheckErr(err)
+		if err != nil {
+			return nil, err
+		}
+		xpGains = append(xpGains, xp)
+	}
+	return xpGains, nil
+
 }

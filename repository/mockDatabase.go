@@ -15,7 +15,7 @@ type MockDB struct {
 
 func NewMockDatabase(shouldError bool) *MockDB {
 	testCampaign := types.NewCampaign(1)
-	testAdventure := types.NewAdventureRecord(1, 1, 5, *types.NewCoins(1000, 1000, 1000, 1000, 1000), []types.Gem{}, []types.Jewellery{}, []types.MonsterGroup{}, []types.MagicItem{}, []types.AdventureCharacter{}, "Test Adventure", time.Now(), time.Now(), time.Now())
+	testAdventure := types.NewAdventureRecord(1, 1, 5, *types.NewCoins(1000, 1000, 1000, 1000, 1000), []types.Gem{}, []types.Jewellery{}, []types.MonsterGroup{}, []types.MagicItem{}, []types.AdventureCharacter{}, "Test Adventure", time.Now(), time.Now(), types.ArcvhistDate(time.Now()))
 	character1 := types.NewCharacter(1, 0, 5, 1, "Billy the Test", "Figher")
 	character2 := types.NewCharacter(2, 0, 5, 1, "Willy the Test", "Figher")
 	character3 := types.NewCharacter(3, 0, 5, 1, "Chilly the Test", "Figher")
