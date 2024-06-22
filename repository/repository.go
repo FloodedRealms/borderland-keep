@@ -44,6 +44,7 @@ type Repository interface {
 	GetCharacterById(types.CharacterRecord) *types.CharacterRecord
 	UpdateCharacterTotalXP(types.CharacterRecord) error
 	GetCharacterXPGains(types.CharacterRecord) ([]int, error)
+	GetLevelForXP(types.CampaignRecord, types.CharacterRecord) int
 
 	SaveApiUser(types.User, bool) error
 	GetApiUserById(providedClientId, providedAPIKey string) (*types.APIUser, error)

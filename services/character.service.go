@@ -75,7 +75,9 @@ func (s CharacterServiceImpl) GetCharactersForCampaign(campaign *types.CampaignR
 			return nil, err
 		}
 		characterList[i].CurrentXP = s.sumXP(allAdventures)
+		characterList[i].Level = s.repo.GetLevelForXP(*campaign, characterList[i])
 	}
+
 	return characterList, nil
 }
 

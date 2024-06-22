@@ -84,7 +84,7 @@ func (s SqliteRepo) processCampaignRows(r *sql.Rows) []*types.CampaignRecord {
 	campaigns := make([]*types.CampaignRecord, 0)
 	for r.Next() {
 		current := &types.CampaignRecord{}
-		err := r.Scan(&current.ID, &current.Name, &current.Recruitment, &current.Judge, &current.Timekeeping, &current.Cadence, &current.CreatedAt, &current.UpdatedAt, &current.LastAdventure, &current.ClientId)
+		err := r.Scan(&current.ID, &current.Name, &current.Recruitment, &current.Judge, &current.Timekeeping, &current.Cadence, &current.CreatedAt, &current.UpdatedAt, &current.LastAdventure, &current.ClientId, &trashInt)
 		util.CheckErr(err)
 		current.Characters, err = s.getCampaignCharacters(current.ID)
 		util.CheckErr(err)
@@ -770,5 +770,24 @@ func (s SqliteRepo) GetCharacterXPGains(c types.CharacterRecord) ([]int, error) 
 		xpGains = append(xpGains, xp)
 	}
 	return xpGains, nil
+
+}
+func (s SqliteRepo) GetLevelForXP(camp types.CampaignRecord, c types.CharacterRecord) int {
+	tableq := "SELECT clt.xp_level, clt.xp_amount FROM classes cl \n" +
+		"INNER JOIN class_level_thresholds clt ON clt.class_id=cl.id WHERE cl.system_id = ? AND cl.class_name = ? AND clt.xp_amount <= ? \n" +
+		"ORDER BY clt.xp_amount  DESC;"
+	s.logger.Print(tableq)
+	rows, err := s.runQuery(tableq, 1, c.Class, c.CurrentXP)
+	util.CheckErr(err)
+	defer rows.Close()
+	// This always returns the current level as the first result
+	// so if rows has no results, somethine failed.
+	// TODO: Actual error handling and surfacing here
+	level := -1
+	if !rows.Next() {
+		return level
+	}
+	rows.Scan(&level, &trashInt)
+	return level
 
 }
