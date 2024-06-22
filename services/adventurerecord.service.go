@@ -164,7 +164,7 @@ func (a AdventureServiceImpl) updateAdventureCharacters(ad *types.AdventureRecor
 				return err
 			}
 		} else {
-			_, err := a.repo.AddHalfshareCharacterToAdventure(ad, &char, adjustedAmount)
+			_, err := a.repo.AddFullshareCharacterToAdventure(ad, &char, adjustedAmount)
 
 			if err != nil {
 				return err
