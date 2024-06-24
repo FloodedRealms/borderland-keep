@@ -10,11 +10,12 @@ import (
 )
 
 type CharacterApi struct {
-	characterService services.CharacterService
+	characterService        services.CharacterService
+	campaignActivityService services.CampaignActionService
 }
 
-func NewCharacterApi(as services.CharacterService) *CharacterApi {
-	return &CharacterApi{characterService: as}
+func NewCharacterApi(as services.CharacterService, cs services.CampaignActionService) *CharacterApi {
+	return &CharacterApi{characterService: as, campaignActivityService: cs}
 }
 
 func (c CharacterApi) CreateCharacterForCampaign(w http.ResponseWriter, r *http.Request) {
@@ -72,4 +73,22 @@ func (c CharacterApi) ManageCharactersForAdventure(w http.ResponseWriter, r *htt
 
 func (c CharacterApi) GetCharacterById(w http.ResponseWriter, r *http.Request) {
 	http.Error(w, util.NotYetImplmented().Error(), http.StatusNotImplemented)
+}
+
+func (c CharacterApi) AddCampaignActivityForCharacter(w http.ResponseWriter, r *http.Request) {
+	characterId, err := strconv.Atoi(r.PathValue("characterId"))
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+	}
+
+	var action types.CampaignActivity
+	decodeJSONBody(w, r, &action)
+	action.Character_id = characterId
+
+	err = c.campaignActivityService.AddNewCampaignActionToCharacter(action)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+	}
+	sendGoodResponseWithObject(w, true)
+
 }

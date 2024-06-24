@@ -54,10 +54,11 @@ func main() {
 		characterService := services.NewCharacterService(sqlRepo, logger, context.TODO())
 		adventureRecordService := services.NewAdventureRecordService(sqlRepo, context.TODO())
 		userService := services.NewUserService(sqlRepo, *logger)
+		campaignActionService := services.NewCampaignActionService(sqlRepo)
 
 		campaignApi := api.NewCampaignApi(campaignService, characterService)
 		adventureRecordApi := api.NewAdventureRecordApi(adventureRecordService, characterService)
-		characterApi := api.NewCharacterApi(characterService)
+		characterApi := api.NewCharacterApi(characterService, *campaignActionService)
 		userApi := api.NewClientAPI(userService)
 
 		router := http.NewServeMux()
@@ -68,6 +69,7 @@ func main() {
 		deleteCampaign := userApi.RequireValidClient(http.HandlerFunc(campaignApi.DeleteCampaign))
 		addAdventureToCampaign := userApi.RequireValidClient(http.HandlerFunc(adventureRecordApi.CreateAdventureRecord))
 		addCharacterToCampaign := userApi.RequireValidClient(http.HandlerFunc(characterApi.CreateCharacterForCampaign))
+		addCampaignActionToCharacter := userApi.RequireValidClient(http.HandlerFunc(characterApi.AddCampaignActivityForCharacter))
 
 		updateAdveture := userApi.RequireValidClient(http.HandlerFunc(adventureRecordApi.UpdateAdventure))
 
@@ -92,6 +94,8 @@ func main() {
 		router.HandleFunc("GET /adventures/{adventureId}", adventureRecordApi.GetAdventure)
 
 		//Character Endpoints
+		router.Handle("POST /characters/{characterId}/campaign-actions", addCampaignActionToCharacter)
+
 		router.HandleFunc(" GET /characters/{characterId}", characterApi.GetCharacterById)
 
 		// USER

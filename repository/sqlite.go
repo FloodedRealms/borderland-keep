@@ -45,6 +45,7 @@ const combatTable string = "monster_groups"
 const characterToAdventureTable string = "adventures_to_characters"
 const characterTable string = "characters"
 const apiUserTable string = "api_users"
+const campaignActivityTable string = "campaign_activities"
 
 var trashInt int = 0
 var trashDate time.Time = time.Now()
@@ -754,7 +755,28 @@ func (s SqliteRepo) SaveApiUser(user types.User, campaignNumberLimited bool) err
 }
 
 func (s SqliteRepo) GetCharacterXPGains(c types.CharacterRecord) ([]int, error) {
+	aXp, aErr := s.getAdventureXP(c)
+	if aErr != nil {
+		return nil, aErr
+	}
+	cXp, cErr := s.getCampaignXP(c)
+	if cErr != nil {
+		return nil, cErr
+	}
+	// Check if both have values
+	if len(aXp) > 0 && len(cXp) > 0 {
+		return append(aXp, cXp...), nil
+
+	} else if len(aXp) > 0 {
+		// if either is empty, check if aXp has any values
+		return aXp, nil
+	} // if not, return cXp which is either an empty array, or the only thing with XP values
+	return cXp, nil
+}
+
+func (s SqliteRepo) getAdventureXP(c types.CharacterRecord) ([]int, error) {
 	tableq := fmt.Sprintf("SELECT u.xp_gained FROM %s u where u.character_id = ?", characterToAdventureTable)
+
 	s.logger.Debug(tableq)
 	rows, err := s.runQuery(tableq, c.ID)
 	util.CheckErr(err)
@@ -770,7 +792,25 @@ func (s SqliteRepo) GetCharacterXPGains(c types.CharacterRecord) ([]int, error) 
 		xpGains = append(xpGains, xp)
 	}
 	return xpGains, nil
+}
+func (s SqliteRepo) getCampaignXP(c types.CharacterRecord) ([]int, error) {
+	tableq := fmt.Sprintf("SELECT u.xp_gained FROM %s u where u.character_id = ?", campaignActivityTable)
 
+	s.logger.Debug(tableq)
+	rows, err := s.runQuery(tableq, c.ID)
+	util.CheckErr(err)
+	defer rows.Close()
+	xpGains := make([]int, 0)
+	for rows.Next() {
+		xp := 0
+		err := rows.Scan(&xp)
+		util.CheckErr(err)
+		if err != nil {
+			return nil, err
+		}
+		xpGains = append(xpGains, xp)
+	}
+	return xpGains, nil
 }
 func (s SqliteRepo) GetLevelForXP(camp types.CampaignRecord, c types.CharacterRecord) int {
 	tableq := "SELECT clt.xp_level, clt.xp_amount FROM classes cl \n" +
@@ -790,4 +830,18 @@ func (s SqliteRepo) GetLevelForXP(camp types.CampaignRecord, c types.CharacterRe
 	rows.Scan(&level, &trashInt)
 	return level
 
+}
+func (s SqliteRepo) AddCampaignActivityForCharacter(a types.CampaignActivity) error {
+	stmtString := fmt.Sprintf("INSERT INTO %s(id,character_id,name,taken_at_level,xp_gained) values(?,?,?,?,?);", apiUserTable)
+	stmt, err := s.db.Prepare(stmtString)
+	if err != nil {
+		return err
+	}
+
+	_, err = stmt.Exec(a.Id, a.Character_id, a.Name, a.LevelAtWhichActionWasTaken, a.XPgained)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
