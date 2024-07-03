@@ -12,6 +12,7 @@ type Repository interface {
 	DeleteCampaign(*types.CampaignRecord) (bool, error)
 	ListCampaigns() ([]*types.CampaignRecord, error)
 	ListCampaignsForClient(string) ([]*types.CampaignRecord, error)
+	UpdateCampaignPassword(int, types.Password) error
 
 	GetAdventureRecordsForCampaign(*types.CampaignRecord) ([]*types.AdventureRecord, error)
 	CreateAdventureRecordForCampaign(*types.CreateAdventureRequest) (*types.AdventureRecord, error)

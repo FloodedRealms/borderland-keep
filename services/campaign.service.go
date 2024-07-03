@@ -17,6 +17,7 @@ type CampaignService interface {
 	ListCampaigns() ([]*types.CampaignRecord, error)
 	ListCampaignsForClient(string) ([]*types.CampaignRecord, error)
 	DeleteCampaign(string) (bool, error)
+	UpdateCampaignPassword(string, string) (string, error)
 }
 
 type CampaignServiceImpl struct {
@@ -67,4 +68,14 @@ func (c *CampaignServiceImpl) DeleteCampaign(id string) (bool, error) {
 	}
 	campaignToDelete := types.NewCampaign(campaignId)
 	return c.repo.DeleteCampaign(campaignToDelete)
+}
+
+func (c *CampaignServiceImpl) UpdateCampaignPassword(id, password string) (string, error) {
+	campaignId, err := strconv.Atoi(id)
+	if err != nil {
+		return "Password update failed", err
+	}
+	hashedPassword, _ := types.NewPassword(password)
+	return password, c.repo.UpdateCampaignPassword(campaignId, *hashedPassword)
+
 }

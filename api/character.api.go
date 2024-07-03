@@ -74,6 +74,19 @@ func (c CharacterApi) ManageCharactersForAdventure(w http.ResponseWriter, r *htt
 func (c CharacterApi) GetCharacterById(w http.ResponseWriter, r *http.Request) {
 	http.Error(w, util.NotYetImplmented().Error(), http.StatusNotImplemented)
 }
+func (c CharacterApi) GetCharactersForCampaign(w http.ResponseWriter, r *http.Request) {
+	campaignId, err := strconv.Atoi(r.PathValue("campaignId"))
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+	characters, err := c.characterService.GetCharactersForCampaign(types.NewCampaign(campaignId))
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+	sendGoodResponseWithObject(w, characters)
+}
 
 func (c CharacterApi) AddCampaignActivityForCharacter(w http.ResponseWriter, r *http.Request) {
 	characterId, err := strconv.Atoi(r.PathValue("characterId"))

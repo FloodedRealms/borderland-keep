@@ -73,6 +73,9 @@ func main() {
 
 		updateAdveture := userApi.RequireValidClient(http.HandlerFunc(adventureRecordApi.UpdateAdventure))
 
+		getAdventure := allowCorsHeaders(http.HandlerFunc(adventureRecordApi.GetAdventure))
+		getCharactersForCampaign := allowCorsHeaders(http.HandlerFunc(characterApi.GetCharactersForCampaign))
+
 		//Campaign Endpoints
 		router.Handle("POST /campaigns", createCampaign)
 		router.Handle("POST /campaigns/{campaignId}/adventures", addAdventureToCampaign)
@@ -83,6 +86,7 @@ func main() {
 		router.HandleFunc("GET /campaigns", campaignApi.ListCampaigns)
 		router.HandleFunc("GET /campaigns/{campaignId}", campaignApi.GetCampaign)
 		router.HandleFunc("GET /campaigns/{campaignId}/adventures", adventureRecordApi.ListAdventureRecordsForCampaign)
+		router.Handle("GET /campaigns/{campaignId}/characters", getCharactersForCampaign)
 
 		router.Handle("DELETE /campaigns/{campaignId}", deleteCampaign)
 
@@ -91,7 +95,7 @@ func main() {
 
 		router.Handle("PATCH /adventures/{adventureId}", updateAdveture)
 
-		router.HandleFunc("GET /adventures/{adventureId}", adventureRecordApi.GetAdventure)
+		router.Handle("GET /adventures/{adventureId}", getAdventure)
 
 		//Character Endpoints
 		router.Handle("POST /characters/{characterId}/campaign-actions", addCampaignActionToCharacter)
@@ -122,3 +126,13 @@ func preflight(w http.ResponseWriter, r *http.Request) {
 	w.Header("Access-Control-Allow-Headers", "access-control-allow-origin, access-control-allow-headers, content-type")
 	w.JSON(http.StatusOK, struct{}{})
 }*/
+
+func allowCorsHeaders(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Access-Control-Allow-Origin", "*")
+		w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE")
+		w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
+		w.Header().Set("Access-Control-Allow-Credentials", "true")
+		next.ServeHTTP(w, r)
+	})
+}

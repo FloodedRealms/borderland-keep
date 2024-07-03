@@ -122,6 +122,15 @@ func (s SqliteRepo) insertCampaign(c types.CampaignRecord) (int, error) {
 	return int(id), nil
 }
 
+func (s SqliteRepo) UpdateCampaignPassword(id int, pass types.Password) error {
+	stmtString := fmt.Sprintf("UPDATE %s set password=?, salt=? WHERE id=?;", campaignTable)
+	stmt, err := s.db.Prepare(stmtString)
+	util.CheckErr(err)
+	s.logger.Debug("statement successully prepared.")
+	_, err = stmt.Exec(pass.Hash.Hash, pass.Hash.Salt, id)
+	return nil
+}
+
 func (s SqliteRepo) selectCampaignById(id int) (*types.CampaignRecord, error) {
 	tableq := fmt.Sprintf("SELECT * FROM %s c where c.id = ?", campaignTable)
 	rows, err := s.runQuery(tableq, id)

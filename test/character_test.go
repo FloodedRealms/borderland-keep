@@ -1,4 +1,4 @@
-package types
+package test
 
 import (
 	"testing"
@@ -6,13 +6,13 @@ import (
 	"github.com/floodedrealms/adventure-archivist/types"
 )
 
-func setup() *types.CharacterRecord {
+func setup_characterTests() *types.CharacterRecord {
 	return types.NewCharacter(1, 0, 0, 1, "Testy", "test man")
 
 }
 
 func TestXPGainFunctionWithNoPrimeReq(t *testing.T) {
-	char := setup()
+	char := setup_characterTests()
 	char.AddXP(1000)
 	wanted := 1000
 	if char.CurrentXP != wanted {
@@ -21,7 +21,7 @@ func TestXPGainFunctionWithNoPrimeReq(t *testing.T) {
 
 }
 func TestXPGainFunctionWithFivePrimeReq(t *testing.T) {
-	char := setup()
+	char := setup_characterTests()
 	char.PrimeReqPercent = 5
 	char.AddXP(1000)
 	wanted := 1050
@@ -31,7 +31,7 @@ func TestXPGainFunctionWithFivePrimeReq(t *testing.T) {
 
 }
 func TestXPGainFunctionWithTenPrimeReq(t *testing.T) {
-	char := setup()
+	char := setup_characterTests()
 	char.PrimeReqPercent = 10
 	char.AddXP(1000)
 	wanted := 1100
