@@ -49,6 +49,7 @@ const campaignActivityTable string = "campaign_activities"
 
 var trashInt int = 0
 var trashDate time.Time = time.Now()
+var trashString string = ""
 
 type SqliteRepo struct {
 	db     *sql.DB
@@ -85,7 +86,7 @@ func (s SqliteRepo) processCampaignRows(r *sql.Rows) []*types.CampaignRecord {
 	campaigns := make([]*types.CampaignRecord, 0)
 	for r.Next() {
 		current := &types.CampaignRecord{}
-		err := r.Scan(&current.ID, &current.Name, &current.Recruitment, &current.Judge, &current.Timekeeping, &current.Cadence, &current.CreatedAt, &current.UpdatedAt, &current.LastAdventure, &current.ClientId, &trashInt)
+		err := r.Scan(&current.ID, &current.Name, &current.Recruitment, &current.Judge, &current.Timekeeping, &current.Cadence, &current.CreatedAt, &current.UpdatedAt, &current.LastAdventure, &current.ClientId, &trashInt, &trashString, &trashString)
 		util.CheckErr(err)
 		current.Characters, err = s.getCampaignCharacters(current.ID)
 		util.CheckErr(err)
