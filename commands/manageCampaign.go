@@ -450,8 +450,28 @@ func numberIsInRange(number, s, e int) (int, error) {
 	return number, nil
 }
 
+/*
+*
+* API HANDLERS
+*
+*
+ */
 func addHeaders(req *http.Request) {
 	req.Header.Set(apiClientIdHeader, currentConfig.Id)
 	req.Header.Set(apiSecretKeyHeader, currentConfig.Key)
 	req.Header.Set(contentHeader, jsonContentType)
+}
+
+func makeApiRequest(url, method string, data []byte) *http.Response {
+	req, err := http.NewRequest(method, url, bytes.NewReader(data))
+	if err != nil {
+		log.Fatalf("Faild to maked Request to %s\nError: %s", url, err.Error())
+	}
+	addHeaders(req)
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		log.Fatalf("Failed to complete Adventure Update Request\nError: %s", err.Error())
+	}
+	return resp
+
 }
