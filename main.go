@@ -24,6 +24,8 @@ func main() {
 	operation := flag.Arg(0)
 	switch operation {
 
+	case "archive":
+		commands.ManageCampaign()
 	case "create-user":
 		if len(flags) == 1 {
 			fmt.Println("usage: archivist create-user [friendly-name]")

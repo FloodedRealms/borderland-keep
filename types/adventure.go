@@ -153,10 +153,10 @@ type UpdateAdventureRequest struct {
 	Electrum      int                        `json:"electrum"`
 	Gold          int                        `json:"gold"`
 	Platinum      int                        `json:"platinum"`
-	Gems          []loot                     `json:"gems"`
-	Jewellery     []loot                     `json:"jewellery"`
-	Combat        []loot                     `json:"combat"`
-	MagicItems    []incomingMagicItem        `json:"magic_items"`
+	Gems          []Loot                     `json:"gems"`
+	Jewellery     []Loot                     `json:"jewellery"`
+	Combat        []Loot                     `json:"combat"`
+	MagicItems    []IncomingMagicItem        `json:"magic_items"`
 	Characters    []UpdateAdventureCharacter `json:"characters"`
 	Name          string                     `json:"name"`
 	AdventureDate ArcvhistDate               `json:"adventure_date"`

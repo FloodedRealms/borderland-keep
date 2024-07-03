@@ -3,7 +3,7 @@ package types
 type MagicItem struct {
 	Id          int `json:"id"`
 	XPEarned    int `json:"magic_item_xp"`
-	Loot        loot
+	Loot        Loot
 	ActualValue int `json:"actual_value"`
 }
 
@@ -28,7 +28,7 @@ func (m *MagicItem) ApparentValue() int {
 	return int(m.Loot.XPValueOfOne)
 }
 
-type incomingMagicItem struct {
+type IncomingMagicItem struct {
 	Name          string `json:"name"`
 	Description   string `json:"description"`
 	ApparentValue int    `json:"apparent_value"`

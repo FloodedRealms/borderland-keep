@@ -10,6 +10,7 @@ type ArcvhistDate time.Time
 
 func (d *ArcvhistDate) UnmarshalJSON(b []byte) error {
 	s := strings.Trim(string(b), "\"")
+	s = s[0:strings.LastIndex(s, "T")]
 	t, err := time.Parse("2006-01-02", s)
 	if err != nil {
 		return err

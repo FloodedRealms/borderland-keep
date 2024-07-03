@@ -35,6 +35,10 @@ func (j JSONRepo) GetCampaign(int) (*types.CampaignRecord, error) {
 	return nil, util.NotYetImplmented()
 }
 
+func (j JSONRepo) UpdateCampaignPassword(id int, pass types.Password) error {
+	return util.NotYetImplmented()
+}
+
 func (j JSONRepo) DeleteCampaign(*types.CampaignRecord) (bool, error) {
 	return false, util.NotYetImplmented()
 }

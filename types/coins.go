@@ -2,11 +2,11 @@ package types
 
 type Coins struct {
 	TotalXPAmount int  `json:"coin_xp"`
-	Copper        loot `json:"copper"`
-	Silver        loot `json:"silver"`
-	Electrum      loot `json:"electrum"`
-	Gold          loot `json:"gold"`
-	Platinum      loot `json:"platinum"`
+	Copper        Loot `json:"copper"`
+	Silver        Loot `json:"silver"`
+	Electrum      Loot `json:"electrum"`
+	Gold          Loot `json:"gold"`
+	Platinum      Loot `json:"platinum"`
 }
 
 type CoinUpdateRequest struct {

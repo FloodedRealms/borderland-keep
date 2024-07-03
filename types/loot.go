@@ -15,7 +15,7 @@ const (
 	Combat        LootCategory = "combat"
 )
 
-type loot struct {
+type Loot struct {
 	Category       LootCategory `json:"type_of_loot"`
 	Name           string       `json:"name"`
 	Description    string       `json:"description"`
@@ -24,8 +24,8 @@ type loot struct {
 	NumberOfItem   int          `json:"total"`
 }
 
-func NewLoot(name, desc string, xpValue float64, numberOfSource int) *loot {
-	source := &loot{
+func NewLoot(name, desc string, xpValue float64, numberOfSource int) *Loot {
+	source := &Loot{
 		Name:         name,
 		Description:  desc,
 		XPValueOfOne: xpValue,
@@ -34,19 +34,19 @@ func NewLoot(name, desc string, xpValue float64, numberOfSource int) *loot {
 	return source
 }
 
-func (g *loot) TotalXPAmount() int {
+func (g *Loot) TotalXPAmount() int {
 	value := g.XPValueOfOne * float64(g.NumberOfItem)
 	rounded := math.Floor(value)
 	final := int(rounded)
 	return final
 }
 
-func (g *loot) GoldValue() float64 {
+func (g *Loot) GoldValue() float64 {
 	return math.Floor((g.GoldValueOfOne * float64(g.NumberOfItem)))
 
 }
 
-func (g *loot) Summary() string {
+func (g *Loot) Summary() string {
 	switch g.Category {
 	case CoinLoot:
 		return fmt.Sprintf("Recovered %d %s coins. This is worth %f gold and %d XP.", g.NumberOfItem, g.Name, g.GoldValue(), g.TotalXPAmount())

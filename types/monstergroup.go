@@ -3,7 +3,7 @@ package types
 type MonsterGroup struct {
 	Id       int `json:"id"`
 	XPEarned int `json:"combat_xp"`
-	XP       loot
+	XP       Loot
 }
 
 type MonsterGroupRequest struct {

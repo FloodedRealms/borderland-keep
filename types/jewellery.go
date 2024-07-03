@@ -3,7 +3,7 @@ package types
 type Jewellery struct {
 	Id       int `json:"id"`
 	XPEarned int `json:"jewellery_xp"`
-	Loot     loot
+	Loot     Loot
 }
 
 func NewJewellery(n, d string, v float64, number, id int) *Jewellery {

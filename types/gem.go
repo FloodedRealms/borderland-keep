@@ -3,7 +3,7 @@ package types
 type Gem struct {
 	Id       int `json:"id"`
 	XPEarned int `json:"gem_xp"`
-	Loot     loot
+	Loot     Loot
 }
 
 func NewGem(n, d string, v float64, number, id int) *Gem {
