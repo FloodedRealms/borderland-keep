@@ -47,6 +47,10 @@ func (j JSONRepo) ListCampaignsForClient(string) ([]*types.CampaignRecord, error
 	return nil, util.NotYetImplmented()
 }
 
+func (j JSONRepo) UpdateCampaignPassword(id int, pass types.Password) error {
+	return util.NotYetImplmented()
+}
+
 func (j JSONRepo) GetAdventureRecordsForCampaign(*types.CampaignRecord) ([]*types.AdventureRecord, error) {
 	return nil, util.NotYetImplmented()
 }
