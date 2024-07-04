@@ -148,8 +148,8 @@ func (j JSONRepo) ChangeCharacterShares(*types.AdventureRecord, *types.Character
 	return false, util.NotYetImplmented()
 }
 
-func (j JSONRepo) GetCharacterById(types.CharacterRecord) *types.CharacterRecord {
-	return nil
+func (j JSONRepo) GetCharacterById(types.CharacterRecord) (*types.CharacterRecord, error) {
+	return nil, util.NotYetImplmented()
 }
 
 func (j JSONRepo) UpdateCharacterTotalXP(types.CharacterRecord) error {

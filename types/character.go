@@ -10,7 +10,7 @@ type Character interface {
 }
 
 type CharacterRecord struct {
-	ID              int    `json:"id"`
+	Id              int    `json:"id"`
 	Name            string `json:"name"`
 	CurrentXP       int    `json:"current_xp"`
 	PrimeReqPercent int    `json:"prime_req"`
@@ -29,13 +29,9 @@ func (c CharacterRecord) GenerateUpdateStatement() string {
 	return ""
 }
 
-func (c CharacterRecord) Id() int {
-	return c.ID
-}
-
 func NewCharacter(id, currentXp, primeReq, level int, name, class string) *CharacterRecord {
 	return &CharacterRecord{
-		ID:              id,
+		Id:              id,
 		Name:            name,
 		CurrentXP:       currentXp,
 		PrimeReqPercent: primeReq,
@@ -50,7 +46,7 @@ func BlankCharacter() *CharacterRecord {
 
 func NewCharacterById(id int) *CharacterRecord {
 	char := BlankCharacter()
-	char.ID = id
+	char.Id = id
 	return char
 }
 func (c *CharacterRecord) AddXP(xpGained int) {
@@ -63,15 +59,13 @@ func (c CharacterRecord) ApplyPrimeReq(xpGained int) int {
 }
 
 type AdventureCharacter struct {
-	Details   CharacterRecord
+	Id        int  `json:"id"`
 	Halfshare bool `json:"halfshare"`
-	XpGained  int  `json:"xp_gained"`
 }
 
-func NewAdventureCharacter(details *CharacterRecord, halfshare bool, xp int) *AdventureCharacter {
+func NewAdventureCharacter(halfshare bool, id int) *AdventureCharacter {
 	return &AdventureCharacter{
-		Details:   *details,
+		Id:        id,
 		Halfshare: halfshare,
-		XpGained:  xp,
 	}
 }

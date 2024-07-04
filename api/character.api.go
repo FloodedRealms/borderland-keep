@@ -48,29 +48,31 @@ func (c CharacterApi) UpdateCharacter(w http.ResponseWriter, r *http.Request) {
 	}
 	sendGoodResponseWithObject(w, created)
 }
-func (c CharacterApi) ManageCharactersForAdventure(w http.ResponseWriter, r *http.Request) {
-	adventureId, err := strconv.Atoi(r.PathValue("advnetureId"))
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
-	}
-	characterId, err := strconv.Atoi(r.PathValue("characterId"))
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
-	}
-	params := r.URL.Query()
 
-	operation := params.Get("operation")
-	halfshare := params.Get("halfshare")
+/*
+	func (c CharacterApi) ManageCharactersForAdventure(w http.ResponseWriter, r *http.Request) {
+		adventureId, err := strconv.Atoi(r.PathValue("advnetureId"))
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusBadRequest)
+		}
+		characterId, err := strconv.Atoi(r.PathValue("characterId"))
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusBadRequest)
+		}
+		params := r.URL.Query()
 
-	adventure := types.NewAdventureRecordById(adventureId)
-	character := types.NewCharacterById(characterId)
-	status, err := c.characterService.ManageCharactersForAdventure(*adventure, character, operation, halfshare)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
+		operation := params.Get("operation")
+		halfshare := params.Get("halfshare")
+
+		adventure := types.NewAdventureRecordById(adventureId)
+		character := types.NewCharacterById(characterId)
+		status, err := c.characterService.ManageCharactersForAdventure(*adventure, character, operation, halfshare)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusBadRequest)
+		}
+		sendGoodResponseWithObject(w, status)
 	}
-	sendGoodResponseWithObject(w, status)
-}
-
+*/
 func (c CharacterApi) GetCharacterById(w http.ResponseWriter, r *http.Request) {
 	http.Error(w, util.NotYetImplmented().Error(), http.StatusNotImplemented)
 }

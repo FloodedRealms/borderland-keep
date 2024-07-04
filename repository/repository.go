@@ -42,7 +42,7 @@ type Repository interface {
 
 	RemoveCharacterFromAdventure(*types.AdventureRecord, *types.CharacterRecord) (bool, error)
 	ChangeCharacterShares(*types.AdventureRecord, *types.CharacterRecord, bool) (bool, error)
-	GetCharacterById(types.CharacterRecord) *types.CharacterRecord
+	GetCharacterById(types.CharacterRecord) (*types.CharacterRecord, error)
 	UpdateCharacterTotalXP(types.CharacterRecord) error
 	GetCharacterXPGains(types.CharacterRecord) ([]int, error)
 	GetLevelForXP(types.CampaignRecord, types.CharacterRecord) int

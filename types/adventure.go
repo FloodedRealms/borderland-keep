@@ -94,7 +94,12 @@ func (a AdventureRecord) TotalXPAmount() int {
 
 func (a AdventureRecord) CalculateXPShares() (fullshare, halfsare int) {
 	numberOfShares := a.CalculateNumberOfShares()
-	totalXp := a.Coins.TotalXPAmount() + a.totalGemXp() + a.totalJewelleryXp() + a.totalMagicItemXp() + a.totalCombatXp()
+	c := a.Coins.TotalXPAmount()
+	g := a.totalGemXp()
+	j := a.totalJewelleryXp()
+	m := a.totalMagicItemXp()
+	com := a.totalCombatXp()
+	totalXp := c + g + j + m + com
 	if totalXp == 0 {
 		return 0, 0
 	}

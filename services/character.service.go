@@ -11,7 +11,7 @@ import (
 type CharacterService interface {
 	CreateCharacterForCampaign(*types.CampaignRecord, *types.CharacterRecord) (*types.CharacterRecord, error)
 	UpdateCharacter(int, *types.CharacterRecord) (*types.CharacterRecord, error)
-	ManageCharactersForAdventure(adventure types.AdventureRecord, character *types.CharacterRecord, operation, halfshare string) (bool, error)
+	//ManageCharactersForAdventure(adventure types.AdventureRecord, character *types.CharacterRecord, operation, halfshare string) (bool, error)
 	GetCharactersForCampaign(campaign *types.CampaignRecord) ([]types.CharacterRecord, error)
 	//AddAdventureXPToCharacters(types.AdventureRecord) ([]types.CharacterRecord, error)
 }
@@ -38,7 +38,7 @@ func (s CharacterServiceImpl) UpdateCharacter(id int, char *types.CharacterRecor
 	return s.repo.UpdateCharacter(*char)
 }
 
-func (s CharacterServiceImpl) ManageCharactersForAdventure(ad types.AdventureRecord, char *types.CharacterRecord, operation, halfshare string) (bool, error) {
+/*func (s CharacterServiceImpl) ManageCharactersForAdventure(ad types.AdventureRecord, char *types.CharacterRecord, operation, halfshare string) (bool, error) {
 	isGettingHalfshare := false
 	if halfshare != "false" {
 		isGettingHalfshare = true
@@ -48,9 +48,9 @@ func (s CharacterServiceImpl) ManageCharactersForAdventure(ad types.AdventureRec
 	case "add":
 		var adventureCharacter *types.AdventureCharacter
 		if isGettingHalfshare {
-			adventureCharacter = types.NewAdventureCharacter(char, isGettingHalfshare, halfShareXP)
+			adventureCharacter = types.NewAdventureCharacter(isGettingHalfshare, char.ID)
 		} else {
-			adventureCharacter = types.NewAdventureCharacter(char, isGettingHalfshare, fullShareXP)
+			adventureCharacter = types.NewAdventureCharacter(isGettingHalfshare, char.ID)
 		}
 		return s.repo.AddCharacterToAdventure(&ad, adventureCharacter)
 	case "remove":
@@ -60,7 +60,7 @@ func (s CharacterServiceImpl) ManageCharactersForAdventure(ad types.AdventureRec
 	default:
 		return false, util.UnknownCharacterOperation(operation)
 	}
-}
+}*/
 
 func (s CharacterServiceImpl) GetCharactersForCampaign(campaign *types.CampaignRecord) ([]types.CharacterRecord, error) {
 	characterList, err := s.repo.GetCharactersForCampaign(campaign)
@@ -79,11 +79,17 @@ func (s CharacterServiceImpl) GetCharactersForCampaign(campaign *types.CampaignR
 	return characterList, nil
 }
 
-func (s CharacterServiceImpl) UpdateTotalCharacterXP(char types.CharacterRecord, xpGained int) error {
-	currentChar := s.repo.GetCharacterById(char)
+func (s CharacterServiceImpl) UpdateTotalCharacterXP(char types.CharacterRecord, xpGained int) (*types.CharacterRecord, error) {
+	currentChar, err := s.repo.GetCharacterById(char)
+	if err != nil {
+		return nil, err
+	}
 	currentChar.AddXP(xpGained)
-	_, err := s.repo.UpdateCharacter(char)
-	return err
+	c, err := s.repo.UpdateCharacter(char)
+	if err != nil {
+		return nil, err
+	}
+	return c, err
 }
 
 func (s CharacterServiceImpl) sumXP(a []int) int {

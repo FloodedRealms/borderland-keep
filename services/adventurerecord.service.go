@@ -35,7 +35,10 @@ func (a *AdventureServiceImpl) CreateAdventureRecordForCampaign(r *types.Adventu
 }
 
 func (a *AdventureServiceImpl) UpdateAdventureRecord(r *types.AdventureRecord) (*types.AdventureRecord, error) {
-	adventureToUpdate, _ := a.repo.GetAdventureRecordById(r)
+	adventureToUpdate, err := a.repo.GetAdventureRecordById(r)
+	if err != nil {
+		return nil, err
+	}
 	charactersInCampaign, _ := a.repo.GetCharactersForCampaign(types.NewCampaign(adventureToUpdate.CampaignId))
 	fullShare, halfShare := r.CalculateXPShares()
 	if r.Name != "" && r.Name != adventureToUpdate.Name {
@@ -50,7 +53,7 @@ func (a *AdventureServiceImpl) UpdateAdventureRecord(r *types.AdventureRecord) (
 			return nil, util.UnableToUpdateAdventure("DATE", err.Error())
 		}
 	}
-	err := a.updateAdventureCoins(adventureToUpdate, &r.Coins)
+	err = a.updateAdventureCoins(adventureToUpdate, &r.Coins)
 	if err != nil {
 		return nil, util.UnableToUpdateAdventure("Coins", err.Error())
 	}
@@ -138,7 +141,7 @@ func (a AdventureServiceImpl) updateAdventureCombat(ad *types.AdventureRecord, g
 func (a AdventureServiceImpl) updateAdventureCharacters(ad *types.AdventureRecord, chars []types.AdventureCharacter, fullShareAmount, halfShareAmount int, campChars []types.CharacterRecord) error {
 	charMap := map[int]types.CharacterRecord{}
 	for _, c := range campChars {
-		charMap[c.ID] = c
+		charMap[c.Id] = c
 	}
 	err := a.repo.DeleteCharactersForAdventure(ad)
 	if err != nil {
@@ -149,7 +152,7 @@ func (a AdventureServiceImpl) updateAdventureCharacters(ad *types.AdventureRecor
 		if char.Halfshare {
 			xpToGain = halfShareAmount
 		}
-		c := charMap[char.Details.ID]
+		c := charMap[char.Id]
 		adjustedAmount := c.ApplyPrimeReq(xpToGain)
 		if char.Halfshare {
 			_, err := a.repo.AddHalfshareCharacterToAdventure(ad, &char, adjustedAmount)
