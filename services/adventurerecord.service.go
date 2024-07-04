@@ -10,8 +10,8 @@ import (
 )
 
 type AdventureService interface {
-	CreateAdventureRecordForCampaign(*types.CreateAdventureRequest) (*types.AdventureRecord, error)
-	UpdateAdventureRecord(*types.UpdateAdventureRequest) (*types.AdventureRecord, error)
+	CreateAdventureRecordForCampaign(*types.AdventureRecord) (*types.AdventureRecord, error)
+	UpdateAdventureRecord(*types.AdventureRecord) (*types.AdventureRecord, error)
 	ListAdventureRecordsForCampaign(string) ([]*types.AdventureRecord, error)
 	GetAdventureRecordById(string) (*types.AdventureRecord, error)
 	//AddCoinsAdventure(*types.Adventure, *types.Coins) (bool, error)
@@ -30,54 +30,47 @@ func NewAdventureRecordService(repo repository.Repository, ctx context.Context) 
 	return &AdventureServiceImpl{repo, ctx}
 }
 
-func (a *AdventureServiceImpl) CreateAdventureRecordForCampaign(r *types.CreateAdventureRequest) (*types.AdventureRecord, error) {
+func (a *AdventureServiceImpl) CreateAdventureRecordForCampaign(r *types.AdventureRecord) (*types.AdventureRecord, error) {
 	return a.repo.CreateAdventureRecordForCampaign(r)
 }
 
-func (a *AdventureServiceImpl) UpdateAdventureRecord(r *types.UpdateAdventureRequest) (*types.AdventureRecord, error) {
-	adventureToUpdate, _ := a.repo.GetAdventureRecordById(types.NewAdventureRecordById(r.ID))
+func (a *AdventureServiceImpl) UpdateAdventureRecord(r *types.AdventureRecord) (*types.AdventureRecord, error) {
+	adventureToUpdate, _ := a.repo.GetAdventureRecordById(r)
 	charactersInCampaign, _ := a.repo.GetCharactersForCampaign(types.NewCampaign(adventureToUpdate.CampaignId))
-	coinsToAdd := types.NewCoins(r.Copper, r.Silver, r.Electrum, r.Gold, r.Platinum)
-	gemsToUpdate := r.GenerateGemList()
-	jewelleryToUpdate := r.GenerateJewelleryList()
-	magicItemsToUpdate := r.GenerateMagicItemList()
-	combatsToUpdate := r.GenerateCombatList()
-	charactersToUpdate := r.GenerateCharacterList()
-	updatedAdventure := types.NewAdventureRecord(r.ID, r.CampaignID, 0, *coinsToAdd, gemsToUpdate, jewelleryToUpdate, combatsToUpdate, magicItemsToUpdate, charactersToUpdate, r.Name, adventureToUpdate.CreatedAt, adventureToUpdate.UpdatedAt, types.ArcvhistDate(r.AdventureDate))
-	//fullShare, halfShare := updatedAdventure.CalculateXPShares()
-	if updatedAdventure.Name != "" && updatedAdventure.Name != adventureToUpdate.Name {
-		err := a.repo.UpdateAdventureName(adventureToUpdate, updatedAdventure.Name)
+	fullShare, halfShare := r.CalculateXPShares()
+	if r.Name != "" && r.Name != adventureToUpdate.Name {
+		err := a.repo.UpdateAdventureName(adventureToUpdate, r.Name)
 		if err != nil {
 			return nil, util.UnableToUpdateAdventure("Name", err.Error())
 		}
 	}
-	if updatedAdventure.AdventureDate != types.NewAdventureRecordById(r.ID).AdventureDate && updatedAdventure.AdventureDate != adventureToUpdate.AdventureDate {
+	if r.AdventureDate != types.NewAdventureRecordById(r.Id).AdventureDate && r.AdventureDate != adventureToUpdate.AdventureDate {
 		err := a.repo.UpdateAdventureDate(adventureToUpdate, r.AdventureDate)
 		if err != nil {
 			return nil, util.UnableToUpdateAdventure("DATE", err.Error())
 		}
 	}
-	err := a.updateAdventureCoins(adventureToUpdate, coinsToAdd)
+	err := a.updateAdventureCoins(adventureToUpdate, &r.Coins)
 	if err != nil {
 		return nil, util.UnableToUpdateAdventure("Coins", err.Error())
 	}
-	err = a.updateAdventureGems(adventureToUpdate, gemsToUpdate)
+	err = a.updateAdventureGems(adventureToUpdate, r.Gems)
 	if err != nil {
 		return nil, util.UnableToUpdateAdventure("Gems", err.Error())
 	}
-	err = a.updateAdventureJewellery(adventureToUpdate, jewelleryToUpdate)
+	err = a.updateAdventureJewellery(adventureToUpdate, r.Jewellery)
 	if err != nil {
 		return nil, util.UnableToUpdateAdventure("Jewellery", err.Error())
 	}
-	err = a.updateAdventureMagicItems(adventureToUpdate, magicItemsToUpdate)
+	err = a.updateAdventureMagicItems(adventureToUpdate, r.MagicItems)
 	if err != nil {
 		return nil, util.UnableToUpdateAdventure("Magic Items", err.Error())
 	}
-	err = a.updateAdventureCombat(adventureToUpdate, combatsToUpdate)
+	err = a.updateAdventureCombat(adventureToUpdate, r.Combat)
 	if err != nil {
 		return nil, util.UnableToUpdateAdventure("Combats", err.Error())
 	}
-	err = a.updateAdventureCharacters(adventureToUpdate, charactersToUpdate, updatedAdventure.FullShareXP, updatedAdventure.HalfShareXP, charactersInCampaign)
+	err = a.updateAdventureCharacters(adventureToUpdate, r.Characters, fullShare, halfShare, charactersInCampaign)
 	if err != nil {
 		return nil, util.UnableToUpdateAdventure("Characters", err.Error())
 	}

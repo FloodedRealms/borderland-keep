@@ -9,8 +9,8 @@ import (
 )
 
 type CharacterService interface {
-	CreateCharacterForCampaign(*types.CampaignRecord, *types.CreateCharacterRecordRequest) (*types.CharacterRecord, error)
-	UpdateCharacter(int, *types.UpdateCharacterRecordRequest) (*types.CharacterRecord, error)
+	CreateCharacterForCampaign(*types.CampaignRecord, *types.CharacterRecord) (*types.CharacterRecord, error)
+	UpdateCharacter(int, *types.CharacterRecord) (*types.CharacterRecord, error)
 	ManageCharactersForAdventure(adventure types.AdventureRecord, character *types.CharacterRecord, operation, halfshare string) (bool, error)
 	GetCharactersForCampaign(campaign *types.CampaignRecord) ([]types.CharacterRecord, error)
 	//AddAdventureXPToCharacters(types.AdventureRecord) ([]types.CharacterRecord, error)
@@ -30,14 +30,12 @@ func NewCharacterService(repo repository.Repository, logger *util.Logger, ctx co
 	}
 }
 
-func (s CharacterServiceImpl) CreateCharacterForCampaign(campaign *types.CampaignRecord, charToInsert *types.CreateCharacterRecordRequest) (*types.CharacterRecord, error) {
-	character := types.NewCharacterFromCreateRequest(-1, *charToInsert)
-	return s.repo.CreateCharacterForCampaign(campaign, character)
+func (s CharacterServiceImpl) CreateCharacterForCampaign(campaign *types.CampaignRecord, charToInsert *types.CharacterRecord) (*types.CharacterRecord, error) {
+	return s.repo.CreateCharacterForCampaign(campaign, charToInsert)
 }
 
-func (s CharacterServiceImpl) UpdateCharacter(id int, updateReq *types.UpdateCharacterRecordRequest) (*types.CharacterRecord, error) {
-	characterToUpdate := types.NewCharacterFromUpdateRequest(id, *updateReq)
-	return s.repo.UpdateCharacter(characterToUpdate)
+func (s CharacterServiceImpl) UpdateCharacter(id int, char *types.CharacterRecord) (*types.CharacterRecord, error) {
+	return s.repo.UpdateCharacter(*char)
 }
 
 func (s CharacterServiceImpl) ManageCharactersForAdventure(ad types.AdventureRecord, char *types.CharacterRecord, operation, halfshare string) (bool, error) {

@@ -55,13 +55,13 @@ func (j JSONRepo) GetAdventureRecordsForCampaign(*types.CampaignRecord) ([]*type
 	return nil, util.NotYetImplmented()
 }
 
-func (j JSONRepo) CreateAdventureRecordForCampaign(*types.CreateAdventureRequest) (*types.AdventureRecord, error) {
+func (j JSONRepo) CreateAdventureRecordForCampaign(*types.AdventureRecord) (*types.AdventureRecord, error) {
 	return nil, util.NotYetImplmented()
 }
 
 func (j JSONRepo) GetAdventureRecordById(in *types.AdventureRecord) (*types.AdventureRecord, error) {
 	for _, a := range j.Adventures {
-		if a.ID == in.ID {
+		if a.Id == in.Id {
 			return &a, nil
 		}
 	}
@@ -124,7 +124,7 @@ func (j JSONRepo) GetCharactersForCampaign(*types.CampaignRecord) ([]types.Chara
 	return nil, util.NotYetImplmented()
 }
 
-func (j JSONRepo) UpdateCharacter(types.Character) (*types.CharacterRecord, error) {
+func (j JSONRepo) UpdateCharacter(types.CharacterRecord) (*types.CharacterRecord, error) {
 	return nil, util.NotYetImplmented()
 }
 

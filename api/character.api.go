@@ -25,7 +25,7 @@ func (c CharacterApi) CreateCharacterForCampaign(w http.ResponseWriter, r *http.
 	}
 	campaign := types.NewCampaign(campaignId)
 
-	var characterToInsert types.CreateCharacterRecordRequest
+	var characterToInsert types.CharacterRecord
 	decodeJSONBody(w, r, &characterToInsert)
 
 	created, err := c.characterService.CreateCharacterForCampaign(campaign, &characterToInsert)
@@ -41,7 +41,7 @@ func (c CharacterApi) UpdateCharacter(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 	}
 
-	var characterToUpdate *types.UpdateCharacterRecordRequest
+	var characterToUpdate *types.CharacterRecord
 	created, err := c.characterService.UpdateCharacter(id, characterToUpdate)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)

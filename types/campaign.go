@@ -5,7 +5,7 @@ import (
 )
 
 type CampaignRecord struct {
-	ID            int               `json:"id"`
+	Id            int               `json:"id"`
 	ClientId      string            `json:"client_id"`
 	Name          string            `json:"name"`
 	Recruitment   bool              `json:"recruitment"`
@@ -16,25 +16,6 @@ type CampaignRecord struct {
 	UpdatedAt     time.Time         `json:"updated_at,omitempty"`
 	LastAdventure time.Time         `json:"last_adventure,omitempty"`
 	Characters    []CharacterRecord `json:"characters"`
-}
-
-type CreateCampaignRecordRequest struct {
-	Name        string `json:"name"`
-	Recruitment bool   `json:"recruitment"`
-	Judge       string `json:"judge"`
-	Timekeeping string `json:"timekeeping"`
-	Cadence     string `json:"cadence"`
-}
-type UpdateCampaignRecordRequest struct {
-	ID            int       `json:"id"`
-	Name          string    `json:"name"`
-	Recruitment   bool      `json:"recruitment"`
-	Judge         string    `json:"judge"`
-	Timekeeping   string    `json:"timekeeping"`
-	Cadence       string    `json:"cadence"`
-	CreatedAt     time.Time `json:"created_at,omitempty"`
-	UpdatedAt     time.Time `json:"updated_at,omitempty"`
-	LastAdventure time.Time `json:"last_adventure,omitempty"`
 }
 
 func ValidateCampaign(u *CampaignRecord) bool { return true }

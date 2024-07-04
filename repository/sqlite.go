@@ -86,9 +86,9 @@ func (s SqliteRepo) processCampaignRows(r *sql.Rows) []*types.CampaignRecord {
 	campaigns := make([]*types.CampaignRecord, 0)
 	for r.Next() {
 		current := &types.CampaignRecord{}
-		err := r.Scan(&current.ID, &current.Name, &current.Recruitment, &current.Judge, &current.Timekeeping, &current.Cadence, &current.CreatedAt, &current.UpdatedAt, &current.LastAdventure, &current.ClientId, &trashInt, &trashString, &trashString)
+		err := r.Scan(&current.Id, &current.Name, &current.Recruitment, &current.Judge, &current.Timekeeping, &current.Cadence, &current.CreatedAt, &current.UpdatedAt, &current.LastAdventure, &current.ClientId, &trashInt, &trashString, &trashString)
 		util.CheckErr(err)
-		current.Characters, err = s.getCampaignCharacters(current.ID)
+		current.Characters, err = s.getCampaignCharacters(current.Id)
 		util.CheckErr(err)
 		campaigns = append(campaigns, current)
 	}
@@ -108,7 +108,7 @@ func (s SqliteRepo) selectAllCampaigns() []*types.CampaignRecord {
 
 func (s SqliteRepo) insertCampaign(c types.CampaignRecord) (int, error) {
 	s.logger.Debug("tried to insert campaign")
-	stmtString := fmt.Sprintf("INSERT INTO %s(name, recruitment, judge, timekeeping, cadence, created_at, updated_at, last_adventure, api_user_id) values(?, ?, ?, ?, ?, ?, ?, ?, ?) ;", campaignTable)
+	stmtString := fmt.Sprintf("INSERT INTO %s(name, recruitment, judge, timekeeping, cadence, created_at, updated_at, last_adventure, api_user_id, password, salt) values(?, ?, ?, ?, ?, ?, ?, ?, ?, \"\", \"\") ;", campaignTable)
 	s.logger.Debug("String is:")
 	s.logger.Debug(stmtString)
 	stmt, err := s.db.Prepare(stmtString)
@@ -156,11 +156,11 @@ func (s SqliteRepo) UpdateCampaign(c *types.CampaignRecord) (*types.CampaignReco
 	if err != nil {
 		return nil, err
 	}
-	_, err = stmt.Exec(c.Name, c.Recruitment, c.Judge, c.Timekeeping, c.Cadence, c.CreatedAt, c.UpdatedAt, c.ID)
+	_, err = stmt.Exec(c.Name, c.Recruitment, c.Judge, c.Timekeeping, c.Cadence, c.CreatedAt, c.UpdatedAt, c.Id)
 	if err != nil {
 		return nil, err
 	}
-	return s.selectCampaignById(c.ID)
+	return s.selectCampaignById(c.Id)
 
 }
 
@@ -188,16 +188,16 @@ func (s SqliteRepo) DeleteCampaign(c *types.CampaignRecord) (bool, error) {
 }
 
 // Adventures
-func (s SqliteRepo) insertAdventureRecord(a types.CreateAdventureRequest) (int, error) {
+func (s SqliteRepo) insertAdventureRecord(a types.AdventureRecord) (int, error) {
 	stmt_string := fmt.Sprintf("INSERT INTO %s(campaign_id, name, created_at, updated_at, adventure_date) values(?, ?, ?, ?, ?)", adventureTable)
 	s.logger.Debug(stmt_string)
 	stmt, err := s.db.Prepare(stmt_string)
 	util.CheckErr(err)
-	res, err := stmt.Exec(a.CampaignID, a.Name, time.Now(), time.Now(), a.AdventureDate)
+	res, err := stmt.Exec(a.CampaignId, a.Name, time.Now(), time.Now(), a.AdventureDate)
 	util.CheckErr(err)
 	stmt2, err := s.db.Prepare(fmt.Sprintf("UPDATE %s SET last_adventure=? WHERE id=?", campaignTable))
 	util.CheckErr(err)
-	_, err = stmt2.Exec(a.AdventureDate, a.CampaignID)
+	_, err = stmt2.Exec(a.AdventureDate, a.CampaignId)
 	util.CheckErr(err)
 
 	var id int64
@@ -222,7 +222,7 @@ func (s SqliteRepo) selectAdventureById(id int) *types.AdventureRecord {
 func (s SqliteRepo) selectAdventureByCampaignId(c *types.CampaignRecord) ([]*types.AdventureRecord, error) {
 
 	tableq := fmt.Sprintf("SELECT * FROM %s c where c.campaign_id = ?", adventureTable)
-	rows, err := s.runQuery(tableq, c.ID)
+	rows, err := s.runQuery(tableq, c.Id)
 	util.CheckErr(err)
 	defer rows.Close()
 
@@ -249,7 +249,7 @@ func (s SqliteRepo) processAdventureRows(r *sql.Rows) []*types.AdventureRecord {
 		currentMagicItems := s.getMagicItemsForAdventure(id)
 		currentCombat := s.getCombatForAdventure(id)
 		currentCharacters := s.getCharactersForAdventure(id)
-		current := types.NewAdventureRecord(id, campaignId, duration, *currentCoins, currentGems, currentJewellery, currentCombat, currentMagicItems, currentCharacters, name, createdDate, updatedDate, types.ArcvhistDate(adventureDate))
+		current := types.NewAdventureRecord(id, campaignId, duration, *currentCoins, currentGems, currentJewellery, currentCombat, currentMagicItems, currentCharacters, name, types.ArcvhistDate(adventureDate))
 		util.CheckErr(err)
 		adventures = append(adventures, current)
 	}
@@ -269,7 +269,7 @@ func (s SqliteRepo) getGemsForAdventure(id int) []types.Gem {
 		value := 0.0
 		err := rows.Scan(&id, &trashInt, &name, &desc, &value, &number)
 		util.CheckErr(err)
-		current := types.NewGem(name, desc, value, number, id)
+		current := types.NewGem(number, name, desc, value, value)
 		gems = append(gems, *current)
 	}
 	return gems
@@ -287,7 +287,7 @@ func (s SqliteRepo) getJewelleryForAdventure(id int) []types.Jewellery {
 		value := 0.0
 		err := rows.Scan(&id, &trashInt, &name, &desc, &value, &number)
 		util.CheckErr(err)
-		current := types.NewJewellery(name, desc, value, number, id)
+		current := types.NewJewellery(number, name, desc, value, value)
 
 		jewellery = append(jewellery, *current)
 	}
@@ -307,7 +307,7 @@ func (s SqliteRepo) getMagicItemsForAdventure(id int) []types.MagicItem {
 		value := 0.0
 		err := rows.Scan(&id, &trashInt, &name, &desc, &value, &actualValue)
 		util.CheckErr(err)
-		current := types.NewMagicItem(name, desc, value, actualValue, id)
+		current := types.NewMagicItem(name, desc, int(value), int(actualValue))
 		magicItems = append(magicItems, *current)
 	}
 	return magicItems
@@ -326,7 +326,7 @@ func (s SqliteRepo) getCombatForAdventure(id int) []types.MonsterGroup {
 		value := 0.0
 		err := rows.Scan(&id, &trashInt, &name, &number, &value, &trashInt)
 		util.CheckErr(err)
-		current := types.NewMonsterGroup(name, number, id, value)
+		current := types.NewMonsterGroup(name, name, number, int(value))
 
 		combat = append(combat, *current)
 	}
@@ -358,7 +358,7 @@ func (s SqliteRepo) getCharactersForAdventure(id int) []types.AdventureCharacter
 
 }
 
-func (s SqliteRepo) CreateAdventureRecordForCampaign(a *types.CreateAdventureRequest) (*types.AdventureRecord, error) {
+func (s SqliteRepo) CreateAdventureRecordForCampaign(a *types.AdventureRecord) (*types.AdventureRecord, error) {
 	id, err := s.insertAdventureRecord(*a)
 	util.CheckErr(err)
 	return s.selectAdventureById(id), nil
@@ -369,7 +369,7 @@ func (s SqliteRepo) GetAdventureRecordsForCampaign(c *types.CampaignRecord) ([]*
 }
 
 func (s SqliteRepo) GetAdventureRecordById(a *types.AdventureRecord) (*types.AdventureRecord, error) {
-	return s.selectAdventureById(a.ID), nil
+	return s.selectAdventureById(a.Id), nil
 }
 
 func (s SqliteRepo) UpdateCoinsForAdventure(a *types.AdventureRecord, c *types.Coins) (bool, error) {
@@ -377,7 +377,7 @@ func (s SqliteRepo) UpdateCoinsForAdventure(a *types.AdventureRecord, c *types.C
 	s.logger.Debug(stmt_string)
 	stmt, err := s.db.Prepare(stmt_string)
 	util.CheckErr(err)
-	_, resErr := stmt.Exec(c.Copper.NumberOfItem, c.Silver.NumberOfItem, c.Electrum.NumberOfItem, c.Gold.NumberOfItem, c.Platinum.NumberOfItem, a.ID)
+	_, resErr := stmt.Exec(c.Copper.Number, c.Silver.Number, c.Electrum.Number, c.Gold.Number, c.Platinum.Number)
 	if resErr != nil {
 		return false, resErr
 	}
@@ -389,7 +389,7 @@ func (s SqliteRepo) UpdateAdventureName(a *types.AdventureRecord, n string) erro
 	s.logger.Debug(stmt_string)
 	stmt, err := s.db.Prepare(stmt_string)
 	util.CheckErr(err)
-	_, resErr := stmt.Exec(n, a.ID)
+	_, resErr := stmt.Exec(n, a.Id)
 	if resErr != nil {
 		return resErr
 	}
@@ -411,7 +411,7 @@ func (s SqliteRepo) UpdateAdventureDate(a *types.AdventureRecord, d types.Arcvhi
 	s.logger.Debug(stmt_string)
 	stmt, err := s.db.Prepare(stmt_string)
 	util.CheckErr(err)
-	_, resErr := stmt.Exec(d.Date(), a.ID)
+	_, resErr := stmt.Exec(d.Date(), a.Id)
 	if resErr != nil {
 		return resErr
 	}
@@ -423,7 +423,7 @@ func (s SqliteRepo) DeleteGemsForAdventure(a *types.AdventureRecord) error {
 	s.logger.Debug(stmt_string)
 	stmt, err := s.db.Prepare(stmt_string)
 	util.CheckErr(err)
-	_, resErr := stmt.Exec(a.ID)
+	_, resErr := stmt.Exec(a.Id)
 	if resErr != nil {
 		return resErr
 	}
@@ -434,7 +434,7 @@ func (s SqliteRepo) DeleteJewelleryForAdventure(a *types.AdventureRecord) error 
 	s.logger.Debug(stmt_string)
 	stmt, err := s.db.Prepare(stmt_string)
 	util.CheckErr(err)
-	_, resErr := stmt.Exec(a.ID)
+	_, resErr := stmt.Exec(a.Id)
 	if resErr != nil {
 		return resErr
 	}
@@ -445,7 +445,7 @@ func (s SqliteRepo) DeleteMagicItemsForAdventure(a *types.AdventureRecord) error
 	s.logger.Debug(stmt_string)
 	stmt, err := s.db.Prepare(stmt_string)
 	util.CheckErr(err)
-	_, resErr := stmt.Exec(a.ID)
+	_, resErr := stmt.Exec(a.Id)
 	if resErr != nil {
 		return resErr
 	}
@@ -456,7 +456,7 @@ func (s SqliteRepo) DeleteCombatForAdventure(a *types.AdventureRecord) error {
 	s.logger.Debug(stmt_string)
 	stmt, err := s.db.Prepare(stmt_string)
 	util.CheckErr(err)
-	_, resErr := stmt.Exec(a.ID)
+	_, resErr := stmt.Exec(a.Id)
 	if resErr != nil {
 		return resErr
 	}
@@ -467,7 +467,7 @@ func (s SqliteRepo) DeleteCharactersForAdventure(a *types.AdventureRecord) error
 	s.logger.Debug(stmt_string)
 	stmt, err := s.db.Prepare(stmt_string)
 	util.CheckErr(err)
-	_, resErr := stmt.Exec(a.ID)
+	_, resErr := stmt.Exec(a.Id)
 	if resErr != nil {
 		return resErr
 	}
@@ -479,7 +479,7 @@ func (s SqliteRepo) AddGemToAdventure(a *types.AdventureRecord, g *types.Gem) (b
 	s.logger.Debug(stmt_string)
 	stmt, err := s.db.Prepare(stmt_string)
 	util.CheckErr(err)
-	_, resErr := stmt.Exec(a.ID, g.Loot.Name, g.Loot.Description, g.Loot.XPValueOfOne, g.Loot.NumberOfItem)
+	_, resErr := stmt.Exec(a.Id, g.Name, g.Description, g.XPValue, g.Number)
 	if resErr != nil {
 		return false, resErr
 	}
@@ -491,7 +491,7 @@ func (s SqliteRepo) AddJewelleryToAdventure(a *types.AdventureRecord, g *types.J
 	s.logger.Debug(stmt_string)
 	stmt, err := s.db.Prepare(stmt_string)
 	util.CheckErr(err)
-	_, resErr := stmt.Exec(a.ID, g.Loot.Name, g.Loot.Description, g.Loot.XPValueOfOne, g.Loot.NumberOfItem)
+	_, resErr := stmt.Exec(a.Id, g.Name, g.Description, g.XPValue, g.Number)
 	if resErr != nil {
 		return false, resErr
 	}
@@ -503,7 +503,7 @@ func (s SqliteRepo) AddMagicItemToAdventure(a *types.AdventureRecord, g *types.M
 	s.logger.Debug(stmt_string)
 	stmt, err := s.db.Prepare(stmt_string)
 	util.CheckErr(err)
-	_, resErr := stmt.Exec(a.ID, g.Loot.Name, g.Loot.Description, g.ApparentValue(), g.ActualValue)
+	_, resErr := stmt.Exec(a.Id, g.Name, g.Description, g.GoldValue, g.XPValue)
 	if resErr != nil {
 		return false, resErr
 	}
@@ -515,7 +515,7 @@ func (s SqliteRepo) AddCombatToAdventure(a *types.AdventureRecord, g *types.Mons
 	s.logger.Debug(stmt_string)
 	stmt, err := s.db.Prepare(stmt_string)
 	util.CheckErr(err)
-	_, resErr := stmt.Exec(a.ID, g.XP.Name, g.XP.NumberOfItem, g.XP.XPValueOfOne, g.XP.TotalXPAmount())
+	_, resErr := stmt.Exec(a.Id, g.Name, g.NumberDefeated, g.XPPerOneKill, g.TotalXPAmount())
 	if resErr != nil {
 		return false, resErr
 	}
@@ -553,7 +553,7 @@ func (s SqliteRepo) selectCharacterById(id int) *types.CharacterRecord {
 	return results[0]
 }
 
-func (s SqliteRepo) updateCharacter(char types.Character) error {
+func (s SqliteRepo) updateCharacter(char types.CharacterRecord) error {
 	tableq := char.GenerateUpdateStatement()
 	stmt, err := s.db.Prepare(tableq)
 	if err != nil {
@@ -607,7 +607,7 @@ func (s SqliteRepo) processCharacterRows(r *sql.Rows) []*types.CharacterRecord {
 }
 
 func (s SqliteRepo) CreateCharacterForCampaign(campaign *types.CampaignRecord, character types.Character) (*types.CharacterRecord, error) {
-	id, err := s.insertCharacter(campaign.ID, character)
+	id, err := s.insertCharacter(campaign.Id, character)
 	if err != nil {
 		return nil, err
 	}
@@ -618,12 +618,12 @@ func (s SqliteRepo) GetCharacterById(char types.CharacterRecord) *types.Characte
 	return s.selectCharacterById(char.Id())
 }
 
-func (s SqliteRepo) UpdateCharacter(character types.Character) (*types.CharacterRecord, error) {
+func (s SqliteRepo) UpdateCharacter(character types.CharacterRecord) (*types.CharacterRecord, error) {
 	err := s.updateCharacter(character)
 	if err != nil {
 		return nil, err
 	}
-	return s.selectCharacterById(character.Id()), nil
+	return s.selectCharacterById(character.ID), nil
 }
 func (s SqliteRepo) AddCharacterToAdventure(ad *types.AdventureRecord, char *types.AdventureCharacter) (bool, error) {
 	s.logger.Debug("tried to insert characer to adventure mapping")
@@ -634,12 +634,12 @@ func (s SqliteRepo) AddCharacterToAdventure(ad *types.AdventureRecord, char *typ
 	util.CheckErr(err)
 	s.logger.Debug("statement successully prepared.")
 	if char.Halfshare {
-		_, err := stmt.Exec(ad.ID, char.Details.Id(), 1)
+		_, err := stmt.Exec(ad.Id, char.Details.Id(), 1)
 		if err != nil {
 			return false, err
 		}
 	} else {
-		_, err := stmt.Exec(ad.ID, char.Details.Id(), 0)
+		_, err := stmt.Exec(ad.Id, char.Details.Id(), 0)
 		if err != nil {
 			return false, err
 		}
@@ -655,7 +655,7 @@ func (s SqliteRepo) AddHalfshareCharacterToAdventure(ad *types.AdventureRecord, 
 	stmt, err := s.db.Prepare(stmtString)
 	util.CheckErr(err)
 	s.logger.Debug("statement successully prepared.")
-	_, err = stmt.Exec(ad.ID, char.Details.Id(), 1, shareAmount)
+	_, err = stmt.Exec(ad.Id, char.Details.Id(), 1, shareAmount)
 	if err != nil {
 		return false, err
 	}
@@ -671,7 +671,7 @@ func (s SqliteRepo) AddFullshareCharacterToAdventure(ad *types.AdventureRecord, 
 	stmt, err := s.db.Prepare(stmtString)
 	util.CheckErr(err)
 	s.logger.Debug("statement successully prepared.")
-	_, err = stmt.Exec(ad.ID, char.Details.Id(), 0, shareAmount)
+	_, err = stmt.Exec(ad.Id, char.Details.Id(), 0, shareAmount)
 	if err != nil {
 		return false, err
 	}
@@ -686,7 +686,7 @@ func (s SqliteRepo) RemoveCharacterFromAdventure(ad *types.AdventureRecord, char
 	stmt, err := s.db.Prepare(stmtString)
 	util.CheckErr(err)
 	s.logger.Debug("statement successully prepared.")
-	_, err = stmt.Exec(ad.ID, char.Id())
+	_, err = stmt.Exec(ad.Id, char.Id())
 	if err != nil {
 		return false, err
 	}
@@ -702,12 +702,12 @@ func (s SqliteRepo) ChangeCharacterShares(ad *types.AdventureRecord, char *types
 	util.CheckErr(err)
 	s.logger.Debug("statement successully prepared.")
 	if isGettingHalfShare {
-		_, err = stmt.Exec(ad.ID, char.Id(), 1)
+		_, err = stmt.Exec(ad.Id, char.Id(), 1)
 		if err != nil {
 			return false, err
 		}
 	} else {
-		_, err = stmt.Exec(ad.ID, char.Id(), 0)
+		_, err = stmt.Exec(ad.Id, char.Id(), 0)
 		if err != nil {
 			return false, err
 		}
@@ -716,7 +716,7 @@ func (s SqliteRepo) ChangeCharacterShares(ad *types.AdventureRecord, char *types
 }
 
 func (s SqliteRepo) GetCharactersForCampaign(camp *types.CampaignRecord) ([]types.CharacterRecord, error) {
-	return s.getCampaignCharacters(camp.ID)
+	return s.getCampaignCharacters(camp.Id)
 }
 
 // Users

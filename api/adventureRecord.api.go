@@ -19,7 +19,7 @@ func NewAdventureRecordApi(as services.AdventureService, cs services.CharacterSe
 }
 
 func (ara AdventureApi) CreateAdventureRecord(w http.ResponseWriter, r *http.Request) {
-	var cr types.CreateAdventureRequest
+	var cr types.AdventureRecord
 	err := decodeJSONBody(w, r, &cr)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
@@ -66,13 +66,13 @@ func (ara AdventureApi) UpdateAdventure(w http.ResponseWriter, r *http.Request) 
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
-	var ur types.UpdateAdventureRequest
+	var ur types.AdventureRecord
 	err = decodeJSONBody(w, r, &ur)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
-	ur.ID = id
+	ur.Id = id
 	uAdventure, err := ara.adventureRecordService.UpdateAdventureRecord(&ur)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)

@@ -1,36 +1,25 @@
 package types
 
 type MagicItem struct {
-	Id          int `json:"id"`
-	XPEarned    int `json:"magic_item_xp"`
-	Loot        loot
-	ActualValue int `json:"actual_value"`
+	Name        string `json:"name"`
+	Description string `json:"Description"`
+	XPValue     int    `json:"magic_item_xp"`
+	GoldValue   int    `json:"actual_value"`
 }
 
-type MagicItemRequest struct {
-	Name          string `json:"name"`
-	Description   string `json:"description"`
-	ApparentValue int    `json:"apparent_value"`
-	ActualValue   int    `json:"actual_value"`
-}
-
-func NewMagicItem(n, d string, v float64, av, id int) *MagicItem {
-	mi := &MagicItem{
-		Id:          id,
-		Loot:        *NewLoot(n, d, v, 1),
-		ActualValue: av,
+func NewMagicItem(n, d string, v, av int) *MagicItem {
+	return &MagicItem{
+		Name:        n,
+		Description: d,
+		XPValue:     v,
+		GoldValue:   av,
 	}
-	mi.XPEarned = mi.Loot.TotalXPAmount()
-	return mi
 }
 
-func (m *MagicItem) ApparentValue() int {
-	return int(m.Loot.XPValueOfOne)
+func (m MagicItem) TotalGoldAmount() int {
+	return m.GoldValue
 }
 
-type incomingMagicItem struct {
-	Name          string `json:"name"`
-	Description   string `json:"description"`
-	ApparentValue int    `json:"apparent_value"`
-	ActualValue   int    `json:"actual_value"`
+func (m MagicItem) TotalXPAmount() float64 {
+	return float64(m.XPValue)
 }

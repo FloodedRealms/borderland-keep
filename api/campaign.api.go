@@ -21,7 +21,8 @@ func NewCampaignApi(cs services.CampaignService, chars services.CharacterService
 }
 
 func (ca *CampaignApi) CreateCampaign(w http.ResponseWriter, r *http.Request) {
-	var cr types.CreateCampaignRecordRequest
+
+	var cr types.CampaignRecord
 	err := decodeJSONBody(w, r, &cr)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
@@ -32,8 +33,11 @@ func (ca *CampaignApi) CreateCampaign(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, errors.New("no client id supplied").Error(), http.StatusBadRequest)
 		return
 	}
+	passwordString := r.URL.Query()["password"][0]
+	password, _ := types.NewPassword(passwordString)
 	//should always be the first Client Id. Need to find a way to expose a possible mismatch from multipe client Id headers
-	nc, err := ca.campaignService.CreateCampaign(cr, clientId[0])
+	cr.ClientId = clientId[0]
+	nc, err := ca.campaignService.CreateCampaign(cr, *password)
 	if err != nil {
 		if strings.Contains(err.Error(), "Index already exists") {
 			http.Error(w, err.Error(), http.StatusConflict)
@@ -118,4 +122,3 @@ func (ca *CampaignApi) EditCampaignPassword(w http.ResponseWriter, r *http.Reque
 	sendSuccessResponse(w, "password successfuly updated")
 
 }
-

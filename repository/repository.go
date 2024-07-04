@@ -15,7 +15,7 @@ type Repository interface {
 	UpdateCampaignPassword(int, types.Password) error
 
 	GetAdventureRecordsForCampaign(*types.CampaignRecord) ([]*types.AdventureRecord, error)
-	CreateAdventureRecordForCampaign(*types.CreateAdventureRequest) (*types.AdventureRecord, error)
+	CreateAdventureRecordForCampaign(*types.AdventureRecord) (*types.AdventureRecord, error)
 	GetAdventureRecordById(*types.AdventureRecord) (*types.AdventureRecord, error)
 	UpdateCoinsForAdventure(a *types.AdventureRecord, c *types.Coins) (bool, error)
 	UpdateAdventureName(*types.AdventureRecord, string) error
@@ -35,7 +35,7 @@ type Repository interface {
 	CreateCharacterForCampaign(*types.CampaignRecord, types.Character) (*types.CharacterRecord, error)
 	GetCharactersForCampaign(*types.CampaignRecord) ([]types.CharacterRecord, error)
 	//GetCharactersForAdventure(types.AdventureRecord) ([]types.CharacterRecord, error)
-	UpdateCharacter(types.Character) (*types.CharacterRecord, error)
+	UpdateCharacter(types.CharacterRecord) (*types.CharacterRecord, error)
 	AddCharacterToAdventure(*types.AdventureRecord, *types.AdventureCharacter) (bool, error)
 	AddHalfshareCharacterToAdventure(*types.AdventureRecord, *types.AdventureCharacter, int) (bool, error)
 	AddFullshareCharacterToAdventure(*types.AdventureRecord, *types.AdventureCharacter, int) (bool, error)
