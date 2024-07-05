@@ -5,16 +5,16 @@ import (
 	"math"
 )
 
-type genericLootType string
+type GenericLootType string
 
 const (
-	CoinLoot      genericLootType = "coin"
-	GemLoot       genericLootType = "gem"
-	JewelleryLoot genericLootType = "jewellery"
+	CoinLoot      GenericLootType = "coin"
+	GemLoot       GenericLootType = "gem"
+	JewelleryLoot GenericLootType = "jewellery"
 )
 
 type genericLoot struct {
-	LootType    genericLootType `json:"type"`
+	LootType    GenericLootType `json:"type"`
 	Name        string          `json:"name"`
 	Description string          `json:"description"`
 	Number      int             `json:"number"`

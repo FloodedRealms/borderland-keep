@@ -8,9 +8,10 @@ import (
 
 	"github.com/floodedrealms/adventure-archivist/api"
 	"github.com/floodedrealms/adventure-archivist/commands"
-	"github.com/floodedrealms/adventure-archivist/repository"
-	"github.com/floodedrealms/adventure-archivist/services"
-	"github.com/floodedrealms/adventure-archivist/util"
+	"github.com/floodedrealms/adventure-archivist/internal/repository"
+	"github.com/floodedrealms/adventure-archivist/internal/services"
+	"github.com/floodedrealms/adventure-archivist/internal/util"
+	"github.com/floodedrealms/adventure-archivist/webapp"
 )
 
 func main() {
@@ -47,20 +48,30 @@ func main() {
 
 		logger := util.NewLogger(debug)
 
+		//Turn on renderer for webpages (will panic if templates are wrong)
+		renderer := webapp.NewRenderer()
+
 		sqlRepo, err := repository.NewSqliteRepo("archivist.db", logger)
 		util.CheckErr(err)
 
+		//services
 		campaignService := services.NewCampaignService(sqlRepo, logger, context.TODO())
 		characterService := services.NewCharacterService(sqlRepo, logger, context.TODO())
 		adventureRecordService := services.NewAdventureRecordService(sqlRepo, context.TODO())
 		userService := services.NewUserService(sqlRepo, *logger)
 		campaignActionService := services.NewCampaignActionService(sqlRepo)
 
+		//api exposure
 		campaignApi := api.NewCampaignApi(campaignService, characterService)
-		adventureRecordApi := api.NewAdventureRecordApi(adventureRecordService, characterService)
+		adventureRecordApi := api.NewAdventureRecordApi(*adventureRecordService, characterService)
 		characterApi := api.NewCharacterApi(characterService, *campaignActionService)
 		userApi := api.NewClientAPI(userService)
 
+		//pages
+		campaignPages := webapp.NewCampaignPage(campaignService, characterService, *renderer)
+		adventurePages := webapp.NewAdventurePage(*adventureRecordService, characterService, *renderer)
+		modals := webapp.NewModals(*renderer)
+		//router
 		router := http.NewServeMux()
 
 		// Wrap functions
@@ -104,6 +115,22 @@ func main() {
 
 		// USER
 		router.HandleFunc(" GET /user/validate", userApi.ValidateClient)
+
+		// static
+		fs := http.FileServer(http.Dir("./static"))
+		router.Handle("/static/", http.StripPrefix("/static/", fs))
+
+		//HTMX Handlers
+		router.HandleFunc("GET /htmx/edit-loot-modal", modals.LootModal)
+		router.HandleFunc("GET /htmx/coins", adventurePages.CoinSummary)
+
+		// Webapp Pages
+		router.HandleFunc("/pages/campaign/{campaignId}", campaignPages.CampaignOverview)
+		router.HandleFunc("/pages/adventure/{adventureId}", adventurePages.AdventureOverview)
+
+		router.HandleFunc("GET /pages/coin/{adventureId}/edit", adventurePages.CoinEditHandler)
+		router.HandleFunc("GET /pages/coin/{adventureId}", adventurePages.CoinSummary)
+		router.HandleFunc("PUT /pages/coin/{adventureId}", adventurePages.SaveAndDisplayCOind)
 
 		server := &http.Server{
 			Addr:    ":9090",

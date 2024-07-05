@@ -159,6 +159,24 @@ func (a AdventureRecord) totalCombatXp() float64 {
 	return xp
 }
 
+func (a AdventureRecord) CoinXPForType(c string) int {
+
+	ans := -10.0
+	switch c {
+	case "Copper":
+		ans = a.Coins.Copper.TotalXPAmount()
+	case "Silver":
+		ans = a.Coins.Silver.TotalXPAmount()
+	case "Electrum":
+		ans = a.Coins.Electrum.TotalXPAmount()
+	case "Gold":
+		ans = a.Coins.Gold.TotalXPAmount()
+	case "Platinum":
+		ans = a.Coins.Platinum.TotalXPAmount()
+	}
+	return int(ans)
+}
+
 /*
 func (r AdventureRecord) GenerateGemList() []GenericLoot {
 	gems := make([]GenericLoot, 0)

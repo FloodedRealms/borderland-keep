@@ -6,8 +6,8 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/floodedrealms/adventure-archivist/internal/util"
 	"github.com/floodedrealms/adventure-archivist/types"
-	"github.com/floodedrealms/adventure-archivist/util"
 	_ "github.com/mattn/go-sqlite3"
 )
 
@@ -76,7 +76,7 @@ func (s SqliteRepo) runQuery(q string, params ...interface{}) (*sql.Rows, error)
 	util.CheckErr(err)
 	return stmt.Query(params...)
 }
-func (s SqliteRepo) executeQuery(q string, params ...interface{}) (sql.Result, error) {
+func (s SqliteRepo) ExecuteQuery(q string, params ...interface{}) (sql.Result, error) {
 	stmt, err := s.db.Prepare(q)
 	util.CheckErr(err)
 	return stmt.Exec(params...)
@@ -86,7 +86,9 @@ func (s SqliteRepo) executeQuery(q string, params ...interface{}) (sql.Result, e
 func (s SqliteRepo) processCampaignRows(r *sql.Rows) []*types.CampaignRecord {
 	campaigns := make([]*types.CampaignRecord, 0)
 	for r.Next() {
-		current := &types.CampaignRecord{}
+		var (
+			current *types.CampaignRecord
+		)
 		err := r.Scan(&current.Id, &current.Name, &current.Recruitment, &current.Judge, &current.Timekeeping, &current.Cadence, &current.CreatedAt, &current.UpdatedAt, &current.LastAdventure, &current.ClientId, &trashInt, &trashString, &trashString)
 		util.CheckErr(err)
 		current.Characters, err = s.getCampaignCharacters(current.Id)
@@ -134,14 +136,33 @@ func (s SqliteRepo) UpdateCampaignPassword(id int, pass types.Password) error {
 }
 
 func (s SqliteRepo) selectCampaignById(id int) (*types.CampaignRecord, error) {
-	tableq := fmt.Sprintf("SELECT * FROM %s c where c.id = ?", campaignTable)
+	tableq := fmt.Sprintf("SELECT c.*, a.id, a.name, a.adventure_date FROM %s c JOIN %s a ON a.campaign_id = c.id where c.id =?;", campaignTable, adventureTable)
+	//tableq1 := fmt.Sprintf("SELECT * FROM %s c where c.id = ?", campaignTable)
 	rows, err := s.runQuery(tableq, id)
 	util.CheckErr(err)
 	defer rows.Close()
+	var (
+		campaignRows []*types.CampaignRecord
+		adventures   []types.AdventureRecord
+	)
+	for rows.Next() {
+		var (
+			current types.CampaignRecord
+			adId    int
+			adName  string
+			aDate   time.Time
+		)
+		err := rows.Scan(&current.Id, &current.Name, &current.Recruitment, &current.Judge, &current.Timekeeping, &current.Cadence, &current.CreatedAt, &current.UpdatedAt, &current.LastAdventure, &current.ClientId, &trashInt, &trashString, &trashString, &adId, &adName, &aDate)
+		util.CheckErr(err)
+		adventures = append(adventures, types.AdventureRecord{Id: adId, Name: adName, AdventureDate: types.ArcvhistDate(aDate)})
+		current.Characters, err = s.getCampaignCharacters(current.Id)
+		util.CheckErr(err)
 
-	results := s.processCampaignRows(rows)
-
-	return results[0], nil
+		campaignRows = append(campaignRows, &current)
+	}
+	result := campaignRows[0]
+	result.Adventures = adventures
+	return result, nil
 }
 
 func (s SqliteRepo) CreateCampaign(c *types.CampaignRecord) (*types.CampaignRecord, error) {
@@ -862,4 +883,24 @@ func (s SqliteRepo) AddCampaignActivityForCharacter(a types.CampaignActivity) er
 	}
 
 	return nil
+}
+
+func (s SqliteRepo) GetCoinsForAdventure(a *types.AdventureRecord) (*types.Coins, error) {
+	stmtStr := fmt.Sprintf("SELECT a.copper, a.silver, a.electrum, a.gold, a.platinum FROM %s a WHERE a.id=?", adventureTable)
+	rows, err := s.runQuery(stmtStr, a.Id)
+	if err != nil {
+		return nil, err
+	}
+
+	var (
+		c  int
+		si int
+		e  int
+		g  int
+		p  int
+	)
+	for rows.Next() {
+		rows.Scan(&c, &si, &e, &g, &p)
+	}
+	return types.NewCoins(c, si, e, g, p), nil
 }

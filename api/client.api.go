@@ -4,7 +4,7 @@ import (
 	"errors"
 	"net/http"
 
-	"github.com/floodedrealms/adventure-archivist/services"
+	"github.com/floodedrealms/adventure-archivist/internal/services"
 	"github.com/floodedrealms/adventure-archivist/types"
 )
 
@@ -51,4 +51,3 @@ func (ua Client) RequireValidClient(next http.Handler) http.Handler {
 	})
 
 }
-

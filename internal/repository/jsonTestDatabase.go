@@ -3,8 +3,8 @@ package repository
 import (
 	"errors"
 
+	"github.com/floodedrealms/adventure-archivist/internal/util"
 	"github.com/floodedrealms/adventure-archivist/types"
-	"github.com/floodedrealms/adventure-archivist/util"
 )
 
 type JSONRepo struct {

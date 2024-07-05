@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <title>The Keep on the Internet</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+    <script src="https://unpkg.com/htmx.org"></script>
+    <script src="https://unpkg.com/hyperscript.org@0.9.12"></script>
+</head>
+
+<body>
+
+    <div id="container">
+        <div class="flex">
+            <div id="maind">
+                <div id="adventure-details">
+                </div>
+                <div class="box">
+                    <h3>{{ .Name }}</h3>
+                    <table>
+                        <tr>
+                            <td><label for="xp-recovered">Amount of XP Recovered:</label></td>
+                            <td><span id="xp-recovered">{{ .TotalXPAmount }}</span></td>
+                        </tr>
+                        <tr>
+                            <td><label for="xp-fullshare">Amount of a Full Share:</label></td>
+                            <td><span id="xp-fullshare">{{ .FullShareXP }}</span> </td>
+                        </tr>
+                        <tr>
+                            <td><label for="xp-halfshare">Amount of a Half Share:</label></td>
+                            <td><span id="xp-halfshare">{{ .HalfShareXP }}</span> </td>
+                        </tr>
+                    </table>
+                </div>
+                <div class="box money" hx-target="this" hx-swap="outerHTML">
+                    <h3>Coins</h3>
+                    <table>
+                        <thead>
+                            <th>Type</th>
+                            <th>Amount</th>
+                            <th>XP Amount</th>
+                        </thead>
+                        <tr>
+                            <td>Copper:</td>
+                            <td>{{ .Coins.Copper.Number }}</td>
+                            <td>{{ .Coins.Copper.TotalXPAmount }}</td>
+                        </tr>
+                        <tr>
+                            <td>Silver:</td>
+                            <td>{{ .Coins.Silver.Number }}</td>
+                            <td>{{ .Coins.Silver.TotalXPAmount }}</td>
+                        </tr>
+                        <tr>
+                            <td>Electrum:</td>
+                            <td>{{ .Coins.Electrum.Number }}</td>
+                            <td>{{ .Coins.Electrum.TotalXPAmount }}</td>
+
+                        </tr>
+                        <tr>
+                            <td>Gold:</td>
+                            <td>{{ .Coins.Gold.Number }}</td>
+                            <td>{{ .Coins.Gold.TotalXPAmount }}</td>
+                        </tr>
+                        <tr>
+                            <td>Platinum:</td>
+                            <td>{{ .Coins.Platinum.Number }}</td>
+                            <td>{{ .Coins.Platinum.TotalXPAmount }}</td>
+                        </tr>
+                    </table>
+                    <button hx-get="/pages/coin/{{ .Id }}/edit">Edit</button>
+                </div>
+                <div class="box characters">
+                    <h3>Characters</h3>
+                    <table id="characterList">
+                    </table>
+                </div>
+                <div class="box">
+                    <h3>Gemstones Recovered</h3>
+                    <table class="xp-source" id="gemList">
+                    </table>
+                    <!--<button hx-get="/htmx/edit-loot-modal?type=gem" hx-trigger="click" hx-target="body" hx-swap="beforeend">Add Gem</button>-->
+                </div>
+                <div class="box">
+                    <h3>jewelery Recovered</h3>
+                    <table class="xp-source" id="jewelleryList">
+                    </table>
+                    <button type="button" onclick="addJewellery()">Add Jewellery</button>
+                </div>
+                <div class="box magic-items">
+                    <h3>Magic Items</h3>
+                    <table class="xp-source" id="magicItemList">
+                    </table>
+                    <button type="button" onclick="addMagicItem()">Add Magic Item</button>
+                </div>
+                <div class="box characters">
+                    <h3>Groups of Monsters Defeated</h3>
+                    <table class="xp-source" id="combatList">
+                    </table>
+                    <button type="button" onclick="addCombat()">Add Monster Group</button>
+                </div>
+            </div>
+            <div id="sided" style="max-width: 225px">
+            </div>
+        </div>
+
+    </div>
+
+</body>
+
+</html>

@@ -1,0 +1,32 @@
+<form class="box" hx-put="/pages/coin/{{ .Id }}" hx-target="this" hx-swap="outerHTML">
+    <table>
+        <thead>
+            <tr>
+              <th scope="col">Type</th>
+              <th scope="col">Amount</th>
+            </tr>
+          </thead>
+        <tr id="Copper-summary">
+            <td>Copper:</td>
+            <td><input type="text" name="copper" value="{{ .Coins.Copper.Number}}" /></td>
+        </tr>
+        <tr>
+            <td>Silver:</td>
+            <td><input type="text" name="silver" value="{{ .Coins.Silver.Number }}" /></td>
+        </tr>
+        <tr>
+            <td>Electrum:</td>
+            <td><input type="text" name="electrum" value="{{ .Coins.Electrum.Number }}" /></td>
+        </tr>
+        <tr>
+            <td>Gold:</td>
+            <td><input type="text" name="gold" value="{{ .Coins.Gold.Number }}" /></td>
+        </tr>
+        <tr>
+            <td>Platinum:</td>
+            <td><input type="text" name="platinum" value="{{ .Coins.Platinum.Number }}" /></td>
+        </tr>
+    </table> 
+    <button hx-put="/pages/coin/{{ .Id }}">Save</button>
+    <button hx-get="/pages/coin/{{ .Id }}">Cancel</button>
+</form>

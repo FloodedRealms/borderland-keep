@@ -8,9 +8,11 @@ import (
 
 type ArcvhistDate time.Time
 
+const formatString = "2006-01-02"
+
 func (d *ArcvhistDate) UnmarshalJSON(b []byte) error {
 	s := strings.Trim(string(b), "\"")
-	t, err := time.Parse("2006-01-02", s)
+	t, err := time.Parse(formatString, s)
 	if err != nil {
 		return err
 	}
@@ -28,8 +30,11 @@ func (d ArcvhistDate) Format(s string) string {
 }
 
 func (d ArcvhistDate) Date() time.Time {
-	format := "2006-01-01"
 	t := time.Time(d)
-	time, _ := time.Parse(format, t.Format(format))
+	time, _ := time.Parse(formatString, t.Format(formatString))
 	return time
+}
+
+func (d ArcvhistDate) String() string {
+	return time.Time(d).Format(formatString)
 }

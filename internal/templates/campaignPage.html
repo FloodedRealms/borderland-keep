@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <title>The Keep on the Internet</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+    <link rel="icon" type="image/x-icon" href="/assets/images/favicon.png">
+</head>
+
+<body>
+
+    <div id="container">
+        <div class="flex">
+            <div id="maind">
+                <div id="campaign-details">
+                    <h3>{{ .Name }}</h3>
+                    <table>
+                        <tr>
+                            <td><b>Judge:</b></td>
+                            <td>{{ .Judge }}</td>
+                        </tr>
+                        <tr>
+                            <td>Looking for Players?</td>
+                            <td>{{ .Recruitment }}</td>
+                        </tr>
+                        <tr>
+                            <td>Last Adventure</td>
+                            <td>{{ .LastAdventure }}</td>
+                        </tr>
+                        <tr>
+                            <td> Time Keeping </td>
+                            <td> {{ .Timekeeping }} </td>
+                        </tr>
+                    </table>
+                </div>
+                <div id="characters">
+                    <div class="box">
+                        <h3>Characters</h3>
+                        {{ if lt .NumberOfCharacters 1}}
+                        <div class="box" id="proj">
+                            <span> No Characters Defined for this Campaign to Display </span>
+                        </div> {{ else }} <table>
+                        <tr>
+                            <th>ID</th>
+                            <th>Name</th>
+                            <th>XP</th>
+                            <th>Class</th>
+                            <th>Level</th>
+                            <th> Bonus XP </th>
+                        </tr> {{ range .Characters }}
+                        <td>{{ .Id }}</td>
+                        <td>{{ .Name }}</td>
+                        <td>{{ .CurrentXP }}</td>
+                        <td>{{ .Class }}</td>
+                        <td>{{ .Level }}</td>
+                        <td>{{ .PrimeReqPercent }}%</td>
+                        </tr>
+                        {{ end}}
+                        </table>
+                        {{ end }}
+                    </div>
+                </div>
+                <div id="adventures">
+                    <div class="box">
+                        <h3>Adventures</h3>
+                        {{ if lt .NumberOfAdventures 1}}
+                        <div class="box" id="proj">
+                            <span> No Characters Defined for this Campaign to Display </span>
+                        </div> 
+                        {{ else }}
+                        <table id="adventureList">
+                            <tr>
+                                <th>Adventure Name</th>
+                                <th>Date</th>
+                            </tr>
+                            {{ range .Adventures }}
+                                <tr>
+                                    <td>{{ .Name }}</td>
+                                    <td>{{ .AdventureDate }}</td>
+                                   <td><a href="/pages/adventure/{{ .Id }}">edit</a></td> 
+                                </tr>
+                            {{ end }}
+                        </table>
+                        {{ end }}
+                    </div>
+                </div>
+            </div>
+            <div id="sided" style="max-width: 225px">
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

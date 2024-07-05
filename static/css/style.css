@@ -1,0 +1,278 @@
+/*
+ * style.css
+ * Copyright (C) 2023 kevin
+ *
+ * Distributed under terms of the MIT license.
+ */
+/*
+ * {
+ box-sizing: border-box;
+ } */
+
+ :root {
+	--black: #2b303b;
+	--red1: #bf616a;
+	--green1: #a3be8c;
+	--yellow1: #ebcb8b;
+	--blue1: #8fa1b3;
+	--magenta1: #b48ead;
+	--teal1: #96b5b4;
+	--lightgrey: #c0c5ce;
+	--grey: #65737e;
+	--red2: #bf616a;
+	--green2: #a3be8c;
+	--yellow2: #ebcb8b;
+	--blue2: #8fa1b3;
+	--magenta2: #b48ead;
+	--teal2: #96b5b4;
+	--white: #eff1f5;
+	--foreground: #eff1f5;
+	--background: #4f5d66;
+	color: var(--foreground);
+	--main-color: var(--grey);
+	--main-color-dk: var(--lightgrey);
+	--accent-1:var(--teal);
+	--accent-2:var(blue1);
+	--content-spacing:5px;
+	--text-color:white;
+	--link-color:var(--green1);
+	--border:1px solid black;
+	--main-bg: #000000a8;
+}
+
+html,body {
+	margin:0;
+	box-sizing:border-box;
+	background-color:var(--background);
+	font-family:"Courier";
+}
+
+body{
+	background-size: cover;
+	color:var(--text-color);
+	background-attachment:fixed;
+}
+
+table {
+	border-collapse: separate;
+	text-indent: initial;
+	border-spacing: 2px;
+}
+tr {
+	display: table-row;
+    vertical-align: inherit;
+    unicode-bidi: isolate;
+    border-color: inherit;
+}
+tbody {
+	display: table-row-group;
+	vertical-align: middle;
+	border-color: inherit;
+}
+
+td {
+	display: table-cell;
+	vertical-align: inherit;
+}
+
+#banner {
+	max-width: 850px;
+	color: #000;
+	background-color: #000000a8;
+	border: 2px solid #000000ff;
+	border-radius: 4px;
+
+
+}
+#ascii-banner {
+	max-width: 850px;
+	color: white;
+	background-color: #000000a8;
+	border: 2px solid red;
+	border-radius: 4px;
+
+
+}
+
+#maind {
+	width: 875px;
+	vertical-align: baseline;
+	background-color: #000000a8;
+	border: 2px solid #000000ff;
+	border-radius: 4px;
+}
+
+#sided {
+	width: 225px;
+	vertical-align: baseline;
+	background-color: #000000a8;
+	border: 2px solid #000000ff;
+	border-radius: 4px;
+	color: #fff;
+
+}
+
+.constributors {
+	list-style-type: none;
+border: 2px solid #383838;
+	border-radius: 4px;
+}
+ .inline-image {
+	 width: 600px;
+	 height: 800px;
+ }
+
+.box {
+	border: 2px solid #383838;
+	border-radius: 4px;
+	color: #fff;
+	padding: 10px 15px;
+	margin: 5px;
+}
+
+.xp-source {
+	table-layout: fixed;
+	& td {
+/*	border: 2px solid #383838;
+	border-radius: 4px; */
+	}
+	& input {
+		width: 30%;
+	}
+	
+	& .delete-col {
+		display: flex;
+		align-items: center;
+	}
+	
+  }
+
+.input-row {
+		width: 20%;
+	}
+.status-ok {
+	color: #36fda0;
+	text-shadow: 0 0 20px #36fda0;
+}
+ .delete-btn {
+	color: #000;
+	background-color: #ff1616;
+	border-radius: 2%;
+
+ }
+
+.status-err {
+	color: #ff1616;
+	text-shadow: 0 0 20px #ff1616;
+}
+.edit {
+	background-color: #36fda0;
+	text-shadow: 0 0 20px #36fda0;
+}
+
+.delete {
+	background-color: #ff1616;
+	text-shadow: 0 0 20px #ff1616;
+}
+
+.flex {
+	display: flex;
+}
+
+#container {
+	max-width:850px;
+	margin:0 auto;
+
+}
+
+#container a {
+	color:var(--link-color);
+}
+
+ /***** MODAL DIALOG ****/
+#modal {
+	/* Underlay covers entire screen. */
+	position: fixed;
+	top:0px;
+	bottom: 0px;
+	left:0px;
+	right:0px;
+	background-color:rgba(0,0,0,0.5);
+	z-index:1000;
+
+	/* Flexbox centers the .modal-content vertically and horizontally */
+	display:flex;
+	flex-direction:column;
+	align-items:center;
+
+	/* Animate when opening */
+	animation-name: fadeIn;
+	animation-duration:150ms;
+	animation-timing-function: ease;
+}
+
+.modal-underlay {
+	/* underlay takes up the entire viewport. This is only
+	required if you want to click to dismiss the popup */
+	position: absolute;
+	z-index: -1;
+	top:0px;
+	bottom:0px;
+	left: 0px;
+	right: 0px;
+}
+
+.modal-content {
+	/* Position visible dialog near the top of the window */
+	margin-top:10vh;
+
+	/* Sizing for visible dialog */
+	width:80%;
+	max-width:600px;
+
+	/* Display properties for visible dialog*/
+	border:solid 1px #999;
+	border-radius:8px;
+	box-shadow: 0px 0px 20px 0px rgba(0,0,0,0.3);
+	background-color: var(--background);
+	padding:20px;
+
+	/* Animate when opening */
+	animation-name:zoomIn;
+	animation-duration:150ms;
+	animation-timing-function: ease;
+}
+
+#modal.closing {
+	/* Animate when closing */
+	animation-name: fadeOut;
+	animation-duration:150ms;
+	animation-timing-function: ease;
+}
+
+.modal-content {
+	/* Animate when closing */
+	animation-name: zoomOut;
+	animation-duration:150ms;
+	animation-timing-function: ease;
+}
+
+@keyframes fadeIn {
+	0% {opacity: 0;}
+	100% {opacity: 1;}
+}
+
+@keyframes fadeOut {
+	0% {opacity: 1;}
+	100% {opacity: 0;}
+}
+
+@keyframes zoomIn {
+	0% {transform: scale(0.9);}
+	100% {transform: scale(1);}
+}
+
+@keyframes zoomOut {
+	0% {transform: scale(1);}
+	100% {transform: scale(0.9);}
+}

@@ -4,9 +4,9 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/floodedrealms/adventure-archivist/services"
+	"github.com/floodedrealms/adventure-archivist/internal/services"
+	"github.com/floodedrealms/adventure-archivist/internal/util"
 	"github.com/floodedrealms/adventure-archivist/types"
-	"github.com/floodedrealms/adventure-archivist/util"
 )
 
 type CharacterApi struct {
