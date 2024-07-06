@@ -43,7 +43,7 @@ func (ca CampaignPage) CampaignOverview(w http.ResponseWriter, r *http.Request) 
 }
 
 func (ca CampaignPage) renderCamapaignPage(w http.ResponseWriter, data types.CampaignRecord) {
-	output, err := ca.renderer.Render("campaignPage.html", data)
+	output, err := ca.renderer.RenderPage("campaignPage.html", data)
 	if err != nil {
 		ca.renderer.MustRenderErrorPage(w, output, err)
 	}

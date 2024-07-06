@@ -9,7 +9,9 @@ import (
 )
 
 type Renderer struct {
-	templates *template.Template
+	pageTemplates    *template.Template
+	partialTemplates *template.Template
+	editorTemplates  *template.Template
 }
 
 type partialRender struct {
@@ -25,13 +27,34 @@ func NewRenderer() *Renderer {
 
 func (r *Renderer) mustLoadTemplates() {
 	wd, _ := os.Getwd()
-	dir := filepath.Join(wd, "/internal/templates/*.html")
-	r.templates = template.Must(template.ParseGlob(dir))
+	pageDir := filepath.Join(wd, "/internal/templates/pages/*.html")
+	partialsDir := filepath.Join(wd, "/internal/templates/partials/*.html")
+	partialEditorsDir := filepath.Join(wd, "/internal/templates/partials/editors/*.html")
+
+	r.pageTemplates = template.Must(template.ParseGlob(pageDir))
+	r.partialTemplates = template.Must(template.ParseGlob(partialsDir))
+	r.editorTemplates = template.Must(template.ParseGlob(partialEditorsDir))
 }
 
-func (r Renderer) Render(tmpl string, data interface{}) (string, error) {
+func (r Renderer) RenderPage(tmpl string, data interface{}) (string, error) {
 	var renderedOutput bytes.Buffer
-	if err := r.templates.ExecuteTemplate(&renderedOutput, tmpl, data); err != nil {
+	if err := r.pageTemplates.ExecuteTemplate(&renderedOutput, tmpl, data); err != nil {
+		return renderedOutput.String(), err
+	}
+	return renderedOutput.String(), nil
+}
+
+func (r Renderer) RenderPartial(tmpl string, data interface{}) (string, error) {
+	var renderedOutput bytes.Buffer
+	if err := r.partialTemplates.ExecuteTemplate(&renderedOutput, tmpl, data); err != nil {
+		return renderedOutput.String(), err
+	}
+	return renderedOutput.String(), nil
+}
+
+func (r Renderer) RenderEditor(tmpl string, data interface{}) (string, error) {
+	var renderedOutput bytes.Buffer
+	if err := r.editorTemplates.ExecuteTemplate(&renderedOutput, tmpl, data); err != nil {
 		return renderedOutput.String(), err
 	}
 	return renderedOutput.String(), nil
@@ -43,7 +66,7 @@ func (r Renderer) MustRenderErrorPage(w http.ResponseWriter, partial string, e e
 		Rendered: partial,
 		E:        e,
 	}
-	if err := r.templates.ExecuteTemplate(w, "errorPage.html", data); err != nil {
+	if err := r.pageTemplates.ExecuteTemplate(w, "errorPage.html", data); err != nil {
 		panic(err)
 	}
 }

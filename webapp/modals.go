@@ -22,7 +22,7 @@ func (m Modals) LootModal(w http.ResponseWriter, r *http.Request) {
 	)
 	switch l {
 	case types.GemLoot:
-		rendered, _ = m.r.Render("lootModal.html", types.Gem{Number: 0, XPValue: 0, Description: "", LootType: types.GemLoot})
+		rendered, _ = m.r.RenderPage("lootModal.html", types.Gem{Number: 0, XPValue: 0, Description: "", LootType: types.GemLoot})
 	}
 	w.Write([]byte(rendered))
 }

@@ -1,5 +1,5 @@
 <div class="box money" hx-target="this" hx-swap="outerHTML">
-    <h3>Coins</h3>
+    <h3>Coins - {{ .Coins.TotalXPAmount }} XP</h3>
     <table>
         <thead>
             <th>Type</th>
@@ -33,5 +33,5 @@
             <td>{{ .Coins.Platinum.TotalXPAmount }}</td>
         </tr>
     </table>
-    <button hx-get="/pages/coin/{{ .Id }}/edit">Edit</button>
+    <button hx-get="{{ .CoinPath.Edit }}">Edit</button>
 </div>

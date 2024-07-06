@@ -34,7 +34,7 @@
                     </table>
                 </div>
                 <div class="box money" hx-target="this" hx-swap="outerHTML">
-                    <h3>Coins</h3>
+                    <h3>Coins - {{.Coins.TotalXPAmount }} XP</h3>
                     <table>
                         <thead>
                             <th>Type</th>
@@ -68,32 +68,32 @@
                             <td>{{ .Coins.Platinum.TotalXPAmount }}</td>
                         </tr>
                     </table>
-                    <button hx-get="/pages/coin/{{ .Id }}/edit">Edit</button>
+                    <button hx-get="{{ .CoinPath.Edit }}">Edit</button>
                 </div>
                 <div class="box characters">
                     <h3>Characters</h3>
                     <table id="characterList">
                     </table>
                 </div>
-                <div class="box">
+                <div class="box" hx-target="this" hx-swap="outerHTML">
                     <h3>Gemstones Recovered</h3>
                     <table class="xp-source" id="gemList">
                     </table>
                     <!--<button hx-get="/htmx/edit-loot-modal?type=gem" hx-trigger="click" hx-target="body" hx-swap="beforeend">Add Gem</button>-->
                 </div>
-                <div class="box">
+                <div class="box" hx-target="this" hx-swap="outerHTML">
                     <h3>jewelery Recovered</h3>
                     <table class="xp-source" id="jewelleryList">
                     </table>
                     <button type="button" onclick="addJewellery()">Add Jewellery</button>
                 </div>
-                <div class="box magic-items">
+                <div class="box items">
                     <h3>Magic Items</h3>
                     <table class="xp-source" id="magicItemList">
                     </table>
                     <button type="button" onclick="addMagicItem()">Add Magic Item</button>
                 </div>
-                <div class="box characters">
+                <div class="box" hx-target="this" hx-swap="outerHTML">
                     <h3>Groups of Monsters Defeated</h3>
                     <table class="xp-source" id="combatList">
                     </table>

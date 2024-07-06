@@ -126,11 +126,7 @@ func main() {
 
 		// Webapp Pages
 		router.HandleFunc("/pages/campaign/{campaignId}", campaignPages.CampaignOverview)
-		router.HandleFunc("/pages/adventure/{adventureId}", adventurePages.AdventureOverview)
-
-		router.HandleFunc("GET /pages/coin/{adventureId}/edit", adventurePages.CoinEditHandler)
-		router.HandleFunc("GET /pages/coin/{adventureId}", adventurePages.CoinSummary)
-		router.HandleFunc("PUT /pages/coin/{adventureId}", adventurePages.SaveAndDisplayCOind)
+		adventurePages.RegisterRoutes(router)
 
 		server := &http.Server{
 			Addr:    ":9090",

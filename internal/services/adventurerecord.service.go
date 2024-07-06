@@ -208,7 +208,7 @@ func stripGoodValueFromCoinForm(coin string, data map[string]string) (int, error
 	if ok {
 		i, err := strconv.Atoi(val)
 		if err != nil {
-			return -1, err
+			return 0, err
 		}
 		return i, nil
 	}
