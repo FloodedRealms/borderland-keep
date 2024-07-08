@@ -122,7 +122,7 @@ func main() {
 
 		//HTMX Handlers
 		router.HandleFunc("GET /htmx/edit-loot-modal", modals.LootModal)
-		router.HandleFunc("GET /htmx/coins", adventurePages.CoinSummary)
+		router.HandleFunc("GET /htmx/coins", adventurePages.CoinDisplay)
 
 		// Webapp Pages
 		router.HandleFunc("/pages/campaign/{campaignId}", campaignPages.CampaignOverview)

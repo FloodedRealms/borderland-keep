@@ -1,11 +1,8 @@
-<div id="modal" _="on closeModal add .closing then wait for animationend then remove me">
-	<div class="modal-underlay" _="on click trigger closeModal"></div>
-	<div class="modal-content">
-		<h1>Modal Dialog for {{ .LootType }}</h1>
-		This is the modal content.
-		You can put anything here, like text, or a form, or an image.
-		<br>
-		<br>
-		<button class="btn danger" _="on click trigger closeModal">Close</button>
-	</div>
+
+<div class="tr" hx-target="this" hx-swap="outerHTML">
+	<span class="td" >{{ .Name }}</span>
+	<span class="td" >{{ .Number }}</span>
+	<span class="td" >{{ .XPValue }}</span>
+	<span class="td" >{{ .TotalXPAmount }}</span>
+	<span class="td" ><button hx-get="{{ .Path.Edit }}">Edit</button></span>
 </div>

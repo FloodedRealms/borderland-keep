@@ -71,9 +71,11 @@ func NewSqliteRepo(f string, logger *util.Logger) (*SqliteRepo, error) {
 	return &SqliteRepo{db: db, logger: logger}, nil
 }
 
-func (s SqliteRepo) runQuery(q string, params ...interface{}) (*sql.Rows, error) {
+func (s SqliteRepo) RunQuery(q string, params ...interface{}) (*sql.Rows, error) {
 	stmt, err := s.db.Prepare(q)
-	util.CheckErr(err)
+	if err != nil {
+		return nil, err
+	}
 	return stmt.Query(params...)
 }
 func (s SqliteRepo) ExecuteQuery(q string, params ...interface{}) (sql.Result, error) {
@@ -100,7 +102,7 @@ func (s SqliteRepo) processCampaignRows(r *sql.Rows) []*types.CampaignRecord {
 
 func (s SqliteRepo) selectAllCampaigns() []*types.CampaignRecord {
 	tableq := fmt.Sprintf("SELECT * FROM %s", campaignTable)
-	rows, err := s.runQuery(tableq)
+	rows, err := s.RunQuery(tableq)
 	util.CheckErr(err)
 	defer rows.Close()
 
@@ -138,7 +140,7 @@ func (s SqliteRepo) UpdateCampaignPassword(id int, pass types.Password) error {
 func (s SqliteRepo) selectCampaignById(id int) (*types.CampaignRecord, error) {
 	tableq := fmt.Sprintf("SELECT c.*, a.id, a.name, a.adventure_date FROM %s c JOIN %s a ON a.campaign_id = c.id where c.id =?;", campaignTable, adventureTable)
 	//tableq1 := fmt.Sprintf("SELECT * FROM %s c where c.id = ?", campaignTable)
-	rows, err := s.runQuery(tableq, id)
+	rows, err := s.RunQuery(tableq, id)
 	util.CheckErr(err)
 	defer rows.Close()
 	var (
@@ -196,7 +198,7 @@ func (s SqliteRepo) ListCampaigns() ([]*types.CampaignRecord, error) {
 
 func (s SqliteRepo) ListCampaignsForClient(clientId string) ([]*types.CampaignRecord, error) {
 	tableq := fmt.Sprintf("SELECT * FROM %s c where c.api_user_id = ?", campaignTable)
-	rows, err := s.runQuery(tableq, clientId)
+	rows, err := s.RunQuery(tableq, clientId)
 	util.CheckErr(err)
 	defer rows.Close()
 
@@ -230,7 +232,7 @@ func (s SqliteRepo) insertAdventureRecord(a types.AdventureRecord) (int, error) 
 }
 func (s SqliteRepo) selectAdventureById(id int) *types.AdventureRecord {
 	tableq := fmt.Sprintf("SELECT * FROM %s c where c.id = ?", adventureTable)
-	rows, err := s.runQuery(tableq, id)
+	rows, err := s.RunQuery(tableq, id)
 	util.CheckErr(err)
 	defer rows.Close()
 
@@ -244,7 +246,7 @@ func (s SqliteRepo) selectAdventureById(id int) *types.AdventureRecord {
 func (s SqliteRepo) selectAdventureByCampaignId(c *types.CampaignRecord) ([]*types.AdventureRecord, error) {
 
 	tableq := fmt.Sprintf("SELECT * FROM %s c where c.campaign_id = ?", adventureTable)
-	rows, err := s.runQuery(tableq, c.Id)
+	rows, err := s.RunQuery(tableq, c.Id)
 	util.CheckErr(err)
 	defer rows.Close()
 
@@ -280,7 +282,7 @@ func (s SqliteRepo) processAdventureRows(r *sql.Rows) []*types.AdventureRecord {
 
 func (s SqliteRepo) getGemsForAdventure(id int) []types.Gem {
 	tableq := fmt.Sprintf("SELECT * FROM %s g where g.adventure_id = ?", gemTable)
-	rows, err := s.runQuery(tableq, id)
+	rows, err := s.RunQuery(tableq, id)
 	util.CheckErr(err)
 	defer rows.Close()
 	gems := make([]types.Gem, 0)
@@ -292,13 +294,14 @@ func (s SqliteRepo) getGemsForAdventure(id int) []types.Gem {
 		err := rows.Scan(&id, &trashInt, &name, &desc, &value, &number)
 		util.CheckErr(err)
 		current := types.NewGem(number, name, desc, value, value)
+		current.Id = id
 		gems = append(gems, *current)
 	}
 	return gems
 }
 func (s SqliteRepo) getJewelleryForAdventure(id int) []types.Jewellery {
 	tableq := fmt.Sprintf("SELECT * FROM %s j where j.adventure_id = ?", jewelleryTable)
-	rows, err := s.runQuery(tableq, id)
+	rows, err := s.RunQuery(tableq, id)
 	util.CheckErr(err)
 	defer rows.Close()
 	jewellery := make([]types.Jewellery, 0)
@@ -318,7 +321,7 @@ func (s SqliteRepo) getJewelleryForAdventure(id int) []types.Jewellery {
 
 func (s SqliteRepo) getMagicItemsForAdventure(id int) []types.MagicItem {
 	tableq := fmt.Sprintf("SELECT * FROM %s m where m.adventure_id = ?", magicItemsTable)
-	rows, err := s.runQuery(tableq, id)
+	rows, err := s.RunQuery(tableq, id)
 	util.CheckErr(err)
 	defer rows.Close()
 	magicItems := make([]types.MagicItem, 0)
@@ -337,7 +340,7 @@ func (s SqliteRepo) getMagicItemsForAdventure(id int) []types.MagicItem {
 
 func (s SqliteRepo) getCombatForAdventure(id int) []types.MonsterGroup {
 	tableq := fmt.Sprintf("SELECT * FROM %s c where c.adventure_id = ?", combatTable)
-	rows, err := s.runQuery(tableq, id)
+	rows, err := s.RunQuery(tableq, id)
 	util.CheckErr(err)
 	defer rows.Close()
 	combat := make([]types.MonsterGroup, 0)
@@ -356,7 +359,7 @@ func (s SqliteRepo) getCombatForAdventure(id int) []types.MonsterGroup {
 }
 func (s SqliteRepo) getCharactersForAdventure(id int) ([]types.AdventureCharacter, error) {
 	tableq := fmt.Sprintf("SELECT * FROM %s c where c.adventure_id = ?", characterToAdventureTable)
-	rows, err := s.runQuery(tableq, id)
+	rows, err := s.RunQuery(tableq, id)
 	util.CheckErr(err)
 	defer rows.Close()
 	characters := make([]types.AdventureCharacter, 0)
@@ -569,7 +572,7 @@ func (s SqliteRepo) insertCharacter(campaignId int, char types.Character) (int, 
 
 func (s SqliteRepo) selectCharacterById(id int) (*types.CharacterRecord, error) {
 	tableq := fmt.Sprintf("SELECT * FROM %s c where c.id = ?", characterTable)
-	rows, err := s.runQuery(tableq, id)
+	rows, err := s.RunQuery(tableq, id)
 	util.CheckErr(err)
 	defer rows.Close()
 
@@ -599,7 +602,7 @@ func (s SqliteRepo) updateCharacter(char types.CharacterRecord) error {
 func (s SqliteRepo) getCampaignCharacters(campaignId int) ([]types.CharacterRecord, error) {
 	tableq := fmt.Sprintf("SELECT * FROM %s c where c.campaign_id = ?", characterTable)
 
-	rows, err := s.runQuery(tableq, campaignId)
+	rows, err := s.RunQuery(tableq, campaignId)
 	util.CheckErr(err)
 	defer rows.Close()
 
@@ -753,7 +756,7 @@ func (s SqliteRepo) GetApiUserById(providedClientId, providedAPIKey string) (*ty
 	tableq := fmt.Sprintf("SELECT * FROM %s u where u.id = ?", apiUserTable)
 	s.logger.Debug(tableq)
 	s.logger.Debug(fmt.Printf("Looking for id: %s", providedClientId))
-	rows, err := s.runQuery(tableq, providedClientId)
+	rows, err := s.RunQuery(tableq, providedClientId)
 	util.CheckErr(err)
 	defer rows.Close()
 	users := make([]*types.APIUser, 0)
@@ -817,7 +820,7 @@ func (s SqliteRepo) getAdventureXP(c types.CharacterRecord) ([]int, error) {
 	tableq := fmt.Sprintf("SELECT u.xp_gained FROM %s u where u.character_id = ?", characterToAdventureTable)
 
 	s.logger.Debug(tableq)
-	rows, err := s.runQuery(tableq, c.Id)
+	rows, err := s.RunQuery(tableq, c.Id)
 	util.CheckErr(err)
 	defer rows.Close()
 	xpGains := make([]int, 0)
@@ -836,7 +839,7 @@ func (s SqliteRepo) getCampaignXP(c types.CharacterRecord) ([]int, error) {
 	tableq := fmt.Sprintf("SELECT u.xp_gained FROM %s u where u.character_id = ?", campaignActivityTable)
 
 	s.logger.Debug(tableq)
-	rows, err := s.runQuery(tableq, c.Id)
+	rows, err := s.RunQuery(tableq, c.Id)
 	util.CheckErr(err)
 	defer rows.Close()
 	xpGains := make([]int, 0)
@@ -856,7 +859,7 @@ func (s SqliteRepo) GetLevelForXP(camp types.CampaignRecord, c types.CharacterRe
 		"INNER JOIN class_level_thresholds clt ON clt.class_id=cl.id WHERE cl.system_id = ? AND cl.class_name = ? AND clt.xp_amount <= ? \n" +
 		"ORDER BY clt.xp_amount  DESC;"
 	s.logger.Print(tableq)
-	rows, err := s.runQuery(tableq, 1, c.Class, c.CurrentXP)
+	rows, err := s.RunQuery(tableq, 1, c.Class, c.CurrentXP)
 	util.CheckErr(err)
 	defer rows.Close()
 	// This always returns the current level as the first result
@@ -887,7 +890,7 @@ func (s SqliteRepo) AddCampaignActivityForCharacter(a types.CampaignActivity) er
 
 func (s SqliteRepo) GetCoinsForAdventure(a *types.AdventureRecord) (*types.Coins, error) {
 	stmtStr := fmt.Sprintf("SELECT a.copper, a.silver, a.electrum, a.gold, a.platinum FROM %s a WHERE a.id=?", adventureTable)
-	rows, err := s.runQuery(stmtStr, a.Id)
+	rows, err := s.RunQuery(stmtStr, a.Id)
 	if err != nil {
 		return nil, err
 	}

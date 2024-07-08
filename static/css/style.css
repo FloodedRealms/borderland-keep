@@ -189,6 +189,21 @@ border: 2px solid #383838;
 	color:var(--link-color);
 }
 
+.xp-source {
+	display: table;
+}
+
+FORM.tr, DIV.tr {
+	display:table-row;
+}
+SPAN.td
+{
+	padding: 50;
+    display:table-cell;
+}
+ SPAN.button-space {
+	min-width: 50px;
+ }
  /***** MODAL DIALOG ****/
 #modal {
 	/* Underlay covers entire screen. */

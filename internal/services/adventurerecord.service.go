@@ -16,6 +16,10 @@ type AdventureService struct {
 }
 
 const adventureTable string = "adventures"
+const gemTable string = "gems"
+const jewelleryTable string = "jewellery"
+const magicItemTable string = "magic_items"
+const combatTable string = "monster_groups"
 
 func NewAdventureRecordService(repo repository.Repository, ctx context.Context) *AdventureService {
 	return &AdventureService{repo, ctx}
@@ -193,18 +197,18 @@ func (a AdventureService) GetCoinsForAdventure(i string) (*types.Coins, error) {
 
 func (a AdventureService) UpdateAdventureCoins(id string, data map[string]string) (*types.AdventureRecord, error) {
 	i, _ := strconv.Atoi(id)
-	copper, _ := stripGoodValueFromCoinForm("copper", data)
-	silver, _ := stripGoodValueFromCoinForm("silver", data)
-	electrum, _ := stripGoodValueFromCoinForm("electrum", data)
-	gold, _ := stripGoodValueFromCoinForm("gold", data)
-	platinum, _ := stripGoodValueFromCoinForm("platinum", data)
+	copper, _ := stripGoodNumberValueFromFormData("copper", data)
+	silver, _ := stripGoodNumberValueFromFormData("silver", data)
+	electrum, _ := stripGoodNumberValueFromFormData("electrum", data)
+	gold, _ := stripGoodNumberValueFromFormData("gold", data)
+	platinum, _ := stripGoodNumberValueFromFormData("platinum", data)
 	stmtStr := fmt.Sprintf("UPDATE %s set copper=?, silver=?, electrum=?, gold=?, platinum=? WHERE ID =?", adventureTable)
 	a.repo.ExecuteQuery(stmtStr, copper, silver, electrum, gold, platinum, id)
 	return a.repo.GetAdventureRecordById(types.NewAdventureRecordById(i))
 }
 
-func stripGoodValueFromCoinForm(coin string, data map[string]string) (int, error) {
-	val, ok := data[coin]
+func stripGoodNumberValueFromFormData(field string, data map[string]string) (int, error) {
+	val, ok := data[field]
 	if ok {
 		i, err := strconv.Atoi(val)
 		if err != nil {
@@ -213,6 +217,130 @@ func stripGoodValueFromCoinForm(coin string, data map[string]string) (int, error
 		return i, nil
 	}
 	return 0, nil
+}
+
+func (a AdventureService) GetGemById(id string) (*types.Gem, error) {
+	gemId, err := strconv.Atoi(id)
+	if err != nil {
+		return nil, err
+	}
+
+	stmtStr := fmt.Sprintf("SELECT * FROM %s WHERE id=?;", gemTable)
+	rows, qErr := a.repo.RunQuery(stmtStr, gemId)
+	if qErr != nil {
+		return nil, err
+	}
+	results := make([]*types.Gem, 0)
+	for rows.Next() {
+		cur := &types.Gem{}
+		var trashInt int
+		rows.Scan(&cur.Id, &trashInt, &cur.Name, &cur.Description, &cur.XPValue, &cur.Number)
+		cur.LootType = types.GemLoot
+		results = append(results, cur)
+	}
+	if len(results) < 1 {
+		return nil, fmt.Errorf("unable to locate gem with id %d", gemId)
+	}
+	return results[0], nil
+}
+
+func (a AdventureService) GetJewelleryById(id string) (*types.Jewellery, error) {
+	jewelleryId, err := strconv.Atoi(id)
+	if err != nil {
+		return nil, err
+	}
+
+	stmtStr := fmt.Sprintf("SELECT * FROM %s WHERE id=?;", jewelleryTable)
+	rows, qErr := a.repo.RunQuery(stmtStr, jewelleryId)
+	if qErr != nil {
+		return nil, err
+	}
+	results := make([]*types.Jewellery, 0)
+	for rows.Next() {
+		cur := &types.Jewellery{}
+		var trashInt int
+		rows.Scan(&cur.Id, &trashInt, &cur.Name, &cur.Description, &cur.XPValue, &cur.Number)
+		cur.LootType = types.JewelleryLoot
+		results = append(results, cur)
+	}
+	if len(results) < 1 {
+		return nil, fmt.Errorf("unable to locate jewellery with id %d", jewelleryId)
+	}
+	return results[0], nil
+}
+
+func (a AdventureService) GetCombatById(id string) (*types.MonsterGroup, error) {
+	jewelleryId, err := strconv.Atoi(id)
+	if err != nil {
+		return nil, err
+	}
+
+	stmtStr := fmt.Sprintf("SELECT * FROM %s WHERE id=?;", combatTable)
+	rows, qErr := a.repo.RunQuery(stmtStr, jewelleryId)
+	if qErr != nil {
+		return nil, err
+	}
+	results := make([]*types.MonsterGroup, 0)
+	for rows.Next() {
+		cur := &types.MonsterGroup{}
+		var trashInt int
+		rows.Scan(&cur.Id, &trashInt, &cur.Name, &cur.Description, &cur.XPPerOneKill, &cur.NumberDefeated)
+		results = append(results, cur)
+	}
+	if len(results) < 1 {
+		return nil, fmt.Errorf("unable to locate combat with id %d", jewelleryId)
+	}
+	return results[0], nil
+}
+
+func (a AdventureService) GetMagicItemById(id string) (*types.MagicItem, error) {
+	jewelleryId, err := strconv.Atoi(id)
+	if err != nil {
+		return nil, err
+	}
+
+	stmtStr := fmt.Sprintf("SELECT * FROM %s WHERE id=?;", magicItemTable)
+	rows, qErr := a.repo.RunQuery(stmtStr, jewelleryId)
+	if qErr != nil {
+		return nil, err
+	}
+	results := make([]*types.MagicItem, 0)
+	for rows.Next() {
+		cur := &types.MagicItem{}
+		var trashInt int
+		rows.Scan(&cur.Id, &trashInt, &cur.Name, &cur.Description, &cur.XPValue, &cur.GoldValue)
+		results = append(results, cur)
+	}
+	if len(results) < 1 {
+		return nil, fmt.Errorf("unable to locate Magic Item with id %d", jewelleryId)
+	}
+	return results[0], nil
+}
+
+func (a AdventureService) SaveGem(gemId string, data map[string]string) error {
+	id, err := strconv.Atoi(gemId)
+	if err != nil {
+		return err
+	}
+	amount, err := stripGoodNumberValueFromFormData("number", data)
+	if err != nil {
+		return err
+	}
+	xpValue, err := stripGoodNumberValueFromFormData("value", data)
+	if err != nil {
+		return err
+	}
+	desc, dOk := data["description"]
+	name, nOk := data["name"]
+	if !dOk {
+		desc = ""
+	}
+	if !nOk {
+		name = ""
+	}
+	stmtStr := fmt.Sprintf("UPDATE %s set name=?, description=?, value=?, total=? WHERE ID =?", gemTable)
+	_, err = a.repo.ExecuteQuery(stmtStr, name, desc, xpValue, amount, id)
+	return err
 }
 
 /*

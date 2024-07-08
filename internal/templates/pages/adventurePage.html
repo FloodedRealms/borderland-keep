@@ -75,10 +75,31 @@
                     <table id="characterList">
                     </table>
                 </div>
-                <div class="box" hx-target="this" hx-swap="outerHTML">
+                <div class="box">
                     <h3>Gemstones Recovered</h3>
-                    <table class="xp-source" id="gemList">
-                    </table>
+                    <div class="xp-source" id="gemList">
+                        <div class="tr">
+                            <span class="td">Gem Name</span>
+                            <span class="td">Number Found</span>
+                            <span class="td">XP Per One</span>
+                            <span class="td">Total XP</span>
+                            <span class="td button-space"></span>
+                            <span class="td"></span>
+                        </div>
+                        <div id="gemList">
+                            {{ range .Gems }}
+                            <div class="tr" hx-target="this" hx-swap="outerHTML">
+                                <span class="td">{{ .Name }}</span >
+                                <span class="td">{{ .Number }}</span >
+                                <span class="td">{{ .XPValue }}</span >
+                                <span class="td">{{ .TotalXPAmount }}</span >
+                                <span class="td button-space"></span>
+                                <span class="td"><button hx-get="{{ .Path.Edit }}">Edit</button></span >
+                            </div>
+                            {{ end }}
+                    </div>
+    <button hx-get="{{ .NewLootPath.Edit }}?type=gem" hx-target="body" hx-swap="beforeend">Add New Gem</button>
+                    </div>
                     <!--<button hx-get="/htmx/edit-loot-modal?type=gem" hx-trigger="click" hx-target="body" hx-swap="beforeend">Add Gem</button>-->
                 </div>
                 <div class="box" hx-target="this" hx-swap="outerHTML">

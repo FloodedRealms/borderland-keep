@@ -55,4 +55,5 @@ type Repository interface {
 	GetApiUserById(providedClientId, providedAPIKey string) (*types.APIUser, error)
 
 	ExecuteQuery(q string, params ...interface{}) (sql.Result, error)
+	RunQuery(q string, params ...interface{}) (*sql.Rows, error)
 }

@@ -14,6 +14,7 @@ const (
 )
 
 type genericLoot struct {
+	Id          int             `json:"id"`
 	LootType    GenericLootType `json:"type"`
 	Name        string          `json:"name"`
 	Description string          `json:"description"`
