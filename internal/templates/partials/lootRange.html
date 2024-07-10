@@ -1,0 +1,10 @@
+{{ range .Loot }}
+<div class="tr" hx-target="this" hx-swap="outerHTML">
+    <span class="td">{{ .Name }}</span>
+    <span class="td">{{ .Number }}</span>
+    <span class="td">{{ .XPValue }}</span>
+    <span class="td">{{ .TotalXPAmount }}</span>
+    <span class="td button-space"></span>
+    <span class="td"><button hx-get="{{ .Path.Edit }}">Edit</button></span>
+</div>
+{{ end }}

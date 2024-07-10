@@ -39,11 +39,12 @@ type AdventurePageModel struct {
 type LootPageModel struct {
 	Id            int
 	LootType      types.GenericLootType `json:"type"`
-	Name          string                `json:"name"`
-	Description   string                `json:"description"`
-	Number        int                   `json:"number"`
-	XPValue       float64               `json:"xp_value"`
-	GoldValue     float64               `json:"gold_value"`
+	DisplayType   string
+	Name          string  `json:"name"`
+	Description   string  `json:"description"`
+	Number        int     `json:"number"`
+	XPValue       float64 `json:"xp_value"`
+	GoldValue     float64 `json:"gold_value"`
 	TotalXPAmount int
 	Path          path
 }
@@ -115,6 +116,7 @@ func newAdventurePageModel(a types.AdventureRecord) AdventurePageModel {
 func NewLootPageModelFromGem(adata types.Gem, adventureId int) LootPageModel {
 	return LootPageModel{
 		Id:            adata.Id,
+		LootType:      types.GemLoot,
 		Name:          adata.Name,
 		Number:        adata.Number,
 		XPValue:       adata.XPValue,
@@ -149,7 +151,8 @@ func (a AdventurePage) RegisterRoutes(m *http.ServeMux) {
 	m.HandleFunc("GET "+gemPath.Display, a.displayGem)
 	m.HandleFunc("GET "+gemPath.Edit, a.editGem)
 
-	m.HandleFunc("GET "+newLootPath.Edit, a.newGem)
+	m.HandleFunc("PUT "+newLootPath.Display, a.saveNewLoot)
+	m.HandleFunc("GET "+newLootPath.Edit, a.newLoot)
 
 }
 
@@ -278,7 +281,7 @@ func (a AdventurePage) editGem(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte(output))
 }
 
-func (a AdventurePage) newGem(w http.ResponseWriter, r *http.Request) {
+func (a AdventurePage) newLoot(w http.ResponseWriter, r *http.Request) {
 	output := make([]byte, 0)
 	aId := r.PathValue("adventureId")
 	adventure, err := strconv.Atoi(aId)
@@ -290,10 +293,12 @@ func (a AdventurePage) newGem(w http.ResponseWriter, r *http.Request) {
 	switch t {
 	case string(types.GemLoot):
 		pageData.Name = "New Gem"
+		pageData.LootType = types.GemLoot
+		pageData.DisplayType = "Gem"
 		pageData.XPValue = 0.0
 		pageData.Number = 0.0
 		pageData.TotalXPAmount = 0
-		pageData.Path = newPhysicalAdventurePath("new-gem", adventure)
+		pageData.Path = newPhysicalAdventurePath("/new-loot", adventure)
 
 		outString, err := a.renderer.RenderEditor("newLootModalEdit.html", pageData)
 		if err != nil {
@@ -304,4 +309,54 @@ func (a AdventurePage) newGem(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.Write(output)
+}
+
+func (a AdventurePage) saveNewLoot(w http.ResponseWriter, r *http.Request) {
+	t := r.URL.Query()["type"][0]
+	switch t {
+	case string(types.GemLoot):
+		a.saveNewGem(w, r)
+	}
+}
+
+func (a AdventurePage) saveNewGem(w http.ResponseWriter, r *http.Request) {
+	output := make([]byte, 0)
+	aId := r.PathValue("adventureId")
+	adventure, err := strconv.Atoi(aId)
+	if err != nil {
+		a.renderer.MustRenderErrorPage(w, "error.html", fmt.Errorf("could not convert %s into adventure id", aId))
+	}
+	formErr := r.ParseForm()
+	if formErr != nil {
+		a.renderer.MustRenderErrorPage(w, "", formErr)
+	}
+	var data = map[string]string{}
+	for key, value := range r.Form {
+		data[key] = value[0]
+	}
+	err = a.adventureService.SaveNewGem(adventure, data)
+	output, err = a.renderGemList(adventure)
+	if err != nil {
+		a.renderer.MustRenderErrorPage(w, "error.html", err)
+	}
+	w.Write(output)
+
+}
+
+func (a AdventurePage) renderGemList(adventure int) ([]byte, error) {
+	var renderData struct {
+		Loot []LootPageModel
+	}
+	gems, err := a.adventureService.GetGemsForAdventure(adventure)
+	if err != nil {
+		return make([]byte, 0), err
+	}
+	renderData.Loot = make([]LootPageModel, 0)
+	for _, gem := range gems {
+		data := NewLootPageModelFromGem(gem, adventure)
+		data.DisplayType = "Gem"
+		renderData.Loot = append(renderData.Loot, data)
+	}
+	str, err := a.renderer.RenderPartial("lootRange.html", renderData)
+	return []byte(str), err
 }
