@@ -86,21 +86,22 @@
                             <span class="td button-space"></span>
                             <span class="td"></span>
                         </div>
-                        <div id="gemList">
-                            {{ range .Gems }}
-                            <div class="tr" hx-target="this" hx-swap="outerHTML">
-                                <span class="td">{{ .Name }}</span >
-                                <span class="td">{{ .Number }}</span >
-                                <span class="td">{{ .XPValue }}</span >
-                                <span class="td">{{ .TotalXPAmount }}</span >
-                                <span class="td button-space"></span>
-                                <span class="td"><button hx-get="{{ .Path.Edit }}">Edit</button></span >
-                            </div>
-                            {{ end }}
+                        {{ range .Gems }}
+                        <div class="tr" hx-target="this" hx-swap="outerHTML">
+                            <span class="td">{{ .Name }}</span>
+                            <span class="td">{{ .Number }}</span>
+                            <span class="td">{{ .XPValue }}</span>
+                            <span class="td">{{ .TotalXPAmount }}</span>
+                            <span class="td button-space"></span>
+                            <span class="td"><button hx-trigger="mousedown"
+                                    hx-get="{{ .Path.Edit }}">Edit</button></span>
+                            <span class="td"><button class="danger" hx-trigger="mousedown"
+                                    hx-delete="{{ .Path.Display }}">Delete</button></span>
+                        </div>
+                        {{ end }}
                     </div>
-    <button hx-get="{{ .NewLootPath.Edit }}?type=gem" hx-target="body" hx-swap="beforeend">Add New Gem</button>
-                    </div>
-                    <!--<button hx-get="/htmx/edit-loot-modal?type=gem" hx-trigger="click" hx-target="body" hx-swap="beforeend">Add Gem</button>-->
+                    <button hx-get="{{ .NewLootPath.Edit }}?type=gem" hx-target="body" hx-swap="beforeend">Add
+                        NewGem</button>
                 </div>
                 <div class="box" hx-target="this" hx-swap="outerHTML">
                     <h3>jewelery Recovered</h3>

@@ -24,3 +24,7 @@ func UnknownCharacterOperation(given string) error {
 func UnableToUpdateAdventure(step, errorMessage string) error {
 	return fmt.Errorf("unable to update the adventure on step %s, the following error was thrown: %s", step, errorMessage)
 }
+
+func UnableToFindResourceWithId(resource string, id int) error {
+	return fmt.Errorf("unable to find %s with id %d", resource, id)
+}

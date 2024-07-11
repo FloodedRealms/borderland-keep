@@ -57,6 +57,14 @@ type SqliteRepo struct {
 	logger *util.Logger
 }
 
+type majorOperation string
+
+const (
+	UPDATE = "UPDATE"
+	SELECT = "SELECT"
+	DELETE = "DELECT"
+)
+
 func NewSqliteRepo(f string, logger *util.Logger) (*SqliteRepo, error) {
 	db, err := sql.Open("sqlite3", f)
 	if err != nil {
@@ -71,6 +79,32 @@ func NewSqliteRepo(f string, logger *util.Logger) (*SqliteRepo, error) {
 	return &SqliteRepo{db: db, logger: logger}, nil
 }
 
+/*
+TODO: Rebuild GORM
+
+	func (s SqliteRepo) Select(from string) *RepositoryStatement {
+		return &RepositoryStatement{
+			majorOpertaion: SELECT,
+			targetTable:    from,
+		}
+	}
+
+	func (s *RepositoryStatement) Where(whereFields []string, whereValues []string) (*RepositoryStatement, error) {
+		if len(whereFields) < 1 {
+			return nil, ParameterNotProvidedError{ParameterName: "Where Fields", Provided: len(whereFields), ExpectedMin: 1}
+		}
+		if len(whereValues) < 1 {
+			return nil, ParameterNotProvidedError{ParameterName: "Where Values", Provided: len(whereValues), ExpectedMin: 1}
+		}
+		if len(whereFields) != len(whereValues) {
+			return nil, ParameterValueMismatch{ParametersProvided: len(whereFields), ValuesProvided: len(whereValues)}
+		}
+		s.whereFields = whereFields
+		s.whereValues = whereValues
+	}
+
+func (s SqliteRepo) BuildStatment(op string, params ...interface{})
+*/
 func (s SqliteRepo) RunQuery(q string, params ...interface{}) (*sql.Rows, error) {
 	stmt, err := s.db.Prepare(q)
 	if err != nil {

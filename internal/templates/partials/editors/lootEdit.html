@@ -15,6 +15,6 @@
 	<span class="td"><input type="text" name="description" value="{{ .Description }}" /></span>
 	<span class="td"><input type="text" name="number" value="{{ .Number }}" /></span>
 	<span class="td"><input type="text" name="value" value="{{ .XPValue }}" /></span>
-	<span class="td"><button hx-put="{{ .Path.Display }}">Save</button></span>
-	<span class="td"><button hx-get="{{ .Path.Display }}">Cancel</button></span>
+	<span class="td"><button hx-trigger="mousedown" hx-put="{{ .Path.Display }}">Save</button></span>
+	<span class="td"><button hx-trigger="mousedown" hx-get="{{ .Path.Display }}">Cancel</button></span>
 </form>

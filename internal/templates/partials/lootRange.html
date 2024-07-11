@@ -1,3 +1,11 @@
+<div class="tr">
+    <span class="td">{{ .DisplayType }} Name</span>
+    <span class="td">Number Found</span>
+    <span class="td">XP Per One</span>
+    <span class="td">Total XP</span>
+    <span class="td button-space"></span>
+    <span class="td"></span>
+</div>
 {{ range .Loot }}
 <div class="tr" hx-target="this" hx-swap="outerHTML">
     <span class="td">{{ .Name }}</span>
@@ -5,6 +13,7 @@
     <span class="td">{{ .XPValue }}</span>
     <span class="td">{{ .TotalXPAmount }}</span>
     <span class="td button-space"></span>
-    <span class="td"><button hx-get="{{ .Path.Edit }}">Edit</button></span>
+    <span class="td"><button hx-trigger="mousedown" hx-get="{{ .Path.Edit }}">Edit</button></span>
+    <span class="td"><button class="danger" hx-trigger="mousedown" hx-delete="{{ .Path.Display }}">Delete</button></span>
 </div>
 {{ end }}

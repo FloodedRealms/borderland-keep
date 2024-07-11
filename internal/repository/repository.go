@@ -57,3 +57,12 @@ type Repository interface {
 	ExecuteQuery(q string, params ...interface{}) (sql.Result, error)
 	RunQuery(q string, params ...interface{}) (*sql.Rows, error)
 }
+
+type RepositoryStatement struct {
+	majorOpertaion majorOperation
+	targetTable    string
+	fields         []string
+	values         []string
+	whereFields    []string
+	whereValues    []string
+}

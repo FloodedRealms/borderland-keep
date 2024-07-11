@@ -3,6 +3,7 @@ package webapp
 type path struct {
 	Display string
 	Edit    string
+	Delete  string
 }
 
 func newPath(baseurl string) path {

@@ -117,6 +117,7 @@ func NewLootPageModelFromGem(adata types.Gem, adventureId int) LootPageModel {
 	return LootPageModel{
 		Id:            adata.Id,
 		LootType:      types.GemLoot,
+		DisplayType:   "Gem",
 		Name:          adata.Name,
 		Number:        adata.Number,
 		XPValue:       adata.XPValue,
@@ -149,6 +150,7 @@ func (a AdventurePage) RegisterRoutes(m *http.ServeMux) {
 
 	m.HandleFunc("PUT "+gemPath.Display, a.saveGem)
 	m.HandleFunc("GET "+gemPath.Display, a.displayGem)
+	m.HandleFunc("DELETE "+gemPath.Display, a.deleteGem)
 	m.HandleFunc("GET "+gemPath.Edit, a.editGem)
 
 	m.HandleFunc("PUT "+newLootPath.Display, a.saveNewLoot)
@@ -248,10 +250,22 @@ func (a AdventurePage) saveGem(w http.ResponseWriter, r *http.Request) {
 	a.displayGem(w, r)
 }
 
+func (a AdventurePage) deleteGem(w http.ResponseWriter, r *http.Request) {
+	gemId := r.PathValue("gemId")
+	err := a.adventureService.DeleteGem(gemId)
+	if err != nil {
+		a.renderer.MustRenderErrorPage(w, "error.html", err)
+	}
+	w.Write(make([]byte, 0))
+}
+
 func (a AdventurePage) displayGem(w http.ResponseWriter, r *http.Request) {
 
 	aId := r.PathValue("adventureId")
 	adventure, err := strconv.Atoi(aId)
+	if err != nil {
+		a.renderer.MustRenderErrorPage(w, "error.html", err)
+	}
 	id := r.PathValue("gemId")
 	adata, err := a.adventureService.GetGemById(id)
 	pageData := NewLootPageModelFromGem(*adata, adventure)
@@ -268,15 +282,21 @@ func (a AdventurePage) displayGem(w http.ResponseWriter, r *http.Request) {
 func (a AdventurePage) editGem(w http.ResponseWriter, r *http.Request) {
 	aId := r.PathValue("adventureId")
 	adventure, err := strconv.Atoi(aId)
+	if err != nil {
+		a.renderer.MustRenderErrorPage(w, "error.html", err)
+		return
+	}
 	id := r.PathValue("gemId")
 	adata, err := a.adventureService.GetGemById(id)
 	pageData := NewLootPageModelFromGem(*adata, adventure)
 	if err != nil {
 		a.renderer.MustRenderErrorPage(w, "", err)
+		return
 	}
 	output, err := a.renderer.RenderEditor("lootEdit.html", pageData)
 	if err != nil {
 		a.renderer.MustRenderErrorPage(w, "", err)
+		return
 	}
 	w.Write([]byte(output))
 }
@@ -345,7 +365,8 @@ func (a AdventurePage) saveNewGem(w http.ResponseWriter, r *http.Request) {
 
 func (a AdventurePage) renderGemList(adventure int) ([]byte, error) {
 	var renderData struct {
-		Loot []LootPageModel
+		DisplayType string
+		Loot        []LootPageModel
 	}
 	gems, err := a.adventureService.GetGemsForAdventure(adventure)
 	if err != nil {
@@ -354,9 +375,21 @@ func (a AdventurePage) renderGemList(adventure int) ([]byte, error) {
 	renderData.Loot = make([]LootPageModel, 0)
 	for _, gem := range gems {
 		data := NewLootPageModelFromGem(gem, adventure)
-		data.DisplayType = "Gem"
+		renderData.DisplayType = data.DisplayType
 		renderData.Loot = append(renderData.Loot, data)
 	}
 	str, err := a.renderer.RenderPartial("lootRange.html", renderData)
 	return []byte(str), err
+}
+
+func parseHTMLFormIntoMap(r *http.Request) (map[string]string, error) {
+	var data = map[string]string{}
+	formErr := r.ParseForm()
+	if formErr != nil {
+		return nil, formErr
+	}
+	for key, value := range r.Form {
+		data[key] = value[0]
+	}
+	return data, nil
 }
