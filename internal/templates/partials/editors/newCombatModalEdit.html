@@ -1,0 +1,14 @@
+<div id="modal" _="on closeModal add .closing then wait for animationend then remove me">
+	<div class="modal-underlay" _="on click trigger closeModal"></div>
+	<div class="modal-content">
+
+		<h1>New {{ .DisplayType }}</h1>
+<form class="tr">
+	<span class="td"><input type="text" name="name" value="" /></span>
+	<span class="td"><input type="text" name="description" value="" /></span>
+	<span class="td"><input type="text" name="number_defeated" value="0" /></span>
+	<span class="td"><input type="text" name="xp_value" value="0" /></span>
+	<span class="td"><button hx-put="{{ .Path.Display }}?type={{ .LootType }}" hx-trigger="mousedown" hx-target="#{{ .DisplayType }}List" hx-swap="innerHTML" _="on mousedown trigger closeModal">Save</button></span>
+	<span class="td"><button class="btn danger" _="on mousedown trigger closeModal">Cancel</button></span>
+</form>
+</div>

@@ -79,6 +79,24 @@ func (s CharacterServiceImpl) GetCharactersForCampaign(campaign *types.CampaignR
 	return characterList, nil
 }
 
+func (s CharacterServiceImpl) GetPossibleCharactersForAdventure(aId int) ([]types.CharacterRecord, error) {
+	chars := make([]types.CharacterRecord, 0)
+	stmtString := ("SELECT c.id, c.name from adventures a " +
+		"JOIN \"characters\" c ON c.campaign_id = a.campaign_id " +
+		"WHERE a.id = ?;")
+
+	result, err := s.repo.RunQuery(stmtString, aId)
+	if err != nil {
+		return chars, err
+	}
+	for result.Next() {
+		c := types.CharacterRecord{}
+		result.Scan(&c.Id, &c.Name)
+		chars = append(chars, c)
+	}
+	return chars, nil
+}
+
 func (s CharacterServiceImpl) UpdateTotalCharacterXP(char types.CharacterRecord, xpGained int) (*types.CharacterRecord, error) {
 	currentChar, err := s.repo.GetCharacterById(char)
 	if err != nil {

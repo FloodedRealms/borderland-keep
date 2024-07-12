@@ -324,6 +324,84 @@ func (a AdventureService) SaveGem(gemId string, data map[string]string) error {
 	return err
 }
 
+func (a AdventureService) SaveJewellery(gemId string, data map[string]string) error {
+	id, err := strconv.Atoi(gemId)
+	if err != nil {
+		return err
+	}
+	amount, err := stripGoodNumberValueFromFormData("number", data)
+	if err != nil {
+		return err
+	}
+	xpValue, err := stripGoodNumberValueFromFormData("value", data)
+	if err != nil {
+		return err
+	}
+	desc, dOk := data["description"]
+	name, nOk := data["name"]
+	if !dOk {
+		desc = ""
+	}
+	if !nOk {
+		name = ""
+	}
+	stmtStr := fmt.Sprintf("UPDATE %s set name=?, description=?, value=?, total=? WHERE ID =?", jewelleryTable)
+	_, err = a.repo.ExecuteQuery(stmtStr, name, desc, xpValue, amount, id)
+	return err
+}
+
+func (a AdventureService) SaveCombat(gemId string, data map[string]string) error {
+	id, err := strconv.Atoi(gemId)
+	if err != nil {
+		return err
+	}
+	amount, err := stripGoodNumberValueFromFormData("number", data)
+	if err != nil {
+		return err
+	}
+	xpValue, err := stripGoodNumberValueFromFormData("value", data)
+	if err != nil {
+		return err
+	}
+	desc, dOk := data["description"]
+	name, nOk := data["name"]
+	if !dOk {
+		desc = ""
+	}
+	if !nOk {
+		name = ""
+	}
+	stmtStr := fmt.Sprintf("UPDATE %s set name=?, description=?, xp_per_monster=?, number_defeated=? WHERE ID =?", combatTable)
+	_, err = a.repo.ExecuteQuery(stmtStr, name, desc, xpValue, amount, id)
+	return err
+}
+
+func (a AdventureService) SaveMagicItem(gemId string, data map[string]string) error {
+	id, err := strconv.Atoi(gemId)
+	if err != nil {
+		return err
+	}
+	xp, err := stripGoodNumberValueFromFormData("xp_value", data)
+	if err != nil {
+		return err
+	}
+	gold, err := stripGoodNumberValueFromFormData("gold_value", data)
+	if err != nil {
+		return err
+	}
+	desc, dOk := data["description"]
+	name, nOk := data["name"]
+	if !dOk {
+		desc = ""
+	}
+	if !nOk {
+		name = ""
+	}
+	stmtStr := fmt.Sprintf("UPDATE %s set name=?, description=?, apparent_value=?, actual_value=? WHERE ID =?", magicItemTable)
+	_, err = a.repo.ExecuteQuery(stmtStr, name, desc, xp, gold, id)
+	return err
+}
+
 func (a AdventureService) SaveNewGem(adventureId int, data map[string]string) error {
 	amount, err := stripGoodNumberValueFromFormData("number", data)
 	if err != nil {
@@ -346,12 +424,108 @@ func (a AdventureService) SaveNewGem(adventureId int, data map[string]string) er
 	return err
 }
 
+func (a AdventureService) SaveNewJewellery(adventureId int, data map[string]string) error {
+	amount, err := stripGoodNumberValueFromFormData("number", data)
+	if err != nil {
+		return err
+	}
+	xpValue, err := stripGoodNumberValueFromFormData("value", data)
+	if err != nil {
+		return err
+	}
+	desc, dOk := data["description"]
+	name, nOk := data["name"]
+	if !dOk {
+		desc = ""
+	}
+	if !nOk {
+		name = ""
+	}
+	stmtStr := fmt.Sprintf("INSERT INTO %s(adventure_id, name, description, value, total) values(?,?,?,?,?)", jewelleryTable)
+	_, err = a.repo.ExecuteQuery(stmtStr, adventureId, name, desc, xpValue, amount)
+	return err
+}
+
+func (a AdventureService) SaveNewCombat(adventureId int, data map[string]string) error {
+	amount, err := stripGoodNumberValueFromFormData("number_defeated", data)
+	if err != nil {
+		return err
+	}
+	xpValue, err := stripGoodNumberValueFromFormData("xp_value", data)
+	if err != nil {
+		return err
+	}
+	desc, dOk := data["description"]
+	name, nOk := data["name"]
+	if !dOk {
+		desc = ""
+	}
+	if !nOk {
+		name = ""
+	}
+	stmtStr := fmt.Sprintf("INSERT INTO %s(adventure_id, name, description, xp_per_monster, number_killed) values(?,?,?,?,?)", combatTable)
+	_, err = a.repo.ExecuteQuery(stmtStr, adventureId, name, desc, xpValue, amount)
+	return err
+}
+
+func (a AdventureService) SaveNewMagicItem(adventureId int, data map[string]string) error {
+	amount, err := stripGoodNumberValueFromFormData("gold_value", data)
+	if err != nil {
+		return err
+	}
+	xpValue, err := stripGoodNumberValueFromFormData("xp_value", data)
+	if err != nil {
+		return err
+	}
+	desc, dOk := data["description"]
+	name, nOk := data["name"]
+	if !dOk {
+		desc = ""
+	}
+	if !nOk {
+		name = ""
+	}
+	stmtStr := fmt.Sprintf("INSERT INTO %s(adventure_id, name, apparent_value, actual_value, total) values(?,?,?,?,?)", magicItemTable)
+	_, err = a.repo.ExecuteQuery(stmtStr, adventureId, name, desc, xpValue, amount)
+	return err
+}
+
 func (a AdventureService) DeleteGem(gemId string) error {
 	id, err := strconv.Atoi(gemId)
 	if err != nil {
 		return err
 	}
 	stmtStr := fmt.Sprintf("DELETE FROM %s WHERE ID =?", gemTable)
+	_, err = a.repo.ExecuteQuery(stmtStr, id)
+	return err
+}
+
+func (a AdventureService) DeleteJewellery(gemId string) error {
+	id, err := strconv.Atoi(gemId)
+	if err != nil {
+		return err
+	}
+	stmtStr := fmt.Sprintf("DELETE FROM %s WHERE ID =?", jewelleryTable)
+	_, err = a.repo.ExecuteQuery(stmtStr, id)
+	return err
+}
+
+func (a AdventureService) DeleteCombat(gemId string) error {
+	id, err := strconv.Atoi(gemId)
+	if err != nil {
+		return err
+	}
+	stmtStr := fmt.Sprintf("DELETE FROM %s WHERE ID =?", combatTable)
+	_, err = a.repo.ExecuteQuery(stmtStr, id)
+	return err
+}
+
+func (a AdventureService) DeleteMagicItem(gemId string) error {
+	id, err := strconv.Atoi(gemId)
+	if err != nil {
+		return err
+	}
+	stmtStr := fmt.Sprintf("DELETE FROM %s WHERE ID =?", magicItemTable)
 	_, err = a.repo.ExecuteQuery(stmtStr, id)
 	return err
 }
@@ -381,6 +555,7 @@ func (a AdventureService) GetJewelleryById(id string) (*types.Jewellery, error) 
 	}
 	return results[0], nil
 }
+
 func (a AdventureService) GetJewelleryForAdventure(id int) ([]types.Jewellery, error) {
 	results := make([]types.Jewellery, 0)
 	stmtStr := fmt.Sprintf("SELECT * FROM %s WHERE adventure_id=?;", jewelleryTable)

@@ -103,23 +103,82 @@
                     <button hx-get="{{ .NewLootPath.Edit }}?type=gem" hx-target="body" hx-swap="beforeend">Add
                         NewGem</button>
                 </div>
-                <div class="box" hx-target="this" hx-swap="outerHTML">
+                <div class="box">
                     <h3>jewelery Recovered</h3>
-                    <table class="xp-source" id="jewelleryList">
-                    </table>
-                    <button type="button" onclick="addJewellery()">Add Jewellery</button>
+                    <div class="xp-source" id="JewelleryList">
+                        <div class="tr">
+                            <span class="td">Gem Name</span>
+                            <span class="td">Number Found</span>
+                            <span class="td">XP Per One</span>
+                            <span class="td">Total XP</span>
+                            <span class="td button-space"></span>
+                            <span class="td"></span>
+                        </div>
+                        {{ range .Jewellery }}
+                        <div class="tr" hx-target="this" hx-swap="outerHTML">
+                            <span class="td">{{ .Name }}</span>
+                            <span class="td">{{ .Number }}</span>
+                            <span class="td">{{ .XPValue }}</span>
+                            <span class="td">{{ .TotalXPAmount }}</span>
+                            <span class="td button-space"></span>
+                            <span class="td"><button hx-trigger="mousedown"
+                                    hx-get="{{ .Path.Edit }}">Edit</button></span>
+                            <span class="td"><button class="danger" hx-trigger="mousedown"
+                                    hx-delete="{{ .Path.Display }}">Delete</button></span>
+                        </div>
+                        {{ end }}
+                    </div>
+                    <button hx-get="{{ .NewLootPath.Edit }}?type=jewellery" hx-target="body" hx-swap="beforeend">Add New Jewellery</button>
                 </div>
-                <div class="box items">
+                <div class="box">
                     <h3>Magic Items</h3>
-                    <table class="xp-source" id="magicItemList">
-                    </table>
-                    <button type="button" onclick="addMagicItem()">Add Magic Item</button>
+                    <div class="xp-source" id="MagicItemList">
+                        <div class="tr">
+                            <span class="td">Name</span>
+                            <span class="td">XP Value</span>
+                            <span class="td">Gold value</span>
+                            <span class="td button-space"></span>
+                            <span class="td"></span>
+                        </div>
+                        {{ range .MagicItems }}
+                        <div class="tr" hx-target="this" hx-swap="outerHTML">
+                            <span class="td">{{ .Name }}</span>
+                            <span class="td">{{ .ApparentValue }}</span>
+                            <span class="td">{{ .GoldValye }}</span>
+                            <span class="td button-space"></span>
+                            <span class="td"><button hx-trigger="mousedown"
+                                    hx-get="{{ .Path.Edit }}">Edit</button></span>
+                            <span class="td"><button class="danger" hx-trigger="mousedown"
+                                    hx-delete="{{ .Path.Display }}">Delete</button></span>
+                        </div>
+                        {{ end }}
+                    </div>
+                    <button hx-get="{{ .NewLootPath.Edit }}?type=magicItem" hx-target="body" hx-swap="beforeend">Add New Jewellery</button>
                 </div>
-                <div class="box" hx-target="this" hx-swap="outerHTML">
+                <div class="box">
                     <h3>Groups of Monsters Defeated</h3>
-                    <table class="xp-source" id="combatList">
-                    </table>
-                    <button type="button" onclick="addCombat()">Add Monster Group</button>
+                    <div class="xp-source" id="CombatList">
+                        <div class="tr">
+                            <span class="td">Name</span>
+                            <span class="td">Number Defeated</span>
+                            <span class="td">XP Value</span>
+                            <span class="td button-space"></span>
+                            <span class="td"></span>
+                        </div>
+                        {{ range .Combat }}
+                        <div class="tr" hx-target="this" hx-swap="outerHTML">
+                            <span class="td">{{ .Name }}</span>
+                            <span class="td">{{ .NumberDefeated }}</span>
+                            <span class="td">{{ .XPValuePerOneKill }}</span>
+                            <span class="td button-space"></span>
+                            <span class="td"><button hx-trigger="mousedown"
+                                    hx-get="{{ .Path.Edit }}">Edit</button></span>
+                            <span class="td"><button class="danger" hx-trigger="mousedown"
+                                    hx-delete="{{ .Path.Display }}">Delete</button></span>
+                        </div>
+                        {{ end }}
+                    </div>
+                    <button hx-get="{{ .NewLootPath.Edit }}?type=combat" hx-target="body" hx-swap="beforeend">Add New Jewellery</button>
                 </div>
             </div>
             <div id="sided" style="max-width: 225px">

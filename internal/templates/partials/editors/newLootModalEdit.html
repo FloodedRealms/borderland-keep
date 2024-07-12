@@ -3,12 +3,13 @@
 	<div class="modal-content">
 
 		<h1>New {{ .DisplayType }}</h1>
-<form>
-	<span class="td"><input type="text" name="name" value="" /></span>
-	<span class="td"><input type="text" name="description" value="" /></span>
-	<span class="td"><input type="text" name="number" value="0" /></span>
-	<span class="td"><input type="text" name="value" value="0" /></span>
-	<span class="td"><button hx-put="{{ .Path.Display }}?type={{ .LootType }}" hx-trigger="mousedown" hx-target="#{{ .DisplayType }}List" hx-swap="innerHTML" _="on mousedown trigger closeModal">Save</button></span>
-	<span class="td"><button class="btn danger" _="on mousedown trigger closeModal">Cancel</button></span>
+<form class="tr">
+	<div><label for="name">Name</label><input type="text" name="name" value="" /></div>
+	<div><label for="description">Description</label><input type="text" name="description" value="" /></div>
+	<div><label for="number">Number Recovered</label><input type="text" name="number" value="0" /></div>
+	<div><label for="value">XP Value</label><input type="text" name="value" value="0" /></div>
+	<div><button hx-put="{{ .Path.Display }}?type={{ .LootType }}" hx-trigger="mousedown" hx-target="#{{ .DisplayType
+			}}List" hx-swap="innerHTML" _="on mousedown trigger closeModal">Save</button></div>
+	<div><button class="btn danger" _="on mousedown trigger closeModal">Cancel</button></div>
 </form>
 </div>

@@ -1,0 +1,8 @@
+<div class="tr" hx-target="this" hx-swap="outerHTML">
+    <span class="td">{{ .Name }}</span>
+    <span class="td">{{ .XPValue }}</span>
+    <span class="td">{{ .GoldValue }}</span>
+    <span class="td button-space"></span>
+    <span class="td"><button hx-trigger="mousedown" hx-get="{{ .Path.Edit }}">Edit</button></span>
+    <span class="td"><button class="danger" hx-trigger="mousedown" hx-delete="{{ .Path.Display }}">Delete</button></span>
+</div>

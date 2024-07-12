@@ -33,5 +33,5 @@
             <td>{{ .Coins.Platinum.TotalXPAmount }}</td>
         </tr>
     </table>
-    <button hx-get="{{ .CoinPath.Edit }}">Edit</button>
+    <button hx-trigger="mousedown" hx-get="{{ .CoinPath.Edit }}">Edit</button>
 </div>

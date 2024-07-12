@@ -11,6 +11,8 @@ const (
 	CoinLoot      GenericLootType = "coin"
 	GemLoot       GenericLootType = "gem"
 	JewelleryLoot GenericLootType = "jewellery"
+	CombatLoot    GenericLootType = "combat"
+	MagicItemLoot GenericLootType = "magicItem"
 )
 
 type genericLoot struct {
