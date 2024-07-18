@@ -114,7 +114,9 @@ func (s SqliteRepo) RunQuery(q string, params ...interface{}) (*sql.Rows, error)
 }
 func (s SqliteRepo) ExecuteQuery(q string, params ...interface{}) (sql.Result, error) {
 	stmt, err := s.db.Prepare(q)
-	util.CheckErr(err)
+	if err != nil {
+		return nil, err
+	}
 	return stmt.Exec(params...)
 }
 

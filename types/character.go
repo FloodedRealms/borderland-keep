@@ -61,6 +61,7 @@ func (c CharacterRecord) ApplyPrimeReq(xpGained int) int {
 type AdventureCharacter struct {
 	Id        int  `json:"id"`
 	Halfshare bool `json:"halfshare"`
+	Name      string
 }
 
 func NewAdventureCharacter(halfshare bool, id int) *AdventureCharacter {

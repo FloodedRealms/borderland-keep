@@ -8,7 +8,8 @@
 	<span class="td"><input type="text" name="description" value="" /></span>
 	<span class="td"><input type="text" name="number_defeated" value="0" /></span>
 	<span class="td"><input type="text" name="xp_value" value="0" /></span>
-	<span class="td"><button hx-put="{{ .Path.Display }}?type={{ .LootType }}" hx-trigger="mousedown" hx-target="#{{ .DisplayType }}List" hx-swap="innerHTML" _="on mousedown trigger closeModal">Save</button></span>
+	<div><button hx-put="{{ .Path.Display }}?type={{ .LootType }}" hx-trigger="mousedown" hx-target="#{{ .DisplayType
+			}}List" hx-swap="innerHTML" _="on mousedown trigger closeModal">Save</button></div>
 	<span class="td"><button class="btn danger" _="on mousedown trigger closeModal">Cancel</button></span>
 </form>
 </div>

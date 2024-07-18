@@ -100,14 +100,13 @@
                         </div>
                         {{ end }}
                     </div>
-                    <button hx-get="{{ .NewLootPath.Edit }}?type=gem" hx-target="body" hx-swap="beforeend">Add
-                        NewGem</button>
+                    <button hx-get="{{ .NewLootPath.Edit }}?type=gem" hx-target="body" hx-swap="beforeend">Add New Gem</button>
                 </div>
                 <div class="box">
                     <h3>jewelery Recovered</h3>
                     <div class="xp-source" id="JewelleryList">
                         <div class="tr">
-                            <span class="td">Gem Name</span>
+                            <span class="td">Jewllery Name</span>
                             <span class="td">Number Found</span>
                             <span class="td">XP Per One</span>
                             <span class="td">Total XP</span>
@@ -153,7 +152,7 @@
                         </div>
                         {{ end }}
                     </div>
-                    <button hx-get="{{ .NewLootPath.Edit }}?type=magicItem" hx-target="body" hx-swap="beforeend">Add New Jewellery</button>
+                    <button hx-get="{{ .NewLootPath.Edit }}?type=magicItem" hx-target="body" hx-swap="beforeend">Add New Magic Item</button>
                 </div>
                 <div class="box">
                     <h3>Groups of Monsters Defeated</h3>
@@ -168,8 +167,8 @@
                         {{ range .Combat }}
                         <div class="tr" hx-target="this" hx-swap="outerHTML">
                             <span class="td">{{ .Name }}</span>
-                            <span class="td">{{ .NumberDefeated }}</span>
-                            <span class="td">{{ .XPValuePerOneKill }}</span>
+                            <span class="td">{{ .Number }}</span>
+                            <span class="td">{{ .XPValue }}</span>
                             <span class="td button-space"></span>
                             <span class="td"><button hx-trigger="mousedown"
                                     hx-get="{{ .Path.Edit }}">Edit</button></span>
@@ -178,7 +177,7 @@
                         </div>
                         {{ end }}
                     </div>
-                    <button hx-get="{{ .NewLootPath.Edit }}?type=combat" hx-target="body" hx-swap="beforeend">Add New Jewellery</button>
+                    <button hx-get="{{ .NewLootPath.Edit }}?type=combat" hx-target="body" hx-swap="beforeend">Add New Monster Group</button>
                 </div>
             </div>
             <div id="sided" style="max-width: 225px">

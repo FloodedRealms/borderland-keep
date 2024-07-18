@@ -70,7 +70,6 @@ func main() {
 		//pages
 		campaignPages := webapp.NewCampaignPage(campaignService, characterService, *renderer)
 		adventurePages := webapp.NewAdventurePage(*adventureRecordService, characterService, *renderer)
-		modals := webapp.NewModals(*renderer)
 		//router
 		router := http.NewServeMux()
 
@@ -119,10 +118,6 @@ func main() {
 		// static
 		fs := http.FileServer(http.Dir("./static"))
 		router.Handle("/static/", http.StripPrefix("/static/", fs))
-
-		//HTMX Handlers
-		router.HandleFunc("GET /htmx/edit-loot-modal", modals.LootModal)
-		router.HandleFunc("GET /htmx/coins", adventurePages.CoinDisplay)
 
 		// Webapp Pages
 		router.HandleFunc("/pages/campaign/{campaignId}", campaignPages.CampaignOverview)

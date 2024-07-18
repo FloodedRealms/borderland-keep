@@ -21,7 +21,9 @@ const gemTable string = "gems"
 const jewelleryTable string = "jewellery"
 const magicItemTable string = "magic_items"
 const combatTable string = "monster_groups"
-const characterToAdventureTable string = "adventures_to_characters"
+
+// const characterToAdventureTable string = "adventures_to_characters"
+const characterToAdventureView string = "adventures_to_character_name"
 
 func NewAdventureRecordService(repo repository.Repository, ctx context.Context) *AdventureService {
 	return &AdventureService{repo, ctx}
@@ -184,6 +186,9 @@ func (a *AdventureService) GetAdventureRecordById(i string) (*types.AdventureRec
 	stmtStr := fmt.Sprintf("SELECT * FROM %s c where c.campaign_id = ?", adventureTable)
 
 	adventureResults, err := a.repo.RunQuery(stmtStr, id)
+	if err != nil {
+		return nil, err
+	}
 	defer adventureResults.Close()
 	if adventureResults.Next() {
 		var (
@@ -463,7 +468,7 @@ func (a AdventureService) SaveNewCombat(adventureId int, data map[string]string)
 	if !nOk {
 		name = ""
 	}
-	stmtStr := fmt.Sprintf("INSERT INTO %s(adventure_id, name, description, xp_per_monster, number_killed) values(?,?,?,?,?)", combatTable)
+	stmtStr := fmt.Sprintf("INSERT INTO %s(adventure_id, monster_name, description, xp_per_monster, number_killed) values(?,?,?,?,?)", combatTable)
 	_, err = a.repo.ExecuteQuery(stmtStr, adventureId, name, desc, xpValue, amount)
 	return err
 }
@@ -659,7 +664,7 @@ func (a AdventureService) GetMagicItemsForAdventure(id int) ([]types.MagicItem, 
 }
 
 func (a AdventureService) GetCharactersForAdventure(id int) ([]types.AdventureCharacter, error) {
-	stmtStr := fmt.Sprintf("SELECT atc.character_id, atc.half_share FROM %s atc WHERE adventure_id=?;", characterToAdventureTable)
+	stmtStr := fmt.Sprintf("SELECT atc.character_id, atc.half_share, atc.name FROM %s atc WHERE adventure_id=?;", characterToAdventureView)
 	rows, err := a.repo.RunQuery(stmtStr, id)
 	if err != nil {
 		return nil, err
@@ -668,7 +673,7 @@ func (a AdventureService) GetCharactersForAdventure(id int) ([]types.AdventureCh
 	defer rows.Close()
 	for rows.Next() {
 		cur := types.AdventureCharacter{}
-		rows.Scan(&cur.Id, &cur.Halfshare)
+		rows.Scan(&cur.Id, &cur.Halfshare, &cur.Name)
 		results = append(results, cur)
 	}
 	return results, nil
