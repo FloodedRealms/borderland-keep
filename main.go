@@ -68,6 +68,7 @@ func main() {
 		userApi := api.NewClientAPI(userService)
 
 		//pages
+		homePages := webapp.NewHomePage(*renderer)
 		campaignPages := webapp.NewCampaignPage(campaignService, characterService, *renderer)
 		adventurePages := webapp.NewAdventurePage(*adventureRecordService, characterService, *renderer)
 		//router
@@ -120,6 +121,7 @@ func main() {
 		router.Handle("/static/", http.StripPrefix("/static/", fs))
 
 		// Webapp Pages
+		router.HandleFunc("/pages/about/", homePages.About)
 		router.HandleFunc("/pages/campaign/{campaignId}", campaignPages.CampaignOverview)
 		adventurePages.RegisterRoutes(router)
 

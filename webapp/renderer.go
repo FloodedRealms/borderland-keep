@@ -36,6 +36,14 @@ func (r *Renderer) mustLoadTemplates() {
 	r.editorTemplates = template.Must(template.ParseGlob(partialEditorsDir))
 }
 
+func (r Renderer) RenderPageWithNoData(tmpl string) (string, error) {
+	var renderedOutput bytes.Buffer
+	if err := r.pageTemplates.ExecuteTemplate(&renderedOutput, tmpl, nil); err != nil {
+		return renderedOutput.String(), err
+	}
+	return renderedOutput.String(), nil
+}
+
 func (r Renderer) RenderPage(tmpl string, data interface{}) (string, error) {
 	var renderedOutput bytes.Buffer
 	if err := r.pageTemplates.ExecuteTemplate(&renderedOutput, tmpl, data); err != nil {
