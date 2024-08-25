@@ -368,16 +368,12 @@ func (a AdventureService) SaveCombat(gemId string, data map[string]string) error
 	if err != nil {
 		return err
 	}
-	desc, dOk := data["description"]
 	name, nOk := data["name"]
-	if !dOk {
-		desc = ""
-	}
 	if !nOk {
 		name = ""
 	}
-	stmtStr := fmt.Sprintf("UPDATE %s set name=?, description=?, xp_per_monster=?, number_defeated=? WHERE ID =?", combatTable)
-	_, err = a.repo.ExecuteQuery(stmtStr, name, desc, xpValue, amount, id)
+	stmtStr := fmt.Sprintf("UPDATE %s set monster_name=?, xp_per_monster=?, number_defeated=? WHERE ID =?", combatTable)
+	_, err = a.repo.ExecuteQuery(stmtStr, name, xpValue, amount, id)
 	return err
 }
 
@@ -412,7 +408,7 @@ func (a AdventureService) SaveNewGem(adventureId int, data map[string]string) er
 	if err != nil {
 		return err
 	}
-	xpValue, err := stripGoodNumberValueFromFormData("value", data)
+	xpValue, err := stripGoodNumberValueFromFormData("xp-value", data)
 	if err != nil {
 		return err
 	}
@@ -460,16 +456,12 @@ func (a AdventureService) SaveNewCombat(adventureId int, data map[string]string)
 	if err != nil {
 		return err
 	}
-	desc, dOk := data["description"]
 	name, nOk := data["name"]
-	if !dOk {
-		desc = ""
-	}
 	if !nOk {
 		name = ""
 	}
-	stmtStr := fmt.Sprintf("INSERT INTO %s(adventure_id, monster_name, description, xp_per_monster, number_killed) values(?,?,?,?,?)", combatTable)
-	_, err = a.repo.ExecuteQuery(stmtStr, adventureId, name, desc, xpValue, amount)
+	stmtStr := fmt.Sprintf("INSERT INTO %s(adventure_id, monster_name, xp_per_monster, number_defeated) values(?,?,?,?)", combatTable)
+	_, err = a.repo.ExecuteQuery(stmtStr, adventureId, name, xpValue, amount)
 	return err
 }
 
@@ -502,6 +494,47 @@ func (a AdventureService) DeleteGem(gemId string) error {
 	}
 	stmtStr := fmt.Sprintf("DELETE FROM %s WHERE ID =?", gemTable)
 	_, err = a.repo.ExecuteQuery(stmtStr, id)
+	return err
+}
+
+func (a AdventureService) DeleteGems(aId string) error {
+	id, err := strconv.Atoi(aId)
+	if err != nil {
+		return err
+	}
+	stmtStr := fmt.Sprintf("DELETE FROM %s WHERE adventure_id =?", gemTable)
+	_, err = a.repo.ExecuteQuery(stmtStr, id)
+	return err
+}
+
+func (a AdventureService) ModifyGems(aId int, data []map[string]string) error {
+	stmtStr := fmt.Sprintf("DELETE FROM %s WHERE adventure_id =?", gemTable)
+	queries := []string{stmtStr}
+	firstParamList := []interface{}{aId}
+	params := [][]interface{}{firstParamList}
+	for _, formData := range data {
+		amount, err := stripGoodNumberValueFromFormData("number", formData)
+		if err != nil {
+			return err
+		}
+		xpValue, err := stripGoodNumberValueFromFormData("xp-value", formData)
+		if err != nil {
+			return err
+		}
+		desc, dOk := formData["description"]
+		name, nOk := formData["name"]
+		if !dOk {
+			desc = ""
+		}
+		if !nOk {
+			name = ""
+		}
+		queries = append(queries, fmt.Sprintf("INSERT INTO %s(adventure_id, name, description, value, total) values(?,?,?,?,?)", gemTable))
+		paramList := []interface{}{aId, name, desc, xpValue, amount}
+		params = append(params, paramList)
+
+	}
+	err := a.repo.DoTransaction(queries, params)
 	return err
 }
 
@@ -580,13 +613,13 @@ func (a AdventureService) GetJewelleryForAdventure(id int) ([]types.Jewellery, e
 }
 
 func (a AdventureService) GetCombatById(id string) (*types.MonsterGroup, error) {
-	jewelleryId, err := strconv.Atoi(id)
+	combatId, err := strconv.Atoi(id)
 	if err != nil {
 		return nil, err
 	}
 
-	stmtStr := fmt.Sprintf("SELECT * FROM %s WHERE id=?;", combatTable)
-	rows, qErr := a.repo.RunQuery(stmtStr, jewelleryId)
+	stmtStr := fmt.Sprintf("SELECT id, monster_name, number_defeated, xp_per_monster FROM %s WHERE id=?;", combatTable)
+	rows, qErr := a.repo.RunQuery(stmtStr, combatId)
 	if qErr != nil {
 		return nil, err
 	}
@@ -594,19 +627,18 @@ func (a AdventureService) GetCombatById(id string) (*types.MonsterGroup, error) 
 	results := make([]*types.MonsterGroup, 0)
 	for rows.Next() {
 		cur := &types.MonsterGroup{}
-		var trashInt int
-		rows.Scan(&cur.Id, &trashInt, &cur.Name, &cur.Description, &cur.XPPerOneKill, &cur.NumberDefeated)
+		rows.Scan(&cur.Id, &cur.Name, &cur.NumberDefeated, &cur.XPPerOneKill)
 		results = append(results, cur)
 	}
 	if len(results) < 1 {
-		return nil, fmt.Errorf("unable to locate combat with id %d", jewelleryId)
+		return nil, fmt.Errorf("unable to locate combat with id %d", combatId)
 	}
 	return results[0], nil
 }
 
 func (a AdventureService) GetCombatForAdventure(id int) ([]types.MonsterGroup, error) {
 	results := make([]types.MonsterGroup, 0)
-	stmtStr := fmt.Sprintf("SELECT * FROM %s WHERE adventure_id=?;", combatTable)
+	stmtStr := fmt.Sprintf("SELECT id, monster_name, number_defeated, xp_per_monster FROM %s WHERE adventure_id=?;", combatTable)
 	rows, qErr := a.repo.RunQuery(stmtStr, id)
 	if qErr != nil {
 		return nil, qErr
@@ -614,8 +646,7 @@ func (a AdventureService) GetCombatForAdventure(id int) ([]types.MonsterGroup, e
 	defer rows.Close()
 	for rows.Next() {
 		cur := types.MonsterGroup{}
-		var trashInt int
-		rows.Scan(&cur.Id, &trashInt, &cur.Name, &cur.NumberDefeated, &cur.XPPerOneKill)
+		rows.Scan(&cur.Id, &cur.Name, &cur.NumberDefeated, &cur.XPPerOneKill)
 		results = append(results, cur)
 	}
 	return results, nil

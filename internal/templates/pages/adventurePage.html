@@ -4,18 +4,15 @@
 <head>
     <meta charset="utf-8" />
     <title>The Keep on the Internet</title>
-    <link rel="stylesheet" href="/static/css/style.css">
+    <link rel="stylesheet" href="/static/css/adventure.css">
     <script src="https://unpkg.com/htmx.org"></script>
-    <script src="https://unpkg.com/hyperscript.org@0.9.12"></script>
 </head>
 
 <body>
     <div id="container">
         <div class="flex">
             <div id="maind">
-                <div id="adventure-details">
-                </div>
-                <div class="box">
+                <div class="box" id="adventure-details">
                     <h3>{{ .Name }}</h3>
                     <table>
                         <tr>
@@ -32,7 +29,7 @@
                         </tr>
                     </table>
                 </div>
-                <div class="box money" hx-target="this" hx-swap="outerHTML">
+                <div class="box" hx-target="this" hx-swap="outerHTML">
                     <h3>Coins - {{.Coins.TotalXPAmount }} XP</h3>
                     <table>
                         <thead>
@@ -69,127 +66,41 @@
                     </table>
                     <button hx-get="{{ .CoinPath.Edit }}">Edit</button>
                 </div>
-                <div class="box characters">
+                <div class="box">
                     <h3>Characters</h3>
                     <table id="characterList">
                     </table>
                 </div>
-                <div class="box">
+                <div class="box" hx-target="this" hx-swap="innerHTML">
                     <h3>Gemstones Recovered</h3>
-                    <div class="xp-source" id="GemList">
-                        <div class="tr">
-                            <span class="td">Gem Name</span>
-                            <span class="td">Number Found</span>
-                            <span class="td">XP Per One</span>
-                            <span class="td">Total XP</span>
-                            <span class="td button-space"></span>
-                            <span class="td"></span>
-                        </div>
-                        {{ range .Gems }}
-                        <div class="tr" hx-target="this" hx-swap="outerHTML">
-                            <span class="td">{{ .Name }}</span>
-                            <span class="td">{{ .Number }}</span>
-                            <span class="td">{{ .XPValue }}</span>
-                            <span class="td">{{ .TotalXPAmount }}</span>
-                            <span class="td button-space"></span>
-                            <span class="td"><button hx-trigger="mousedown"
-                                    hx-get="{{ .Path.Edit }}">Edit</button></span>
-                            <span class="td"><button class="danger" hx-trigger="mousedown"
-                                    hx-delete="{{ .Path.Display }}">Delete</button></span>
-                        </div>
-                        {{ end }}
-                    </div>
-                    <button hx-get="{{ .NewLootPath.Edit }}?type=gem" hx-target="body" hx-swap="beforeend">Add New
-                        Gem</button>
+                    <table class="xp-source" id="GemList">
+                        <thead>
+                            <tr>
+                                <th class="td">Gem Name</th>
+                                <th class="td">Number Found</th>
+                                <th class="td">XP Per One</th>
+                                <th class="td">Total XP</th>
+                                <th class="td button-space"></th>
+                                <th class="td"></th>
+                            </tr>
+                        </thead>
+                        <tbody> {{ range .Gems }}
+                            <tr>
+                                <td>{{ .Name }}</td>
+                                <td>{{ .Number }}</td>
+                                <td>{{ .XPValue }}</td>
+                                <td>{{ .TotalXPAmount }}</td>
+                            </tr>
+                            {{ end }}
+                        </tbody>
+                    </table>
+                    <button hx-get="{{ .GemPath.Edit }}" hx-trigger="mousedown">Edit Gems</button>
                 </div>
-                <div class="box">
-                    <h3>jewelery Recovered</h3>
-                    <div class="xp-source" id="JewelleryList">
-                        <div class="tr">
-                            <span class="td">Jewllery Name</span>
-                            <span class="td">Number Found</span>
-                            <span class="td">XP Per One</span>
-                            <span class="td">Total XP</span>
-                            <span class="td button-space"></span>
-                            <span class="td"></span>
-                        </div>
-                        {{ range .Jewellery }}
-                        <div class="tr" hx-target="this" hx-swap="outerHTML">
-                            <span class="td">{{ .Name }}</span>
-                            <span class="td">{{ .Number }}</span>
-                            <span class="td">{{ .XPValue }}</span>
-                            <span class="td">{{ .TotalXPAmount }}</span>
-                            <span class="td button-space"></span>
-                            <span class="td"><button hx-trigger="mousedown"
-                                    hx-get="{{ .Path.Edit }}">Edit</button></span>
-                            <span class="td"><button class="danger" hx-trigger="mousedown"
-                                    hx-delete="{{ .Path.Display }}">Delete</button></span>
-                        </div>
-                        {{ end }}
-                    </div>
-                    <button hx-get="{{ .NewLootPath.Edit }}?type=jewellery" hx-target="body" hx-swap="beforeend">Add New
-                        Jewellery</button>
+                <div id="sided" style="max-width: 225px">
                 </div>
-                <div class="box">
-                    <h3>Magic Items</h3>
-                    <div class="xp-source" id="MagicItemList">
-                        <div class="tr">
-                            <span class="td">Name</span>
-                            <span class="td">XP Value</span>
-                            <span class="td">Gold value</span>
-                            <span class="td button-space"></span>
-                            <span class="td"></span>
-                        </div>
-                        {{ range .MagicItems }}
-                        <div class="tr" hx-target="this" hx-swap="outerHTML">
-                            <span class="td">{{ .Name }}</span>
-                            <span class="td">{{ .ApparentValue }}</span>
-                            <span class="td">{{ .GoldValye }}</span>
-                            <span class="td button-space"></span>
-                            <span class="td"><button hx-trigger="mousedown"
-                                    hx-get="{{ .Path.Edit }}">Edit</button></span>
-                            <span class="td"><button class="danger" hx-trigger="mousedown"
-                                    hx-delete="{{ .Path.Display }}">Delete</button></span>
-                        </div>
-                        {{ end }}
-                    </div>
-                    <button hx-get="{{ .NewLootPath.Edit }}?type=magicItem" hx-target="body" hx-swap="beforeend">Add New
-                        Magic Item</button>
-                </div>
-                <div class="box">
-                    <h3>Groups of Monsters Defeated</h3>
-                    <div class="xp-source" id="CombatList">
-                        <div class="tr">
-                            <span class="td">Name</span>
-                            <span class="td">Number Defeated</span>
-                            <span class="td">XP Value</span>
-                            <span class="td button-space"></span>
-                            <span class="td"></span>
-                        </div>
-                        {{ range .Combat }}
-                        <div class="tr" hx-target="this" hx-swap="outerHTML">
-                            <span class="td">{{ .Name }}</span>
-                            <span class="td">{{ .Number }}</span>
-                            <span class="td">{{ .XPValue }}</span>
-                            <span class="td button-space"></span>
-                            <span class="td"><button hx-trigger="mousedown"
-                                    hx-get="{{ .Path.Edit }}">Edit</button></span>
-                            <span class="td"><button class="danger" hx-trigger="mousedown"
-                                    hx-delete="{{ .Path.Display }}">Delete</button></span>
-                        </div>
-                        {{ end }}
-                    </div>
-                    <button hx-get="{{ .NewLootPath.Edit }}?type=combat" hx-target="body" hx-swap="beforeend">Add New
-                        Monster Group</button>
-                </div>
-
-            </div>
-            <div id="sided" style="max-width: 225px">
             </div>
         </div>
-
     </div>
-
 </body>
 
 </html>

@@ -95,7 +95,7 @@ td {
 }
 
 #maind {
-	width: 875px;
+/*	width: 875px;*/
 	vertical-align: baseline;
 	background-color: #000000a8;
 	border: 2px solid #000000ff;
@@ -129,23 +129,6 @@ border: 2px solid #383838;
 	padding: 10px 15px;
 	margin: 5px;
 }
-
-.xp-source {
-	table-layout: fixed;
-	& td {
-/*	border: 2px solid #383838;
-	border-radius: 4px; */
-	}
-	& input {
-		width: 30%;
-	}
-	
-	& .delete-col {
-		display: flex;
-		align-items: center;
-	}
-	
-  }
 
 .input-row {
 		width: 20%;

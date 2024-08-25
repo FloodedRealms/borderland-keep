@@ -1,0 +1,54 @@
+<h3>Gemstones Recovered</h3>
+<!--<div class="xp-source" id="GemList">
+                        <div class="tr">
+                            <span class="td">Gem Name</span>
+                            <span class="td">Number Found</span>
+                            <span class="td">XP Per One</span>
+                            <span class="td">Total XP</span>
+                            <span class="td button-space"></span>
+                            <span class="td"></span>
+                        </div>
+                        {{ range .Gems }}
+                        <div class="tr" hx-target="this" hx-swap="outerHTML">
+                            <span class="td">{{ .Name }}</span>
+                            <span class="td">{{ .Number }}</span>
+                            <span class="td">{{ .XPValue }}</span>
+                            <span class="td">{{ .TotalXPAmount }}</span>
+                            <span class="td button-space"></span>
+                            <span class="td"><button hx-trigger="mousedown"
+                                    hx-get="{{ .Path.Edit }}">Edit</button></span>
+                            <span class="td"><button class="danger" hx-trigger="mousedown"
+                                    hx-delete="{{ .Path.Display }}">Delete</button></span>
+                        </div>
+                        {{ end }}
+                    </div>-->
+<form hx-target="this" hx-swap="outerHTML" onsubmit="return false;">
+    <h3>Editing Gemstones Recovered</h3>
+    <table class="xp-source" id="GemList">
+        <thead>
+            <tr>
+                <th class="td">Gem Name</th>
+                <th class="td">Number Found</th>
+                <th class="td">XP Per One</th>
+            </tr>
+        </thead>
+        <tbody > 
+            {{ range .Gems }}
+            <tr>
+                <td><input name="name" type="text" value="{{ .Name }}"></input></td>
+                <td><input name="number" type="text" value="{{ .Number }}"></input></td>
+                <td><input name="xp-value" type="text" value="{{ .XPValue }}"></input></td>
+                <td><button hx-target="closest tr" hx-swap="outerHTML" hx-trigger="mousedown" hx-delete="{{ .Path.Display }}">Delete</button></td>
+            </tr>
+            {{ end }}
+           <tr hx-target="this" hx-swap="beforebegin">
+               <td></td>
+            <td><button hx-get="{{ .NewLootPath.Display }}?type=gem" >Add New</button></td>
+            <td></td>
+            </tr>
+        </tbody>
+    </table>
+                Gem</button>
+    <button hx-post="{{ .Path.Display }}" hx-trigger="mousedown">Save Gems</button>
+    <button hx-get="{{ .Path.Display }}" hx-trigger="mousedown">Cancel</button>
+</form>

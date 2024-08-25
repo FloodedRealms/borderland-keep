@@ -120,6 +120,31 @@ func (s SqliteRepo) ExecuteQuery(q string, params ...interface{}) (sql.Result, e
 	return stmt.Exec(params...)
 }
 
+func (s SqliteRepo) DoTransaction(qs []string, params [][]interface{}) error {
+	if len(qs) != len(params) {
+		return fmt.Errorf("query / parameter list mismatch. please ensure that there is a number or paramaters equal to the number of queries")
+	}
+	tx, err := s.db.Begin()
+	if err != nil {
+		return err
+	}
+	for i, p := range params {
+
+		stmt, serr := tx.Prepare(qs[i])
+		if serr != nil {
+			tx.Rollback()
+			return err
+		}
+		_, eerr := stmt.Exec(p...)
+		if eerr != nil {
+			tx.Rollback()
+			return err
+
+		}
+	}
+	return tx.Commit()
+}
+
 // Campaigns
 func (s SqliteRepo) processCampaignRows(r *sql.Rows) []*types.CampaignRecord {
 	campaigns := make([]*types.CampaignRecord, 0)
