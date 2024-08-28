@@ -49,8 +49,8 @@ func (ara AdventureApi) ListAdventureRecordsForCampaign(w http.ResponseWriter, r
 }
 
 func (ara AdventureApi) GetAdventure(w http.ResponseWriter, r *http.Request) {
-	id := r.PathValue("adventureId")
-
+	i := r.PathValue("adventureId")
+	id, _ := strconv.Atoi(i)
 	arr, err := ara.adventureRecordService.GetAdventureRecordById(id)
 
 	if err != nil {

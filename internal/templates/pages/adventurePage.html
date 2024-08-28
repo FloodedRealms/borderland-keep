@@ -12,22 +12,48 @@
     <div id="container">
         <div class="flex">
             <div id="maind">
-                <div class="box" id="adventure-details">
-                    <h3>{{ .Name }}</h3>
-                    <table>
-                        <tr>
-                            <td><label for="xp-recovered">Amount of XP Recovered:</label></td>
-                            <td><span id="xp-recovered">{{ .TotalXPAmount }}</span></td>
-                        </tr>
-                        <tr>
-                            <td><label for="xp-fullshare">Amount of a Full Share:</label></td>
-                            <td><span id="xp-fullshare">{{ .FullShareXP }}</span> </td>
-                        </tr>
-                        <tr>
-                            <td><label for="xp-halfshare">Amount of a Half Share:</label></td>
-                            <td><span id="xp-halfshare">{{ .HalfShareXP }}</span> </td>
-                        </tr>
-                    </table>
+                <div class="box" id="adventure-and-characters" hx-get="{{ .DetailsPath.Display }}"
+                            hx-trigger="updateOverview from:body" hx-target="this" hx-swap="outerHTML">
+                    <div class="box" id="adventure-details">
+                        <h3>{{ .Name }}</h3>
+                        <table id="adventure-overview" >
+                            <tr>
+                                <td><label for="xp-recovered">Amount of XP Recovered:</label></td>
+                                <td><span id="xp-recovered">{{ .TotalXPAmount }}</span></td>
+                            </tr>
+                            <tr>
+                                <td><label for="xp-fullshare">Amount of a Full Share:</label></td>
+                                <td><span id="xp-fullshare">{{ .FullShareXP }}</span> </td>
+                            </tr>
+                            <tr>
+                                <td><label for="xp-halfshare">Amount of a Half Share:</label></td>
+                                <td><span id="xp-halfshare">{{ .HalfShareXP }}</span> </td>
+                            </tr>
+                        </table>
+                    </div>
+                    <div class="box">
+                        <h3>Characters</h3>
+                        <table id="CharacterList">
+                            <thead>
+                                <tr>
+                                    <th>Name</th>
+                                    <th>Type</th>
+                                    <th>XP Earned</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {{ range .Characters}}
+                                <tr>
+                                    <td>{{ .Name }}</td>
+                                    <td>{{ if .Halfshare}} Henchmen {{ else }} Player Character {{ end }}</td>
+                                    <td>{{ if .Halfshare}} {{ $.HalfShareXP }} {{ else }} {{ $.FullShareXP }} {{ end }}
+                                    </td>
+                                </tr>
+                                {{ end }}
+                            </tbody>
+                        </table>
+                        <button hx-disinherit="true" hx-target="closest div" hx-swap="innerHTML" hx-get="{{ .CharacterPath.Edit}}">Edit Characters</button>
+                    </div>
                 </div>
                 <div class="box" hx-target="this" hx-swap="outerHTML">
                     <h3>Coins - {{.Coins.TotalXPAmount }} XP</h3>
@@ -65,11 +91,6 @@
                         </tr>
                     </table>
                     <button hx-get="{{ .CoinPath.Edit }}">Edit</button>
-                </div>
-                <div class="box">
-                    <h3>Characters</h3>
-                    <table id="characterList">
-                    </table>
                 </div>
                 <div class="box" hx-target="this" hx-swap="innerHTML">
                     <h3>Gemstones Recovered</h3>
@@ -119,60 +140,60 @@
                     </table>
                     <button hx-get="{{ .JewelleryPath.Edit }}" hx-trigger="mousedown">Edit Jewellery</button>
 
-                    </div>
-                    <div class="box" id="CombatList"  hx-target="this" hx-swap="innerHTML">
-                        <h3>Combat Encounters</h3>
-                        <table class="xp-source" id="CombatList">
-                            <thead>
-                                <tr>
-                                    <th class="td">Name</th>
-                                    <th class="td">Number Defeated</th>
-                                    <th class="td">XP Per Kill</th>
-                                    <th class="td">Total XP</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {{ range .Combat }}
-                                <tr>
-                                    <td>{{ .Name }}</td>
-                                    <td>{{ .Number }}</td>
-                                    <td>{{ .XPValue }}</td>
-                                    <td>{{ .TotalXPAmount }}</td>
-                                </tr>
-                                {{ end }}
-                            </tbody>
-                        </table>
-                        <button hx-get="{{ .CombatPath.Edit }}" hx-trigger="mousedown">Edit Combat</button>
-                    </div>
-                    <div class="box" id="MagicItemList"  hx-target="this" hx-swap="innerHTML">
-                        <h3>Magic Items</h3>
-                        <table class="xp-source" id="CombatList">
-                            <thead>
-                                <tr>
-                                    <th class="td">Name</th>
-                                    <th class="td">Number Defeated</th>
-                                    <th class="td">XP Per Kill</th>
-                                    <th class="td">Total XP</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {{ range .MagicItems }}
-                                <tr>
-                                    <td>{{ .Name }}</td>
-                                    <td>{{ .Number }}</td>
-                                    <td>{{ .XPValue }}</td>
-                                    <td>{{ .TotalXPAmount }}</td>
-                                </tr>
-                                {{ end }}
-                            </tbody>
-                        </table>
-                        <button hx-get="{{ .MagicItemPath.Edit }}" hx-trigger="mousedown">Edit Magic Items</button>
-                    </div>
-                    <div id="sided" style="max-width: 225px">
-                    </div>
+                </div>
+                <div class="box" id="CombatList" hx-target="this" hx-swap="innerHTML">
+                    <h3>Combat Encounters</h3>
+                    <table class="xp-source" id="CombatList">
+                        <thead>
+                            <tr>
+                                <th class="td">Name</th>
+                                <th class="td">Number Defeated</th>
+                                <th class="td">XP Per Kill</th>
+                                <th class="td">Total XP</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {{ range .Combat }}
+                            <tr>
+                                <td>{{ .Name }}</td>
+                                <td>{{ .Number }}</td>
+                                <td>{{ .XPValue }}</td>
+                                <td>{{ .TotalXPAmount }}</td>
+                            </tr>
+                            {{ end }}
+                        </tbody>
+                    </table>
+                    <button hx-get="{{ .CombatPath.Edit }}" hx-trigger="mousedown">Edit Combat</button>
+                </div>
+                <div class="box" id="MagicItemList" hx-target="this" hx-swap="innerHTML">
+                    <h3>Magic Items</h3>
+                    <table class="xp-source" id="CombatList">
+                        <thead>
+                            <tr>
+                                <th class="td">Name</th>
+                                <th class="td">Number Defeated</th>
+                                <th class="td">XP Earned</th>
+                                <th class="td">Total XP</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {{ range .MagicItems }}
+                            <tr>
+                                <td>{{ .Name }}</td>
+                                <td>{{ .Number }}</td>
+                                <td>{{ .XPValue }}</td>
+                                <td>{{ .TotalXPAmount }}</td>
+                            </tr>
+                            {{ end }}
+                        </tbody>
+                    </table>
+                    <button hx-get="{{ .MagicItemPath.Edit }}" hx-trigger="mousedown">Edit Magic Items</button>
+                </div>
+                <div id="sided" style="max-width: 225px">
                 </div>
             </div>
         </div>
+    </div>
 </body>
 
 </html>

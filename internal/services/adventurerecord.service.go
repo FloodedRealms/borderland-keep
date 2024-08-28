@@ -21,9 +21,10 @@ const gemTable string = "gems"
 const jewelleryTable string = "jewellery"
 const magicItemTable string = "magic_items"
 const combatTable string = "monster_groups"
+const adventureToCharactersTable string = "adventures_to_characters"
 
-// const characterToAdventureTable string = "adventures_to_characters"
 const characterToAdventureView string = "adventures_to_character_name"
+const possibleCharactersView string = "possible_characters_for_adventure"
 
 func NewAdventureRecordService(repo repository.Repository, ctx context.Context) *AdventureService {
 	return &AdventureService{repo, ctx}
@@ -174,16 +175,11 @@ func (a *AdventureService) ListAdventureRecordsForCampaign(i string) ([]*types.A
 	util.CheckErr(err)
 	campaign := types.NewCampaign(id)
 	return a.repo.GetAdventureRecordsForCampaign(campaign)
-
 }
 
-func (a *AdventureService) GetAdventureRecordById(i string) (*types.AdventureRecord, error) {
+func (a *AdventureService) GetAdventureRecordById(id int) (*types.AdventureRecord, error) {
 	adventureToReturn := &types.AdventureRecord{}
-	id, err := strconv.Atoi(i)
-	if err != nil {
-		return nil, err
-	}
-	stmtStr := fmt.Sprintf("SELECT * FROM %s c where c.campaign_id = ?", adventureTable)
+	stmtStr := fmt.Sprintf("SELECT * FROM %s a where a.id = ?", adventureTable)
 
 	adventureResults, err := a.repo.RunQuery(stmtStr, id)
 	if err != nil {
@@ -215,12 +211,14 @@ func (a *AdventureService) GetAdventureRecordById(i string) (*types.AdventureRec
 		adventureToReturn.MagicItems = mi
 		adventureToReturn.Combat = c
 		adventureToReturn.Characters = chars
+		f, h := adventureToReturn.CalculateXPShares()
+		adventureToReturn.HalfShareXP = h
+		adventureToReturn.FullShareXP = f
 
 	} else {
 		return nil, util.UnableToFindResourceWithId("adventure", id)
 	}
 	return adventureToReturn, nil
-
 }
 
 func (a AdventureService) GetCoinsForAdventure(i string) (*types.Coins, error) {
@@ -591,8 +589,9 @@ func (a AdventureService) ModifyCombat(aId int, data []map[string]string) error 
 		if !nOk {
 			name = ""
 		}
-		queries = append(queries, fmt.Sprintf("INSERT INTO %s(adventure_id, monster_name, number_defeated, xp_per_monster) values(?,?,?,?)", combatTable))
-		paramList := []interface{}{aId, name, amount, xpValue}
+		c := types.NewMonsterGroup(name, "", amount, xpValue)
+		queries = append(queries, fmt.Sprintf("INSERT INTO %s(adventure_id, monster_name, number_defeated, xp_per_monster, total_xp) values(?,?,?,?,?)", combatTable))
+		paramList := []interface{}{aId, name, amount, xpValue, int(c.TotalXPAmount())}
 		params = append(params, paramList)
 
 	}
@@ -622,6 +621,20 @@ func (a AdventureService) ModifyMagicItems(aId int, data []map[string]string) er
 		paramList := []interface{}{aId, name, "", xpValue, xpValue}
 		params = append(params, paramList)
 
+	}
+	err := a.repo.DoTransaction(queries, params)
+	return err
+}
+
+func (a AdventureService) ModifyCharacters(aId int, data []types.AdventureCharacter) error {
+	stmtStr := fmt.Sprintf("DELETE FROM %s WHERE adventure_id =?", adventureToCharactersTable)
+	queries := []string{stmtStr}
+	firstParamList := []interface{}{aId}
+	params := [][]interface{}{firstParamList}
+	for _, formData := range data {
+		queries = append(queries, fmt.Sprintf("INSERT INTO %s(adventure_id, character_id, half_share) values(?,?,?)", adventureToCharactersTable))
+		paramList := []interface{}{aId, formData.Id, formData.Halfshare}
+		params = append(params, paramList)
 	}
 	err := a.repo.DoTransaction(queries, params)
 	return err
@@ -797,6 +810,29 @@ func (a AdventureService) GetCharactersForAdventure(id int) ([]types.AdventureCh
 		results = append(results, cur)
 	}
 	return results, nil
+}
+
+func (a AdventureService) GetPossibleCharactersForAdventure(id int) ([]types.AdventureCharacter, []bool, error) {
+	stmtStr := fmt.Sprintf("SELECT atc.character_id, atc.character_name, atc.on_adventure FROM %s atc WHERE adventure_id=? ORDER BY character_name ASC;", possibleCharactersView)
+	rows, err := a.repo.RunQuery(stmtStr, id)
+	if err != nil {
+		return nil, nil, err
+	}
+	results := make([]types.AdventureCharacter, 0)
+	onAdventure := make([]bool, 0)
+	defer rows.Close()
+	for rows.Next() {
+		cur := types.AdventureCharacter{}
+		wasThere := ""
+		rows.Scan(&cur.Id, &cur.Name, &wasThere)
+		results = append(results, cur)
+		if wasThere == "Yes" {
+			onAdventure = append(onAdventure, true)
+		} else {
+			onAdventure = append(onAdventure, false)
+		}
+	}
+	return results, onAdventure, nil
 }
 
 /*

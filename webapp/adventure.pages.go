@@ -9,6 +9,8 @@ import (
 	"github.com/floodedrealms/adventure-archivist/types"
 )
 
+const BASE_PATH = "/pages/adventure"
+
 type AdventurePage struct {
 	adventureService services.AdventureService
 	characterService services.CharacterService
@@ -32,6 +34,7 @@ type AdventurePageModel struct {
 	Characters    []types.AdventureCharacter
 	//These will hold the paths to the various editors
 	DetailsPath   path
+	CharacterPath path
 	CoinPath      path
 	GemPath       path
 	JewelleryPath path
@@ -83,14 +86,13 @@ type MagicItemPageModel struct {
 	Path        path
 }
 
-const basepath = "/pages/adventure"
-
 func newPhysicalAdventurePath(resource string, id int) path {
-	path := fmt.Sprintf(basepath+"/%d"+resource, id)
+	path := fmt.Sprintf(BASE_PATH+"/%d"+resource, id)
 	return newPath(path)
 }
+
 func newPhysicalAdventurePathWithResourceId(resource string, adventureId, resourceId int) path {
-	path := fmt.Sprintf(basepath+"/%d"+resource+"/%d", adventureId, resourceId)
+	path := fmt.Sprintf(BASE_PATH+"/%d"+resource+"/%d", adventureId, resourceId)
 	return newPath(path)
 }
 
@@ -129,9 +131,9 @@ func createMagicItemPageModels(data []types.MagicItem, aId int) []LootPageModel 
 func newAdventurePathToRegister(appendedPath string, additionalPathParams ...string) path {
 	path := ""
 	if len(additionalPathParams) == 1 {
-		path = fmt.Sprintf(basepath+"/%s"+appendedPath+"/%s", "{adventureId}", additionalPathParams[0])
+		path = fmt.Sprintf(BASE_PATH+"/%s"+appendedPath+"/%s", "{adventureId}", additionalPathParams[0])
 	} else {
-		path = fmt.Sprintf(basepath+"/%s"+appendedPath, "{adventureId}")
+		path = fmt.Sprintf(BASE_PATH+"/%s"+appendedPath, "{adventureId}")
 	}
 	return newPath(path)
 }
@@ -148,7 +150,8 @@ func newAdventurePageModel(a types.AdventureRecord) AdventurePageModel {
 		GameDays:      a.GameDays,
 		Coins:         a.Coins,
 		Characters:    a.Characters,
-		DetailsPath:   newPhysicalAdventurePath("", a.Id),
+		DetailsPath:   newPhysicalAdventurePath("/details", a.Id),
+		CharacterPath: newPhysicalAdventurePath("/characters", a.Id),
 		CoinPath:      newPhysicalAdventurePath("/coin", a.Id),
 		GemPath:       newPhysicalAdventurePath("/gems", a.Id),
 		JewelleryPath: newPhysicalAdventurePath("/jewellery", a.Id),
@@ -217,6 +220,7 @@ func NewAdventurePage(cs services.AdventureService, ch services.CharacterService
 
 func (a AdventurePage) RegisterRoutes(m *http.ServeMux) {
 	mainPath := newAdventurePathToRegister("")
+	detailsPath := newAdventurePathToRegister("/details")
 	coinPath := newAdventurePathToRegister("/coin")
 	gemPath := newAdventurePathToRegister("/gems")
 	jewelleryPath := newAdventurePathToRegister("/jewellery")
@@ -224,9 +228,11 @@ func (a AdventurePage) RegisterRoutes(m *http.ServeMux) {
 	magicItemPath := newAdventurePathToRegister("/magic-item")
 	newLootPath := newAdventurePathToRegister("/new-loot")
 	goldTogglePath := newAdventurePathToRegister("/gold-toggle")
-	//characterPath := newAdventurePathToRegister("/characters")
+	characterPath := newAdventurePathToRegister("/characters")
 
 	m.HandleFunc(mainPath.Display, a.AdventureOverview)
+
+	m.HandleFunc(detailsPath.Display, a.updateDetails)
 
 	m.HandleFunc("GET "+newLootPath.Display, a.newLoot)
 
@@ -275,14 +281,14 @@ func (a AdventurePage) RegisterRoutes(m *http.ServeMux) {
 	m.HandleFunc("POST "+magicItemPath.Display, a.saveMagicItems)
 	m.HandleFunc("DELETE "+magicItemPath.Display, sendEmptyResponse)
 
-	//m.HandleFunc("GET "+characterPath.Display, a.displayCharacters)
+	m.HandleFunc("GET "+characterPath.Edit, a.openCharacterEditor)
+	m.HandleFunc("GET "+characterPath.Display, a.updateDetails)
+	m.HandleFunc("POST "+characterPath.Display, a.saveCharacters)
 
 }
 
 func (a AdventurePage) AdventureOverview(w http.ResponseWriter, r *http.Request) {
-	//applyCorsHeaders(w)
-	id := r.PathValue("adventureId")
-
+	id, _ := a.extractAdventureId(r)
 	adventure, err := a.adventureService.GetAdventureRecordById(id)
 
 	if err != nil {
@@ -305,8 +311,28 @@ func (a AdventurePage) renderAdventurePage(w http.ResponseWriter, data types.Adv
 	w.Write([]byte(output))
 }
 
+func (a AdventurePage) updateDetails(w http.ResponseWriter, r *http.Request) {
+	aid, _ := a.extractAdventureId(r)
+	adventure, _ := a.adventureService.GetAdventureRecordById(aid)
+	pdata := AdventurePageModel{
+		DetailsPath:   newPhysicalAdventurePath("/details", aid),
+		TotalXPAmount: adventure.TotalXPAmount(),
+		FullShareXP:   adventure.FullShareXP,
+		HalfShareXP:   adventure.HalfShareXP,
+		Characters:    adventure.Characters,
+		Name:          adventure.Name,
+		CharacterPath: newPhysicalAdventurePath("/characters", aid),
+	}
+	output, err := a.renderer.RenderPartial("adventureOverview.html", pdata)
+	if err != nil {
+		a.renderer.MustRenderErrorPage(w, "error.html", err)
+		return
+	}
+	w.Write([]byte(output))
+}
+
 func (a AdventurePage) CoinDisplay(w http.ResponseWriter, r *http.Request) {
-	id := r.PathValue("adventureId")
+	id, _ := a.extractAdventureId(r)
 	adata, err := a.adventureService.GetAdventureRecordById(id)
 	adventure := newAdventurePageModel(*adata)
 	if err != nil {
@@ -320,7 +346,7 @@ func (a AdventurePage) CoinDisplay(w http.ResponseWriter, r *http.Request) {
 }
 
 func (a AdventurePage) CoinEditHandler(w http.ResponseWriter, r *http.Request) {
-	id := r.PathValue("adventureId")
+	id, _ := a.extractAdventureId(r)
 	adata, err := a.adventureService.GetAdventureRecordById(id)
 	adventure := newAdventurePageModel(*adata)
 	if err != nil {
@@ -354,6 +380,8 @@ func (a AdventurePage) SaveAndDisplayCoins(w http.ResponseWriter, r *http.Reques
 	if err != nil {
 		a.renderer.MustRenderErrorPage(w, "", err)
 	}
+
+	w.Header().Set("HX-Trigger", "updateOverview")
 	w.Write([]byte(output))
 }
 
@@ -526,6 +554,37 @@ func (a AdventurePage) openMagicItemEditor(w http.ResponseWriter, r *http.Reques
 	w.Write([]byte(output))
 }
 
+func (a AdventurePage) openCharacterEditor(w http.ResponseWriter, r *http.Request) {
+	aId, err := a.extractAdventureId(r)
+	if err != nil {
+		a.renderer.MustRenderErrorPage(w, "", err)
+		return
+	}
+	adata, attendance, err := a.adventureService.GetPossibleCharactersForAdventure(aId)
+	if err != nil {
+		a.renderer.MustRenderErrorPage(w, "", err)
+		return
+	}
+	pData := struct {
+		Characters  []types.AdventureCharacter
+		Attendance  []bool
+		Path        path
+		DisplayType string
+	}{
+		Characters:  adata,
+		Attendance:  attendance,
+		Path:        newPhysicalAdventurePath("/characters", aId),
+		DisplayType: "Characters",
+	}
+
+	output, err := a.renderer.RenderEditor("characterTableEdit.html", pData)
+	if err != nil {
+		a.renderer.MustRenderErrorPage(w, "", err)
+		return
+	}
+	w.Write([]byte(output))
+}
+
 func (a AdventurePage) displayGemList(w http.ResponseWriter, r *http.Request) {
 	id := r.PathValue("adventureId")
 	aId, err := strconv.Atoi(id)
@@ -549,6 +608,8 @@ func (a AdventurePage) displayGemList(w http.ResponseWriter, r *http.Request) {
 		a.renderer.MustRenderErrorPage(w, "", err)
 		return
 	}
+	w.Header().Set("HX-Trigger", "updateOverview")
+
 	w.Write([]byte(output))
 }
 
@@ -575,6 +636,8 @@ func (a AdventurePage) displayJewelleryList(w http.ResponseWriter, r *http.Reque
 		a.renderer.MustRenderErrorPage(w, "", err)
 		return
 	}
+	w.Header().Set("HX-Trigger", "updateOverview")
+
 	w.Write([]byte(output))
 }
 
@@ -601,6 +664,8 @@ func (a AdventurePage) displayCombatList(w http.ResponseWriter, r *http.Request)
 		a.renderer.MustRenderErrorPage(w, "", err)
 		return
 	}
+	w.Header().Set("HX-Trigger", "updateOverview")
+
 	w.Write([]byte(output))
 }
 
@@ -627,8 +692,11 @@ func (a AdventurePage) displayMagicItemList(w http.ResponseWriter, r *http.Reque
 		a.renderer.MustRenderErrorPage(w, "", err)
 		return
 	}
+	w.Header().Set("HX-Trigger", "updateOverview")
+
 	w.Write([]byte(output))
 }
+
 func (a AdventurePage) saveGems(w http.ResponseWriter, r *http.Request) {
 	id := r.PathValue("adventureId")
 	aId, err := strconv.Atoi(id)
@@ -729,6 +797,16 @@ func (a AdventurePage) saveCombat(w http.ResponseWriter, r *http.Request) {
 	a.displayCombatList(w, r)
 }
 
+func (a AdventurePage) saveCharacters(w http.ResponseWriter, r *http.Request) {
+	id, _ := a.extractAdventureId(r)
+	data, _ := parseCharacterForm(r)
+	err := a.adventureService.ModifyCharacters(id, data)
+	if err != nil {
+		a.renderer.MustRenderErrorPage(w, "", err)
+	}
+	a.updateDetails(w, r)
+}
+
 func (a AdventurePage) displayErrorPage(partial string, err error) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		a.renderer.MustRenderErrorPage(w, partial, err)
@@ -754,6 +832,33 @@ func parseForm(r *http.Request) ([]map[string]string, error) {
 	}
 
 	return data, nil
+}
+
+func parseCharacterForm(r *http.Request) ([]types.AdventureCharacter, error) {
+	formErr := r.ParseForm()
+	if formErr != nil {
+		return nil, formErr
+	}
+
+	var characters = make([]types.AdventureCharacter, 0)
+	for _, id := range r.Form["character-id"] {
+		_, ok := r.Form[fmt.Sprintf("on-adventure-%s", id)]
+		if !ok {
+			continue
+		}
+		charId, _ := strconv.Atoi(id)
+		halfShare := false
+		xpType, ok := r.Form[fmt.Sprintf("character-type-%s", id)]
+		if !ok {
+			return nil, fmt.Errorf("unable to get character type")
+		}
+		if xpType[0] == "henchmen" {
+			halfShare = true
+		}
+		characters = append(characters, *types.NewAdventureCharacter(halfShare, charId))
+
+	}
+	return characters, nil
 }
 
 func validateLootForm(data []map[string]string, lt types.GenericLootType, aId int) (bool, []LootPageModel) {
@@ -823,400 +928,3 @@ func (a AdventurePage) extractAdventureId(r *http.Request) (int, error) {
 func intToString(i int) string {
 	return fmt.Sprintf("%d", i)
 }
-
-/*
-func (a AdventurePage) saveGem(w http.ResponseWriter, r *http.Request) {
-	gemId := r.PathValue("gemId")
-	formErr := r.ParseForm()
-	if formErr != nil {
-		a.renderer.MustRenderErrorPage(w, "", formErr)
-	}
-	var data = map[string]string{}
-	for key, value := range r.Form {
-		data[key] = value[0]
-	}
-	err := a.adventureService.SaveGem(gemId, data)
-	if err != nil {
-		a.renderer.MustRenderErrorPage(w, "error.html", err)
-	}
-	a.displayGem(w, r)
-}
-
-func (a AdventurePage) saveJewellery(w http.ResponseWriter, r *http.Request) {
-	gemId := r.PathValue("jewelleryId")
-	formErr := r.ParseForm()
-	if formErr != nil {
-		a.renderer.MustRenderErrorPage(w, "", formErr)
-	}
-	var data = map[string]string{}
-	for key, value := range r.Form {
-		data[key] = value[0]
-	}
-	err := a.adventureService.SaveJewellery(gemId, data)
-	if err != nil {
-		a.renderer.MustRenderErrorPage(w, "error.html", err)
-	}
-	a.displayGem(w, r)
-}
-
-func (a AdventurePage) saveCombat(w http.ResponseWriter, r *http.Request) {
-	gemId := r.PathValue("combatId")
-	formErr := r.ParseForm()
-	if formErr != nil {
-		a.renderer.MustRenderErrorPage(w, "", formErr)
-	}
-	var data = map[string]string{}
-	for key, value := range r.Form {
-		data[key] = value[0]
-	}
-	err := a.adventureService.SaveCombat(gemId, data)
-	if err != nil {
-		a.renderer.MustRenderErrorPage(w, "error.html", err)
-		return
-	}
-	a.displayCombat(w, r)
-}
-
-func (a AdventurePage) saveMagicItem(w http.ResponseWriter, r *http.Request) {
-	gemId := r.PathValue("magicItemId")
-	formErr := r.ParseForm()
-	if formErr != nil {
-		a.renderer.MustRenderErrorPage(w, "", formErr)
-	}
-	var data = map[string]string{}
-	for key, value := range r.Form {
-		data[key] = value[0]
-	}
-	err := a.adventureService.SaveMagicItem(gemId, data)
-	if err != nil {
-		a.renderer.MustRenderErrorPage(w, "error.html", err)
-	}
-	a.displayGem(w, r)
-}
-
-func (a AdventurePage) deleteGem(w http.ResponseWriter, r *http.Request) {
-	gemId := r.PathValue("gemId")
-	err := a.adventureService.DeleteGem(gemId)
-	if err != nil {
-		a.renderer.MustRenderErrorPage(w, "error.html", err)
-	}
-	w.Write(make([]byte, 0))
-}
-
-func (a AdventurePage) deleteJewellery(w http.ResponseWriter, r *http.Request) {
-	gemId := r.PathValue("jewelleryId")
-	err := a.adventureService.DeleteJewellery(gemId)
-	if err != nil {
-		a.renderer.MustRenderErrorPage(w, "error.html", err)
-	}
-	w.Write(make([]byte, 0))
-}
-
-func (a AdventurePage) deleteCombat(w http.ResponseWriter, r *http.Request) {
-	gemId := r.PathValue("combatId")
-	err := a.adventureService.DeleteCombat(gemId)
-	if err != nil {
-		a.renderer.MustRenderErrorPage(w, "error.html", err)
-	}
-	w.Write(make([]byte, 0))
-}
-
-func (a AdventurePage) deleteMagicItem(w http.ResponseWriter, r *http.Request) {
-	gemId := r.PathValue("magicItemId")
-	err := a.adventureService.DeleteMagicItem(gemId)
-	if err != nil {
-		a.renderer.MustRenderErrorPage(w, "error.html", err)
-	}
-	w.Write(make([]byte, 0))
-}
-
-func (a AdventurePage) displayGem(w http.ResponseWriter, r *http.Request) {
-
-	aId := r.PathValue("adventureId")
-	adventure, err := strconv.Atoi(aId)
-	if err != nil {
-		a.renderer.MustRenderErrorPage(w, "error.html", err)
-	}
-	id := r.PathValue("gemId")
-	adata, err := a.adventureService.GetGemById(id)
-	pageData := NewLootPageModelFromGem(*adata, adventure)
-	if err != nil {
-		a.renderer.MustRenderErrorPage(w, "", err)
-	}
-	output, err := a.renderer.RenderPartial("loot.html", pageData)
-	if err != nil {
-		a.renderer.MustRenderErrorPage(w, "", err)
-	}
-	w.Write([]byte(output))
-}
-
-func (a AdventurePage) displayJewellery(w http.ResponseWriter, r *http.Request) {
-
-	aId := r.PathValue("adventureId")
-	adventure, err := strconv.Atoi(aId)
-	if err != nil {
-		a.renderer.MustRenderErrorPage(w, "error.html", err)
-	}
-	id := r.PathValue("jewelleryId")
-	adata, err := a.adventureService.GetJewelleryById(id)
-	pageData := NewLootPageModelFromJewellery(*adata, adventure)
-	if err != nil {
-		a.renderer.MustRenderErrorPage(w, "", err)
-	}
-	output, err := a.renderer.RenderPartial("loot.html", pageData)
-	if err != nil {
-		a.renderer.MustRenderErrorPage(w, "", err)
-	}
-	w.Write([]byte(output))
-}
-
-func (a AdventurePage) displayCombat(w http.ResponseWriter, r *http.Request) {
-
-	aId := r.PathValue("adventureId")
-	adventure, err := strconv.Atoi(aId)
-	if err != nil {
-		a.renderer.MustRenderErrorPage(w, "error.html", err)
-	}
-	id := r.PathValue("combatId")
-	adata, err := a.adventureService.GetCombatById(id)
-	pageData := NewLootPageModelFromCombat(*adata, adventure)
-	if err != nil {
-		a.renderer.MustRenderErrorPage(w, "", err)
-	}
-	output, err := a.renderer.RenderPartial("combat.html", pageData)
-	if err != nil {
-		a.renderer.MustRenderErrorPage(w, "", err)
-	}
-	w.Write([]byte(output))
-}
-
-func (a AdventurePage) displayMagicItem(w http.ResponseWriter, r *http.Request) {
-
-	aId := r.PathValue("adventureId")
-	adventure, err := strconv.Atoi(aId)
-	if err != nil {
-		a.renderer.MustRenderErrorPage(w, "error.html", err)
-	}
-	id := r.PathValue("magicItem")
-	adata, err := a.adventureService.GetMagicItemById(id)
-	pageData := NewLootPageModelFromMagicItem(*adata, adventure)
-	if err != nil {
-		a.renderer.MustRenderErrorPage(w, "", err)
-	}
-	output, err := a.renderer.RenderPartial("magicItem.html", pageData)
-	if err != nil {
-		a.renderer.MustRenderErrorPage(w, "", err)
-	}
-	w.Write([]byte(output))
-}
-
-func (a AdventurePage) displayAdventureCharacters(w http.ResponseWriter, r *http.Request) {
-	aId := r.PathValue("adventureId")
-	adventure, err := strconv.Atoi(aId)
-	if err != nil {
-		a.renderer.MustRenderErrorPage(w, "error.html", err)
-	}
-	//adata, err := a.characterService.GetCharactersForCampaign(types.NewCampaign(campaign))
-	pageData, err := a.adventureService.GetCharactersForAdventure(adventure)
-	if err != nil {
-		a.renderer.MustRenderErrorPage(w, "", err)
-	}
-
-	output, err := a.renderer.RenderPartial("characters.html", pageData)
-	if err != nil {
-		a.renderer.MustRenderErrorPage(w, "", err)
-	}
-	w.Write([]byte(output))
-}
-
-func (a AdventurePage) editGem(w http.ResponseWriter, r *http.Request) {
-	aId := r.PathValue("adventureId")
-	adventure, err := strconv.Atoi(aId)
-	if err != nil {
-		a.renderer.MustRenderErrorPage(w, "error.html", err)
-		return
-	}
-	id := r.PathValue("gemId")
-	adata, err := a.adventureService.GetGemById(id)
-	pageData := NewLootPageModelFromGem(*adata, adventure)
-	if err != nil {
-		a.renderer.MustRenderErrorPage(w, "", err)
-		return
-	}
-	output, err := a.renderer.RenderEditor("lootEdit.html", pageData)
-	if err != nil {
-		a.renderer.MustRenderErrorPage(w, "", err)
-		return
-	}
-	w.Write([]byte(output))
-}
-
-func (a AdventurePage) editJewellery(w http.ResponseWriter, r *http.Request) {
-	aId := r.PathValue("adventureId")
-	adventure, err := strconv.Atoi(aId)
-	if err != nil {
-		a.renderer.MustRenderErrorPage(w, "error.html", err)
-		return
-	}
-	id := r.PathValue("jewelleryId")
-	adata, err := a.adventureService.GetJewelleryById(id)
-	pageData := NewLootPageModelFromJewellery(*adata, adventure)
-	if err != nil {
-		a.renderer.MustRenderErrorPage(w, "", err)
-		return
-	}
-	output, err := a.renderer.RenderEditor("lootEdit.html", pageData)
-	if err != nil {
-		a.renderer.MustRenderErrorPage(w, "", err)
-		return
-	}
-	w.Write([]byte(output))
-}
-
-func (a AdventurePage) editCombat(w http.ResponseWriter, r *http.Request) {
-	aId := r.PathValue("adventureId")
-	adventure, err := strconv.Atoi(aId)
-	if err != nil {
-		a.renderer.MustRenderErrorPage(w, "error.html", err)
-		return
-	}
-	id := r.PathValue("combatId")
-	adata, err := a.adventureService.GetCombatById(id)
-	pageData := NewLootPageModelFromCombat(*adata, adventure)
-	if err != nil {
-		a.renderer.MustRenderErrorPage(w, "", err)
-		return
-	}
-	output, err := a.renderer.RenderEditor("combatEdit.html", pageData)
-	if err != nil {
-		a.renderer.MustRenderErrorPage(w, "", err)
-		return
-	}
-	w.Write([]byte(output))
-}
-
-func (a AdventurePage) editMagicItem(w http.ResponseWriter, r *http.Request) {
-	aId := r.PathValue("adventureId")
-	adventure, err := strconv.Atoi(aId)
-	if err != nil {
-		a.renderer.MustRenderErrorPage(w, "error.html", err)
-		return
-	}
-	id := r.PathValue("magicItemId")
-	adata, err := a.adventureService.GetMagicItemById(id)
-	pageData := NewLootPageModelFromMagicItem(*adata, adventure)
-	if err != nil {
-		a.renderer.MustRenderErrorPage(w, "", err)
-		return
-	}
-	output, err := a.renderer.RenderEditor("lootEdit.html", pageData)
-	if err != nil {
-		a.renderer.MustRenderErrorPage(w, "", err)
-		return
-	}
-	w.Write([]byte(output))
-}
-
-
-
-func (a AdventurePage) saveNewLoot(w http.ResponseWriter, r *http.Request) {
-	t := r.URL.Query()["type"][0]
-	switch t {
-	case string(types.GemLoot):
-		a.saveNewGem(w, r)
-	case string(types.JewelleryLoot):
-		a.saveNewJewellery(w, r)
-	case string(types.CombatLoot):
-		a.saveNewCombat(w, r)
-	case string(types.MagicItemLoot):
-		a.saveNewMagicItem(w, r)
-	}
-}
-
-func (a AdventurePage) saveNewGem(w http.ResponseWriter, r *http.Request) {
-	//	output := make([]byte, 0)
-	aId := r.PathValue("adventureId")
-	adventure, err := strconv.Atoi(aId)
-	if err != nil {
-		a.renderer.MustRenderErrorPage(w, "error.html", fmt.Errorf("could not convert %s into adventure id", aId))
-	}
-	data, err := parseHTMLFormIntoMap(r)
-	if err != nil {
-		a.renderer.MustRenderErrorPage(w, "error.html", err)
-	}
-	err = a.adventureService.SaveNewGem(adventure, data)
-	//output, err = a.renderGemList(adventure)
-	if err != nil {
-		a.renderer.MustRenderErrorPage(w, "error.html", err)
-	}
-}
-
-func (a AdventurePage) saveNewJewellery(w http.ResponseWriter, r *http.Request) {
-	output := make([]byte, 0)
-	aId := r.PathValue("adventureId")
-	adventure, err := strconv.Atoi(aId)
-	if err != nil {
-		a.renderer.MustRenderErrorPage(w, "error.html", fmt.Errorf("could not convert %s into adventure id", aId))
-	}
-	data, err := parseHTMLFormIntoMap(r)
-	if err != nil {
-		a.renderer.MustRenderErrorPage(w, "error.html", err)
-	}
-	err = a.adventureService.SaveNewJewellery(adventure, data)
-	//output, err = a.renderJewelleryList(adventure)
-	if err != nil {
-		a.renderer.MustRenderErrorPage(w, "error.html", err)
-	}
-	w.Write(output)
-}
-
-func (a AdventurePage) saveNewCombat(w http.ResponseWriter, r *http.Request) {
-	output := make([]byte, 0)
-	aId := r.PathValue("adventureId")
-	adventure, err := strconv.Atoi(aId)
-	if err != nil {
-		a.renderer.MustRenderErrorPage(w, "error.html", fmt.Errorf("could not convert %s into adventure id", aId))
-	}
-	data, err := parseHTMLFormIntoMap(r)
-	if err != nil {
-		a.renderer.MustRenderErrorPage(w, "error.html", err)
-	}
-	err = a.adventureService.SaveNewCombat(adventure, data)
-	//output, err = a.renderCombatList(adventure)
-	if err != nil {
-		a.renderer.MustRenderErrorPage(w, "error.html", err)
-	}
-	w.Write(output)
-}
-
-func (a AdventurePage) saveNewMagicItem(w http.ResponseWriter, r *http.Request) {
-	output := make([]byte, 0)
-	aId := r.PathValue("adventureId")
-	adventure, err := strconv.Atoi(aId)
-	if err != nil {
-		a.renderer.MustRenderErrorPage(w, "error.html", fmt.Errorf("could not convert %s into adventure id", aId))
-	}
-	data, err := parseHTMLFormIntoMap(r)
-	if err != nil {
-		a.renderer.MustRenderErrorPage(w, "error.html", err)
-	}
-	err = a.adventureService.SaveNewMagicItem(adventure, data)
-	//output, err = a.renderMagicItemList(adventure)
-	if err != nil {
-		a.renderer.MustRenderErrorPage(w, "error.html", err)
-	}
-	w.Write(output)
-}
-
-func parseHTMLFormIntoMap(r *http.Request) (map[string]string, error) {
-	var data = map[string]string{}
-	formErr := r.ParseForm()
-	if formErr != nil {
-		return nil, formErr
-	}
-	for key, value := range r.Form {
-		data[key] = value[0]
-	}
-	return data, nil
-}
-*/

@@ -1,0 +1,30 @@
+<form onsubmit="return false;">
+    <h3>Editing {{ .DisplayType }}</h3>
+    <table class="xp-source" id="{{ .DisplayType}}List">
+        <thead>
+            <tr>
+                <th></th>
+                <th>Was on Adventure</th>
+                <th>Name</th>
+                <th>Character Type</th>
+            </tr>
+        </thead>
+        <tbody>
+            {{ range $index, $char := .Characters }}
+            <tr>
+                <td> <input name="character-id" type="hidden" value="{{ $char.Id }}" /></td>
+                <td> <input name="on-adventure-{{ $char.Id}}" type="checkbox" {{ if index $.Attendance $index }} checked {{ end }} />
+                </td>
+                <td>{{ $char.Name }}</td>
+                <td> <select name="character-type-{{ $char.Id}}">
+                        <option value="player-character">Player Character</option>
+                        <option value="henchmen">Henchmen</option>
+                    </select>
+                </td>
+            </tr>
+            {{ end }}
+        </tbody>
+    </table>
+    <button hx-post="{{ .Path.Display }}" hx-trigger="mousedown">Save {{ .DisplayType }}</button>
+    <button hx-get="{{ .Path.Display }}" hx-trigger="mousedown">Cancel</button>
+</form>
