@@ -1,6 +1,7 @@
 package types
 
 type MagicItem struct {
+	Id          int    `json:"id"`
 	Name        string `json:"name"`
 	Description string `json:"Description"`
 	XPValue     int    `json:"magic_item_xp"`

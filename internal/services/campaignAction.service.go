@@ -1,7 +1,7 @@
 package services
 
 import (
-	"github.com/floodedrealms/adventure-archivist/repository"
+	"github.com/floodedrealms/adventure-archivist/internal/repository"
 	"github.com/floodedrealms/adventure-archivist/types"
 )
 

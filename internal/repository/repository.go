@@ -1,6 +1,8 @@
 package repository
 
 import (
+	"database/sql"
+
 	"github.com/floodedrealms/adventure-archivist/types"
 )
 
@@ -20,6 +22,7 @@ type Repository interface {
 	UpdateCoinsForAdventure(a *types.AdventureRecord, c *types.Coins) (bool, error)
 	UpdateAdventureName(*types.AdventureRecord, string) error
 	UpdateAdventureDate(*types.AdventureRecord, types.ArcvhistDate) error
+	GetCoinsForAdventure(*types.AdventureRecord) (*types.Coins, error)
 
 	DeleteGemsForAdventure(a *types.AdventureRecord) error
 	DeleteJewelleryForAdventure(a *types.AdventureRecord) error
@@ -50,4 +53,17 @@ type Repository interface {
 
 	SaveApiUser(types.User, bool) error
 	GetApiUserById(providedClientId, providedAPIKey string) (*types.APIUser, error)
+
+	ExecuteQuery(q string, params ...interface{}) (sql.Result, error)
+	RunQuery(q string, params ...interface{}) (*sql.Rows, error)
+	DoTransaction(qs []string, params [][]interface{}) error
+}
+
+type RepositoryStatement struct {
+	majorOpertaion majorOperation
+	targetTable    string
+	fields         []string
+	values         []string
+	whereFields    []string
+	whereValues    []string
 }

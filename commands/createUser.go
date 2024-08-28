@@ -3,9 +3,9 @@ package commands
 import (
 	"log"
 
-	"github.com/floodedrealms/adventure-archivist/repository"
-	"github.com/floodedrealms/adventure-archivist/services"
-	"github.com/floodedrealms/adventure-archivist/util"
+	"github.com/floodedrealms/adventure-archivist/internal/repository"
+	"github.com/floodedrealms/adventure-archivist/internal/services"
+	"github.com/floodedrealms/adventure-archivist/internal/util"
 )
 
 func createApiUser(friendlyName string, campaignLimit bool) {

@@ -1,0 +1,19 @@
+{{$message := .}}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Error</title>
+    <script src="https://unpkg.com/htmx.org"></script>
+</head>
+<body>
+    <h1>Error</h1>
+    <div> 
+    {{ .E.Error }}
+    </div>
+    <!-- Todo List will be loaded here -->
+    <p>Partial render follows...</p>
+    {{ .Rendered }}
+</body>
+</html>

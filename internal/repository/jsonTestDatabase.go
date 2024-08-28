@@ -1,10 +1,11 @@
 package repository
 
 import (
+	"database/sql"
 	"errors"
 
+	"github.com/floodedrealms/adventure-archivist/internal/util"
 	"github.com/floodedrealms/adventure-archivist/types"
-	"github.com/floodedrealms/adventure-archivist/util"
 )
 
 type JSONRepo struct {
@@ -21,6 +22,18 @@ func NewJSONRepo(filename string) *JSONRepo {
 		panic(err)
 	}
 	return &repo
+}
+
+func (j JSONRepo) ExecuteQuery(stmt string, params ...interface{}) (sql.Result, error) {
+	return nil, util.NotYetImplmented()
+}
+
+func (j JSONRepo) RunQuery(stmt string, params ...interface{}) (*sql.Rows, error) {
+	return nil, util.NotYetImplmented()
+}
+
+func (j JSONRepo) GetCoinsForAdventure(a *types.AdventureRecord) (*types.Coins, error) {
+	return nil, util.NotYetImplmented()
 }
 
 func (j JSONRepo) CreateCampaign(*types.CampaignRecord) (*types.CampaignRecord, error) {
