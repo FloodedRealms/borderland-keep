@@ -538,6 +538,95 @@ func (a AdventureService) ModifyGems(aId int, data []map[string]string) error {
 	return err
 }
 
+func (a AdventureService) ModifyJewellery(aId int, data []map[string]string) error {
+	stmtStr := fmt.Sprintf("DELETE FROM %s WHERE adventure_id =?", jewelleryTable)
+	queries := []string{stmtStr}
+	firstParamList := []interface{}{aId}
+	params := [][]interface{}{firstParamList}
+	for _, formData := range data {
+		amount, err := stripGoodNumberValueFromFormData("number", formData)
+		if err != nil {
+			return err
+		}
+		xpValue, err := stripGoodNumberValueFromFormData("xp-value", formData)
+		if err != nil {
+			return err
+		}
+		desc, dOk := formData["description"]
+		name, nOk := formData["name"]
+		if !dOk {
+			desc = ""
+		}
+		if !nOk {
+			name = ""
+		}
+		queries = append(queries, fmt.Sprintf("INSERT INTO %s(adventure_id, name, description, value, total) values(?,?,?,?,?)", jewelleryTable))
+		paramList := []interface{}{aId, name, desc, xpValue, amount}
+		params = append(params, paramList)
+
+	}
+	err := a.repo.DoTransaction(queries, params)
+	return err
+}
+
+func (a AdventureService) ModifyCombat(aId int, data []map[string]string) error {
+	stmtStr := fmt.Sprintf("DELETE FROM %s WHERE adventure_id =?", combatTable)
+	queries := []string{stmtStr}
+	firstParamList := []interface{}{aId}
+	params := [][]interface{}{firstParamList}
+	for _, formData := range data {
+		amount, err := stripGoodNumberValueFromFormData("number", formData)
+		if err != nil {
+			return err
+		}
+		xpValue, err := stripGoodNumberValueFromFormData("xp-value", formData)
+		if err != nil {
+			return err
+		}
+		//desc, dOk := formData["description"]
+		name, nOk := formData["name"]
+		/*	if !dOk {
+			desc = ""
+		}*/
+		if !nOk {
+			name = ""
+		}
+		queries = append(queries, fmt.Sprintf("INSERT INTO %s(adventure_id, monster_name, number_defeated, xp_per_monster) values(?,?,?,?)", combatTable))
+		paramList := []interface{}{aId, name, amount, xpValue}
+		params = append(params, paramList)
+
+	}
+	err := a.repo.DoTransaction(queries, params)
+	return err
+}
+
+func (a AdventureService) ModifyMagicItems(aId int, data []map[string]string) error {
+	stmtStr := fmt.Sprintf("DELETE FROM %s WHERE adventure_id =?", magicItemTable)
+	queries := []string{stmtStr}
+	firstParamList := []interface{}{aId}
+	params := [][]interface{}{firstParamList}
+	for _, formData := range data {
+		xpValue, err := stripGoodNumberValueFromFormData("xp-value", formData)
+		if err != nil {
+			return err
+		}
+		//desc, dOk := formData["description"]
+		name, nOk := formData["name"]
+		/*	if !dOk {
+			desc = ""
+		}*/
+		if !nOk {
+			name = ""
+		}
+		queries = append(queries, fmt.Sprintf("INSERT INTO %s(adventure_id, name, description, apparent_value, actual_value) values(?,?,?,?,?)", magicItemTable))
+		paramList := []interface{}{aId, name, "", xpValue, xpValue}
+		params = append(params, paramList)
+
+	}
+	err := a.repo.DoTransaction(queries, params)
+	return err
+}
+
 func (a AdventureService) DeleteJewellery(gemId string) error {
 	id, err := strconv.Atoi(gemId)
 	if err != nil {

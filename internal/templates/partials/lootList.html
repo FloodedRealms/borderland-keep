@@ -1,16 +1,14 @@
-<h3>Gemstones Recovered</h3>
-<table class="xp-source" id="GemList">
+	<h3>{{ .DisplayType}} Recovered</h3>
+<table class="xp-source" id="{{ .DisplayType}}List">
 	<thead>
 		<tr>
-			<th class="td">Gem Name</th>
+			<th class="td">Name</th>
 			<th class="td">Number Found</th>
 			<th class="td">XP Per One</th>
 			<th class="td">Total XP</th>
-			<th class="td button-space"></th>
-			<th class="td"></th>
 		</tr>
 	</thead>
-	<tbody> {{ range .Gems }}
+	<tbody> {{ range .Items }}
 		<tr hx-target="this" hx-swap="outerHTML">
 			<td>{{ .Name }}</td>
 			<td>{{ .Number }}</td>
@@ -20,4 +18,4 @@
 		{{ end }}
 	</tbody>
 </table>
-<button hx-get="{{ .Path.Edit }}" hx-trigger="mousedown">Edit Gems</button>
+<button hx-get="{{ .Path.Edit }}" hx-trigger="mousedown">Edit {{ .DisplayType }}</button>

@@ -77,3 +77,6 @@ func decodeJSONBody(w http.ResponseWriter, r *http.Request, dst interface{}) err
 
 	return nil
 }
+func sendEmptyResponse(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(http.StatusOK)
+}

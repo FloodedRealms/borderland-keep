@@ -1,6 +1,35 @@
 <tr>
-    <td><input name="name" type="text"></input></td>
-    <td><input name="number" type="text"></input></td>
-    <td><input name="xp-value" type="text"></input></td>
-<td><button hx-disinherit="*" hx-target="closest tr" hx-swap="delete" hx-trigger="mousedown" hx-delete="{{ .Path.Display }}">Delete</button></td>
+    <td><input name="name" type="text" value="{{ .Name }}"></input></td>
+    {{ if .Errors.Name }}
+    <br>
+    <small class="form-text text-danger">
+        {{ .Errors.Name }}
+    </small>
+    {{end}}
+    <td><input name="number" type="text" value="{{ .Number }}"></input>
+        {{ if .Errors.Number }}
+        <br>
+        <small class="form-text text-danger">
+            {{ .Errors.Number }}
+        </small>
+        {{end}}
+    </td>
+    <td><input name="xp-value" type="text" value="{{ .XPValue }}"></input>
+
+        {{ if .Errors.XPValue }}
+        <br>
+        <small class="form-text text-danger">
+            {{ .Errors.XPValue }}
+        </small>
+        {{end}}
+    </td>
+    <!--
+    <td hx-target="this" hx-swap="outerHTML">
+        <input type="checkbox" name="sep_gp_value" hx-trigger="mousedown" hx-get="{{ .GPPath.Edit }}" />
+        <label for="sep_gp_value">GP != XP</label>
+        <input name="gp-value" type="text" value="" disabled />
+    </td>
+-->
+    <td><button hx-target="closest tr" hx-swap="outerHTML" hx-trigger="mousedown"
+            hx-delete="{{ .Path.Display }}">Delete</button></td>
 </tr>
