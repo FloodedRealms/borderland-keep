@@ -78,3 +78,9 @@ func (r Renderer) MustRenderErrorPage(w http.ResponseWriter, partial string, e e
 		panic(err)
 	}
 }
+
+func (r Renderer) TriggerErrorModal(w http.ResponseWriter, e error) {
+	w.Header().Set("HX-Trigger", "gotError")
+	w.Header().Set("BK-Error", e.Error())
+	w.WriteHeader(http.StatusInternalServerError)
+}

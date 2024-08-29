@@ -123,6 +123,7 @@ func main() {
 
 		// Webapp Pages
 		router.HandleFunc("/", homePages.Index)
+		router.HandleFunc("/error-modal", homePages.RespondToErrorEvent)
 		router.HandleFunc("/guild", homePages.GuildLanding)
 		router.HandleFunc("/tavern", homePages.TavernLanding)
 		router.HandleFunc("/crier", homePages.Campaigns)

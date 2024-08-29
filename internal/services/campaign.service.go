@@ -99,7 +99,7 @@ func (c *CampaignService) TenMostRecentlyActiveCampaigns(page int) []types.Campa
 }
 
 func (c CampaignService) GetClassOptionsForCampaign(id int) ([]types.CampaignClassOption, error) {
-	stmtStr := fmt.Sprintf("SELECT cl.class_id, cl.class_name FROM %s cl WHERE campaign_id = %d", "campaign_to_class_options", id)
+	stmtStr := fmt.Sprintf("SELECT cl.class_id, cl.class_name FROM %s  WHERE campaign_id = %d", "campaign_to_class_options", id)
 	rows, err := c.repo.RunQuery(stmtStr)
 	if err != nil {
 		return nil, err

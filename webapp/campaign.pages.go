@@ -107,11 +107,11 @@ func (ca CampaignPage) openCharacterEditor(w http.ResponseWriter, r *http.Reques
 	campaignId := ca.mustExtractCampaignId(w, r)
 	characters, err := ca.characterService.GetCharactersForCampaign(types.NewCampaign(campaignId))
 	if err != nil {
-		ca.renderer.MustRenderErrorPage(w, "", err)
+		ca.renderer.TriggerErrorModal(w, err)
 	}
 	classOptions, err := ca.campaignService.GetClassOptionsForCampaign(campaignId)
 	if err != nil {
-		ca.renderer.MustRenderErrorPage(w, "", err)
+		ca.renderer.TriggerErrorModal(w, err)
 	}
 	pdata := struct {
 		Characters       []types.CharacterRecord
@@ -129,6 +129,8 @@ func (ca CampaignPage) openCharacterEditor(w http.ResponseWriter, r *http.Reques
 
 	output, err := ca.renderer.RenderEditor("characterDetailsTableEdit.html", pdata)
 	if err != nil {
+		ca.renderer.TriggerErrorModal(w, err)
+
 		ca.renderer.MustRenderErrorPage(w, "", err)
 	}
 	w.Write([]byte(output))

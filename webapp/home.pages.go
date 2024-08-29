@@ -92,3 +92,16 @@ func (h HomePage) LoadNextCampaignSet(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte(output))
 
 }
+
+func (h HomePage) RespondToErrorEvent(w http.ResponseWriter, r *http.Request) {
+	msg := struct {
+		Message string
+	}{
+		Message: r.Header.Get("BK-Error"),
+	}
+	output, err := h.renderer.RenderPartial("errorModal.html", msg)
+	if err != nil {
+		h.renderer.MustRenderErrorPage(w, output, err)
+	}
+	w.Write([]byte(output))
+}

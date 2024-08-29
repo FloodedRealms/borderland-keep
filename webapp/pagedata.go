@@ -5,6 +5,10 @@ type PageData interface {
 	HasEditAccessToResource(resourceType string, resourceId int) bool
 }
 
+type FormData interface {
+	Validate() (bool, []interface{})
+}
+
 type UserDetails struct {
 	UserName        string
 	PrefferredStyle string
