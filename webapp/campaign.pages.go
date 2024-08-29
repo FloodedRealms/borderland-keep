@@ -44,12 +44,17 @@ func newPhysicalCampaignPath(resource string, id int) path {
 func (c CampaignPage) RegisterRoutes(m *http.ServeMux) {
 	mainPath := newCampaignPathToRegister("")
 	characterPath := newCampaignPathToRegister("/characters")
+	newCharacterPath := newCampaignPathToRegister("/new-character")
 
 	m.HandleFunc(mainPath.Display, c.CampaignOverview)
 
 	m.HandleFunc("GET "+characterPath.Edit, c.openCharacterEditor)
 	m.HandleFunc("GET "+characterPath.Display, c.displayCharacterList)
 	m.HandleFunc("POST "+characterPath.Display, c.saveCharacters)
+	m.HandleFunc("DELETE "+characterPath.Display, c.DeleteCharacter)
+
+	m.HandleFunc("GET "+newCharacterPath.Display, c.newCharacter)
+	m.HandleFunc("DELETE "+newCharacterPath.Display, c.DeleteUnSavedCharacter)
 }
 
 func (ca CampaignPage) CampaignOverview(w http.ResponseWriter, r *http.Request) {
@@ -103,6 +108,27 @@ func (ca CampaignPage) CampaignOverview(w http.ResponseWriter, r *http.Request) 
 	w.Write([]byte(output))
 }
 
+func (ca CampaignPage) newCharacter(w http.ResponseWriter, r *http.Request) {
+	cid := ca.mustExtractCampaignId(w, r)
+	classOptions, err := ca.campaignService.GetClassOptionsForCampaign(cid)
+	if err != nil {
+		ca.renderer.MustRenderErrorPage(w, "", err)
+	}
+	pdata := struct {
+		ClassOptions []types.CampaignClassOption
+		DeletePath   path
+	}{
+		ClassOptions: classOptions,
+		DeletePath:   newPhysicalCampaignPath("/new-character", cid),
+	}
+	output, err := ca.renderer.RenderPartial("characterDetailsTableRow.html", pdata)
+	if err != nil {
+		ca.renderer.MustRenderErrorPage(w, output, err)
+	}
+	w.Write([]byte(output))
+
+}
+
 func (ca CampaignPage) openCharacterEditor(w http.ResponseWriter, r *http.Request) {
 	campaignId := ca.mustExtractCampaignId(w, r)
 	characters, err := ca.characterService.GetCharactersForCampaign(types.NewCampaign(campaignId))
@@ -119,6 +145,7 @@ func (ca CampaignPage) openCharacterEditor(w http.ResponseWriter, r *http.Reques
 		Errors           []formError
 		Path             path
 		NewCharacterPath path
+		DeletePath       path
 	}{
 		Characters:       characters,
 		ClassOptions:     classOptions,
@@ -135,8 +162,45 @@ func (ca CampaignPage) openCharacterEditor(w http.ResponseWriter, r *http.Reques
 
 }
 
-func (ca CampaignPage) displayCharacterList(w http.ResponseWriter, r *http.Request) {
+func (ca CampaignPage) DeleteCharacter(w http.ResponseWriter, r *http.Request) {
+	charId := r.URL.Query()["char-id"][0]
+	pdata := struct {
+		Id string
+	}{
+		Id: charId,
+	}
+	output, err := ca.renderer.RenderPartial("deletedCharacterFormData.html", pdata)
+	if err != nil {
+		ca.renderer.MustRenderErrorPage(w, "", err)
+	}
+	w.Write([]byte(output))
 
+}
+func (ca CampaignPage) DeleteUnSavedCharacter(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(http.StatusOK)
+}
+
+func (ca CampaignPage) displayCharacterList(w http.ResponseWriter, r *http.Request) {
+	campaignId := ca.mustExtractCampaignId(w, r)
+	characters, err := ca.characterService.GetCharactersForCampaign(types.NewCampaign(campaignId))
+	if err != nil {
+		ca.renderer.MustRenderErrorPage(w, "", err)
+	}
+	pdata := struct {
+		Characters         []types.CharacterRecord
+		NumberOfCharacters int
+		CharacterPath      path
+	}{
+		Characters:         characters,
+		CharacterPath:      newPhysicalCampaignPath("/characters", campaignId),
+		NumberOfCharacters: len(characters),
+	}
+
+	output, err := ca.renderer.RenderPartial("characterList.html", pdata)
+	if err != nil {
+		ca.renderer.MustRenderErrorPage(w, "", err)
+	}
+	w.Write([]byte(output))
 }
 
 func (ca CampaignPage) saveCharacters(w http.ResponseWriter, r *http.Request) {

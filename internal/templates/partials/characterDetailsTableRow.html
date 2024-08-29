@@ -1,23 +1,20 @@
 <tr>
-    <td> <input name="character-id" type="hidden" value="{{ .Id }}" /></td>
-    <td><input name="character-name-{{ .Id }}" type="text" value="{{ .Name }}"></input></td>
-    {{ if .Errors.Name }}
-    <br>
-    <small class="form-text text-danger">
-        {{ .Errors.Name }}
-    </small>
-    {{end}}
-    <td> <select name="character-class-{{ .Id}}">
+    <td></td>
+    <td><input name="new-character-name" type="text" value=""></input></td>
+    <td> <select name="new-character-class">
             {{ range .ClassOptions }}
             <option value="{{ .ClassId }}">{{ .ClassName }}</option>
             {{ end }}
         </select>
     </td>
     <td>
-        <select name="character-preq-{{ .Id}}">
+        <select name="new-character-preq">
             <option value="0">0%</option>
             <option value="5">5%</option>
             <option value="10">10%</option>
         </select>
+
     </td>
+    <td><button hx-disinherit="true" class="danger" hx-target="closest tr" hx-swap="outerHTML"
+            hx-delete="{{ .DeletePath.Display }}" hx-trigger="mousedown">Delete</button></td>
 </tr>

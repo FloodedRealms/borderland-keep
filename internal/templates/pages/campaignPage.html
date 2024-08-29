@@ -7,6 +7,11 @@
     <link rel="stylesheet" href="/static/css/borderlandkeep.css">
     <link rel="icon" type="image/x-icon" href="/assets/images/favicon.png">
     <script src="https://unpkg.com/htmx.org"></script>
+    <script>
+        htmx.on("htmx:swapError", function(evt) {
+    console.log(evt);
+});
+    </script>
 </head>
 
 <body>
@@ -61,7 +66,7 @@
                         {{ end}}
                         </table>
                         {{ end }}
-                    <button hx-get="{{ .CharacterPath.Edit}}">Edit Characters</button>
+                    <button hx-get="{{ .CharacterPath.Edit}}" hx-trigger="mousedown">Edit Characters</button>
                 </div>
                 <div id="adventures">
                     <div class="box">
