@@ -1,0 +1,23 @@
+<tr>
+    <td> <input name="character-id" type="hidden" value="{{ .Id }}" /></td>
+    <td><input name="character-name-{{ .Id }}" type="text" value="{{ .Name }}"></input></td>
+    {{ if .Errors.Name }}
+    <br>
+    <small class="form-text text-danger">
+        {{ .Errors.Name }}
+    </small>
+    {{end}}
+    <td> <select name="character-class-{{ .Id}}">
+            {{ range .ClassOptions }}
+            <option value="{{ .ClassId }}">{{ .ClassName }}</option>
+            {{ end }}
+        </select>
+    </td>
+    <td>
+        <select name="character-preq-{{ .Id}}">
+            <option value="0">0%</option>
+            <option value="5">5%</option>
+            <option value="10">10%</option>
+        </select>
+    </td>
+</tr>

@@ -4,15 +4,20 @@
 <head>
     <meta charset="utf-8" />
     <title>The Keep on the Internet</title>
-    <link rel="stylesheet" href="/static/css/style.css">
+    <link rel="stylesheet" href="/static/css/borderlandkeep.css">
     <link rel="icon" type="image/x-icon" href="/assets/images/favicon.png">
+    <script src="https://unpkg.com/htmx.org"></script>
 </head>
 
 <body>
+    <header>
+        {{ template "banner.html" }}
+    </header>
+    <nav>
+        {{ template "nav.html" }}
+    </nav>
 
-    <div id="container">
-        <div class="flex">
-            <div id="maind">
+    <main>
                 <div id="campaign-details">
                     <h3>{{ .Name }}</h3>
                     <table>
@@ -34,22 +39,19 @@
                         </tr>
                     </table>
                 </div>
-                <div id="characters">
-                    <div class="box">
+                    <div id="characters" class="box" hx-target="this" hx-swap="innerHTML">
                         <h3>Characters</h3>
                         {{ if lt .NumberOfCharacters 1}}
                         <div class="box" id="proj">
                             <span> No Characters Defined for this Campaign to Display </span>
                         </div> {{ else }} <table>
                         <tr>
-                            <th>ID</th>
                             <th>Name</th>
                             <th>XP</th>
                             <th>Class</th>
                             <th>Level</th>
                             <th> Bonus XP </th>
                         </tr> {{ range .Characters }}
-                        <td>{{ .Id }}</td>
                         <td>{{ .Name }}</td>
                         <td>{{ .CurrentXP }}</td>
                         <td>{{ .Class }}</td>
@@ -59,7 +61,7 @@
                         {{ end}}
                         </table>
                         {{ end }}
-                    </div>
+                    <button hx-get="{{ .CharacterPath.Edit}}">Edit Characters</button>
                 </div>
                 <div id="adventures">
                     <div class="box">
@@ -78,18 +80,17 @@
                                 <tr>
                                     <td>{{ .Name }}</td>
                                     <td>{{ .AdventureDate }}</td>
-                                   <td><a href="/pages/adventure/{{ .Id }}">edit</a></td> 
+                                   <td><a href="/adventure/{{ .Id }}">Edit Details</a></td> 
                                 </tr>
                             {{ end }}
                         </table>
                         {{ end }}
+                        <button>Add New Adventure</button>
                     </div>
                 </div>
             </div>
-            <div id="sided" style="max-width: 225px">
-            </div>
-        </div>
-    </div>
+    </main>
+    <aside></aside>
 </body>
 
 </html>

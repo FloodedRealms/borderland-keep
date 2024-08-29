@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <title>The Keep on the Internet</title>
+    <link rel="stylesheet" href="/static/css/borderlandkeep.css">
+    <link rel="icon" type="image/x-icon" href="/assets/images/favicon.png">
+</head>
+
+<body>
+    <header>
+        {{ template "banner.html" }}
+    </header>
+    <nav>
+        {{ template "nav.html" }}
+    </nav>
+    <main>
+        <div class="box" id="hello">
+            <h2 style="display:inline">Welcome...</h2>
+            <p>This is the landing page for the Keep on the Internet, and attempt to fight back against the increasing
+                centralization of ttrpg hobby discusions into walled gardens like Discord, Twitter or Reddit. This site
+                aims to maintain serveral services, including: <a href="/tavern">A mastodon instance</a>, <a
+                    href="/guild"> a matrix homeserver </a>, and (eventually) <a href="/crier">a campaign
+                    logging service.</a> Please take a look around, and enjoy your stay.</p>
+        </div>
+        <div class="box" id="proj">
+            <h2 style="display:inline">News</h2>
+            <ul>
+
+            </ul>
+        </div>
+        <div class="box" id="selfhost">
+            <h2 style="display:inline">Borderland Keep Services Status</h2>
+            <table>
+                <tbody>
+                    <tr id="statuses">
+                        <td>
+                            <span>
+                                [
+                                <span id="foundry-status" class="status-ok"> OK </span>
+                                ] Guild - Matrix Homeserver
+                            </span>
+                            <br>
+                            <span>
+                                [
+                                <span id="borderland-status" class="status-ok"> OK </span>
+                                ] Tavern - Mastodon Instance
+                            </span>
+                            <br>
+                            <span>
+                                [
+                                <span id="borderland-status" class="status-err"> OFFLINE </span>
+                                ] Cryer - Campaign Reporter
+                            </span>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+    </main>
+    <aside>
+    </aside>
+</body>
+
+</html>

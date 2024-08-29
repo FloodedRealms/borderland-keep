@@ -9,7 +9,7 @@ import (
 	"github.com/floodedrealms/adventure-archivist/types"
 )
 
-const BASE_PATH = "/pages/adventure"
+const baseAdventurePath = "/adventure"
 
 type AdventurePage struct {
 	adventureService services.AdventureService
@@ -87,12 +87,12 @@ type MagicItemPageModel struct {
 }
 
 func newPhysicalAdventurePath(resource string, id int) path {
-	path := fmt.Sprintf(BASE_PATH+"/%d"+resource, id)
+	path := fmt.Sprintf(baseAdventurePath+"/%d"+resource, id)
 	return newPath(path)
 }
 
 func newPhysicalAdventurePathWithResourceId(resource string, adventureId, resourceId int) path {
-	path := fmt.Sprintf(BASE_PATH+"/%d"+resource+"/%d", adventureId, resourceId)
+	path := fmt.Sprintf(baseAdventurePath+"/%d"+resource+"/%d", adventureId, resourceId)
 	return newPath(path)
 }
 
@@ -131,9 +131,9 @@ func createMagicItemPageModels(data []types.MagicItem, aId int) []LootPageModel 
 func newAdventurePathToRegister(appendedPath string, additionalPathParams ...string) path {
 	path := ""
 	if len(additionalPathParams) == 1 {
-		path = fmt.Sprintf(BASE_PATH+"/%s"+appendedPath+"/%s", "{adventureId}", additionalPathParams[0])
+		path = fmt.Sprintf(baseAdventurePath+"/%s"+appendedPath+"/%s", "{adventureId}", additionalPathParams[0])
 	} else {
-		path = fmt.Sprintf(BASE_PATH+"/%s"+appendedPath, "{adventureId}")
+		path = fmt.Sprintf(baseAdventurePath+"/%s"+appendedPath, "{adventureId}")
 	}
 	return newPath(path)
 }

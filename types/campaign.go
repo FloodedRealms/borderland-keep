@@ -42,3 +42,8 @@ func (c CampaignRecord) NumberOfCharacters() int {
 func (c CampaignRecord) NumberOfAdventures() int {
 	return len(c.Adventures)
 }
+
+type CampaignClassOption struct {
+	ClassId   int
+	ClassName string
+}

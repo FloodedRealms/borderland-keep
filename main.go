@@ -59,23 +59,24 @@ func main() {
 		characterService := services.NewCharacterService(sqlRepo, logger, context.TODO())
 		adventureRecordService := services.NewAdventureRecordService(sqlRepo, context.TODO())
 		userService := services.NewUserService(sqlRepo, *logger)
-		campaignActionService := services.NewCampaignActionService(sqlRepo)
+		// campaignActionService := services.NewCampaignActionService(sqlRepo)
 
 		//api exposure
-		campaignApi := api.NewCampaignApi(campaignService, characterService)
+		/*campaignApi := api.NewCampaignApi(campaignService, characterService)
 		adventureRecordApi := api.NewAdventureRecordApi(*adventureRecordService, characterService)
-		characterApi := api.NewCharacterApi(characterService, *campaignActionService)
+		characterApi := api.NewCharacterApi(characterService, *campaignActionService)*/
 		userApi := api.NewClientAPI(userService)
 
 		//pages
-		homePages := webapp.NewHomePage(*renderer)
-		campaignPages := webapp.NewCampaignPage(campaignService, characterService, *renderer)
+		homePages := webapp.NewHomePage(*renderer, *campaignService)
+		campaignPages := webapp.NewCampaignPage(*campaignService, characterService, *renderer)
 		adventurePages := webapp.NewAdventurePage(*adventureRecordService, characterService, *renderer)
+
 		//router
 		router := http.NewServeMux()
 
 		// Wrap functions
-		createCampaign := userApi.RequireValidClient(http.HandlerFunc(campaignApi.CreateCampaign))
+		/*createCampaign := userApi.RequireValidClient(http.HandlerFunc(campaignApi.CreateCampaign))
 		updateCampaign := userApi.RequireValidClient(http.HandlerFunc(campaignApi.UpdateCampaign))
 		deleteCampaign := userApi.RequireValidClient(http.HandlerFunc(campaignApi.DeleteCampaign))
 		addAdventureToCampaign := userApi.RequireValidClient(http.HandlerFunc(adventureRecordApi.CreateAdventureRecord))
@@ -85,10 +86,10 @@ func main() {
 		updateAdveture := userApi.RequireValidClient(http.HandlerFunc(adventureRecordApi.UpdateAdventure))
 
 		getAdventure := allowCorsHeaders(http.HandlerFunc(adventureRecordApi.GetAdventure))
-		getCharactersForCampaign := allowCorsHeaders(http.HandlerFunc(characterApi.GetCharactersForCampaign))
+		getCharactersForCampaign := allowCorsHeaders(http.HandlerFunc(characterApi.GetCharactersForCampaign))*/
 
 		//Campaign Endpoints
-		router.Handle("POST /campaigns", createCampaign)
+		/*router.Handle("POST /campaigns", createCampaign)
 		router.Handle("POST /campaigns/{campaignId}/adventures", addAdventureToCampaign)
 		router.Handle("POST /campaigns/{campaignId}/characters", addCharacterToCampaign)
 
@@ -111,7 +112,7 @@ func main() {
 		//Character Endpoints
 		router.Handle("POST /characters/{characterId}/campaign-actions", addCampaignActionToCharacter)
 
-		router.HandleFunc(" GET /characters/{characterId}", characterApi.GetCharacterById)
+		router.HandleFunc(" GET /characters/{characterId}", characterApi.GetCharacterById)*/
 
 		// USER
 		router.HandleFunc(" GET /user/validate", userApi.ValidateClient)
@@ -121,8 +122,13 @@ func main() {
 		router.Handle("/static/", http.StripPrefix("/static/", fs))
 
 		// Webapp Pages
-		router.HandleFunc("/pages/about/", homePages.About)
-		router.HandleFunc("/pages/campaign/{campaignId}", campaignPages.CampaignOverview)
+		router.HandleFunc("/", homePages.Index)
+		router.HandleFunc("/guild", homePages.GuildLanding)
+		router.HandleFunc("/tavern", homePages.TavernLanding)
+		router.HandleFunc("/crier", homePages.Campaigns)
+		router.HandleFunc("/campaign-list", homePages.LoadNextCampaignSet)
+		router.HandleFunc("/about", homePages.About)
+		campaignPages.RegisterRoutes(router)
 		adventurePages.RegisterRoutes(router)
 
 		server := &http.Server{
