@@ -1,4 +1,4 @@
-package types
+package guardsman
 
 import "github.com/google/uuid"
 

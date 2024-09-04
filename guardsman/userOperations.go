@@ -1,6 +1,7 @@
 package guardsman
 
 import (
+	"fmt"
 	"log"
 	"strconv"
 
@@ -9,57 +10,70 @@ import (
 	"github.com/floodedrealms/borderland-keep/internal/util"
 )
 
-func createApiUser(friendlyName string) {
-	logger := util.NewLogger(true)
-	sqlRepo, err := repository.NewSqliteRepo(logger)
-	util.CheckErr(err)
-	userService := services.NewUserService(sqlRepo, *logger)
-	newUser, err := userService.CreateNewAPIUser(friendlyName, true)
-	util.CheckErr(err)
-	log.Printf("New User created with Id: %s api_key: %s. Friendly name is: %s", newUser.DisplayUUID(), newUser.DisplayAPIKey(), newUser.DisplayUserName())
+/*
+	func createApiUser(friendlyName string) {
+		logger := util.NewLogger(true)
+		sqlRepo, err := repository.NewSqliteRepo(logger)
+		util.CheckErr(err)
+		userService := services.NewUserService(sqlRepo, *logger)
+		newUser, err := userService.CreateNewAPIUser(friendlyName, true)
+		util.CheckErr(err)
+		log.Printf("New User created with Id: %s api_key: %s. Friendly name is: %s", newUser.DisplayUUID(), newUser.DisplayAPIKey(), newUser.DisplayUserName())
+	}
+*/
+
+type Guardsman struct {
+	Repo repository.Repository
 }
 
-func createWebUser(username, email, password string) {
+func (g Guardsman) createWebUser(username, email, password string) {
 	logger := util.NewLogger(true)
-	sqlRepo, err := repository.NewSqliteRepo(logger)
+	userService := services.NewUserService(g.Repo, *logger)
+	nameTaken, err := userService.IsNameTaken(username)
+	if err != nil {
+		fmt.Println(err.Error())
+		return
+	}
+	if nameTaken {
+		fmt.Println("Username must be Unique")
+		return
+	}
+	user, err := GenerateNewPasswordUser(username, password)
 	util.CheckErr(err)
-	userService := services.NewUserService(sqlRepo, *logger)
-	err = userService.CreateNewWebUser(username, email, password)
+	user.Email = email
+	err = userService.InsertWebUser(user.Friendly_name, user.Email, user.RetreiveHash(), user.RetreiveSalt())
 	util.CheckErr(err)
 	log.Printf("New User created with. Friendly name is: %s", username)
 }
 
-func CreateUser(userType, friendlyName, email, password string) {
+func (g Guardsman) CreateUser(userType, friendlyName, email, password string) {
 	switch userType {
 	case "api":
-		createApiUser(friendlyName)
+		//createApiUser(friendlyName)
 	case "web":
-		createWebUser(friendlyName, email, password)
+		g.createWebUser(friendlyName, email, password)
 	default:
-		createWebUser(friendlyName, email, password)
+		g.createWebUser(friendlyName, email, password)
+
 	}
 }
 
-func UnlimitUserCampaigns(id string) error {
+func (g Guardsman) UnlimitUserCampaigns(id string) error {
 	userId, err := strconv.Atoi(id)
 	if err != nil {
 		return err
 	}
 	logger := util.NewLogger(true)
-	sqlRepo, err := repository.NewSqliteRepo(logger)
-	util.CheckErr(err)
-	userService := services.NewUserService(sqlRepo, *logger)
+	userService := services.NewUserService(g.Repo, *logger)
 	return userService.UnlimitUserCampaigns(userId)
 }
 
-func LimitUserCampaigns(id string) error {
+func (g Guardsman) LimitUserCampaigns(id string) error {
 	userId, err := strconv.Atoi(id)
 	if err != nil {
 		return err
 	}
 	logger := util.NewLogger(true)
-	sqlRepo, err := repository.NewSqliteRepo(logger)
-	util.CheckErr(err)
-	userService := services.NewUserService(sqlRepo, *logger)
+	userService := services.NewUserService(g.Repo, *logger)
 	return userService.LimitUserCampaigns(userId)
 }

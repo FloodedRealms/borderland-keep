@@ -1,4 +1,4 @@
-package types
+package guardsman
 
 type Password struct {
 	HashGenerator HashGenerator

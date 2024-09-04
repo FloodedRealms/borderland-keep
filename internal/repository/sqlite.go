@@ -12,7 +12,6 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 )
 
-const dbName = "keep.db"
 const campaignTable string = "campaigns"
 const adventureTable = "adventures"
 const gemTable string = "gems"
@@ -49,22 +48,19 @@ const (
 	DELETE = "DELECT"
 )
 
-func NewSqliteRepo(logger *util.Logger) (*SqliteRepo, error) {
-	if _, err := os.Stat(dbName); errors.Is(err, os.ErrNotExist) {
-		//Try to initialize
-		err := InitializeDatabase()
-		if err != nil {
-			return nil, err
-		}
+func NewSqliteRepo(logger *util.Logger, dbPath string) (*SqliteRepo, error) {
+	if _, err := os.Stat(dbPath); errors.Is(err, os.ErrNotExist) {
+		logger.Print("Make sure database exists and is up to date.")
+		return nil, err
 	}
-	db, err := sql.Open("sqlite3", dbName)
+	db, err := sql.Open("sqlite3", dbPath)
 	if err != nil {
 		return nil, err
 	}
 	return &SqliteRepo{db: db, logger: logger}, nil
 }
 
-func InitializeDatabase() error {
+func InitializeDatabase(dbName string) error {
 	if _, err := os.Stat(dbName); err == nil {
 		return &DatabaseExistsError{Err: fmt.Errorf("database already exists")}
 	} else if !errors.Is(err, os.ErrNotExist) {
@@ -206,15 +202,6 @@ func (s SqliteRepo) insertCampaign(c types.CampaignRecord) (int, error) {
 		return 0, err
 	}
 	return int(id), nil
-}
-
-func (s SqliteRepo) UpdateCampaignPassword(id int, pass types.Password) error {
-	stmtString := fmt.Sprintf("UPDATE %s set password=?, salt=? WHERE id=?;", campaignTable)
-	stmt, err := s.db.Prepare(stmtString)
-	util.CheckErr(err)
-	s.logger.Debug("statement successully prepared.")
-	_, err = stmt.Exec(pass.Hash.Hash, pass.Hash.Salt, id)
-	return nil
 }
 
 func (s SqliteRepo) selectCampaignById(id int) (*types.CampaignRecord, error) {
@@ -832,50 +819,6 @@ func (s SqliteRepo) GetCharactersForCampaign(camp *types.CampaignRecord) ([]type
 }
 
 // Users
-func (s SqliteRepo) GetApiUserById(providedClientId, providedAPIKey string) (*types.APIUser, error) {
-	tableq := fmt.Sprintf("SELECT * FROM %s u where u.id = ?", apiUserTable)
-	s.logger.Debug(tableq)
-	s.logger.Debug(fmt.Printf("Looking for id: %s", providedClientId))
-	rows, err := s.RunQuery(tableq, providedClientId)
-	util.CheckErr(err)
-	defer rows.Close()
-	users := make([]*types.APIUser, 0)
-	for rows.Next() {
-		s.logger.Debug("Trying to get user")
-		id, hashedKey, name, salt := "", "", "", ""
-		err := rows.Scan(&id, &hashedKey, &name, &trashInt, &salt)
-		util.CheckErr(err)
-		current, err := types.LoadUser(id, providedAPIKey, name, hashedKey, salt)
-		if err != nil {
-			return nil, err
-		}
-		users = append(users, current)
-	}
-	return users[0], nil
-
-}
-
-func (s SqliteRepo) SaveApiUser(user types.User, campaignNumberLimited bool) error {
-	stmtString := fmt.Sprintf("INSERT INTO %s(id,api_key,friendly_name,campaign_number_limited,salt) values(?,?,?,?,?);", apiUserTable)
-	stmt, err := s.db.Prepare(stmtString)
-	if err != nil {
-		return err
-	}
-
-	if campaignNumberLimited {
-		_, err := stmt.Exec(user.DisplayUUID(), user.RetreiveHash(), user.DisplayUserName(), 1, user.RetreiveSalt())
-		if err != nil {
-			return err
-		}
-	} else {
-		_, err := stmt.Exec(user.DisplayUUID(), user.RetreiveHash(), user.DisplayUserName(), 1, user.RetreiveSalt())
-		if err != nil {
-			return err
-		}
-	}
-	return nil
-}
-
 func (s SqliteRepo) GetCharacterXPGains(c types.CharacterRecord) ([]int, error) {
 	aXp, aErr := s.getAdventureXP(c)
 	if aErr != nil {

@@ -1,4 +1,4 @@
-package types
+package guardsman
 
 import "github.com/google/uuid"
 
@@ -68,6 +68,7 @@ func (au APIUser) Validate() (bool, error) {
 type WebUser struct {
 	Id            string
 	Friendly_name string
+	Email         string
 	Password      APIKey
 }
 

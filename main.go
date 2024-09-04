@@ -13,6 +13,8 @@ import (
 	"github.com/floodedrealms/borderland-keep/internal/util"
 )
 
+const dbName = "keep.db"
+
 func main() {
 	flag.Parse()
 	flags := flag.Args()
@@ -21,10 +23,14 @@ func main() {
 		fmt.Print("usage: archivist [operation] <args>")
 		return
 	}
+	repo, _ := repository.NewSqliteRepo(util.NewLogger(true), dbName)
+	guardsman := guardsman.Guardsman{
+		Repo: repo,
+	}
 	operation := flag.Arg(0)
 	switch operation {
 	default:
-		fmt.Printf("Unrecgonized Comman: %s", operation)
+		fmt.Printf("Unrecgonized Command: %s", operation)
 	case "create-user":
 		if len(flags) == 1 {
 			fmt.Println("usage: archivist create-user [friendly-name]")
@@ -80,7 +86,7 @@ func main() {
 		//Turn on renderer for webpages (will panic if templates are wrong)
 		renderer := archivist.NewRenderer()
 
-		sqlRepo, err := repository.NewSqliteRepo(logger)
+		sqlRepo, err := repository.NewSqliteRepo(logger, dbName)
 		util.CheckErr(err)
 
 		//services

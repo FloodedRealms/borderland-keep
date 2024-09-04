@@ -70,3 +70,5 @@ func VerifyJWT(endpointHandler func(writer http.ResponseWriter, request *http.Re
 		}
 	})
 }
+
+func LoginUser()

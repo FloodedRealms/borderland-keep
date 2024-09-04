@@ -102,7 +102,6 @@ taken_at_level INTEGER,
 xp_gained INTEGER,
 FOREIGN KEY(character_id) REFERENCES characters(id)
 );
-CREATE TABLE sqlite_sequence(name,seq);
 CREATE VIEW adventures_to_character_name AS SELECT atc.*, c.name FROM adventures_to_characters atc
 JOIN "characters" c ON c.id = atc.character_id
 /* adventures_to_character_name(id,adventure_id,character_id,half_share,xp_gained,name) */;

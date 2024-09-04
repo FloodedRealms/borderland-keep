@@ -24,18 +24,6 @@ func NewCampaignService(repo repository.Repository, logger *util.Logger, ctx con
 	return &CampaignService{repo, *logger, ctx}
 }
 
-func (c *CampaignService) CreateCampaign(cr types.CampaignRecord, pass types.Password) (*types.CampaignRecord, error) {
-	ca, err := c.repo.CreateCampaign(&cr)
-	if err != nil {
-		return nil, err
-	}
-	err = c.repo.UpdateCampaignPassword(ca.Id, pass)
-	if err != nil {
-		return nil, err
-	}
-	return ca, nil
-}
-
 func (c *CampaignService) UpdateCampaign(ur *types.CampaignRecord) (*types.CampaignRecord, error) {
 	ur.UpdatedAt = time.Now()
 
@@ -107,16 +95,6 @@ func (c *CampaignService) DeleteCampaign(id string) (bool, error) {
 	}
 	campaignToDelete := types.NewCampaign(campaignId)
 	return c.repo.DeleteCampaign(campaignToDelete)
-}
-
-func (c *CampaignService) UpdateCampaignPassword(id, password string) (string, error) {
-	campaignId, err := strconv.Atoi(id)
-	if err != nil {
-		return "Password update failed", err
-	}
-	hashedPassword, _ := types.NewPassword(password)
-	return password, c.repo.UpdateCampaignPassword(campaignId, *hashedPassword)
-
 }
 
 func (c *CampaignService) TenMostRecentlyActiveCampaigns(page int) []types.CampaignRecord {
