@@ -48,7 +48,7 @@ func main() {
 		//Turn on renderer for webpages (will panic if templates are wrong)
 		renderer := archivist.NewRenderer()
 
-		sqlRepo, err := repository.NewSqliteRepo("archivist.db", logger)
+		sqlRepo, err := repository.NewSqliteRepo(logger)
 		util.CheckErr(err)
 
 		//services

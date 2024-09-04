@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"os"
 	"time"
 
 	"github.com/floodedrealms/borderland-keep/internal/util"
@@ -11,34 +12,9 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 )
 
+const dbName = "keep.db"
 const campaignTable string = "campaigns"
-const createCampaignTable string = `
-CREATE TABLE IF NOT EXISTS campaigns (
-	id INTEGER NOT NULL PRIMARY KEY,
-	name TEXT,
-	recruitment INTEGER,
-	judge TEXT,
-	timekeeping TEXT,
-	cadence TEXT,
-	created_at DATETIME NOT NULL,
-	updated_at DATETIME NOT NULL,
-	last_adventure DATETIME
-	);
-`
-
-const adventureTable string = "adventures"
-const createAdventureTable string = `
-CREATE TABLE IF NOT EXISTS adventures (
-	id INTEGER NOT NULL PRIMARY KEY,
-	campaign_id INTEGER,
-	name TEXT,
-	adventure_date DATETIME,
-	created_at DATETIME NOT NULL,
-	updated_at DATETIME NOT NULL,
-	FOREIGN KEY(campaign_id) REFERENCES campaigns(id)	
-	);
-`
-
+const adventureTable = "adventures"
 const gemTable string = "gems"
 const jewelleryTable string = "jewellery"
 const magicItemsTable string = "magic_items"
@@ -57,6 +33,14 @@ type SqliteRepo struct {
 	logger *util.Logger
 }
 
+type DatabaseExistsError struct {
+	Err error
+}
+
+func (r *DatabaseExistsError) Error() string {
+	return r.Err.Error()
+}
+
 type majorOperation string
 
 const (
@@ -65,18 +49,53 @@ const (
 	DELETE = "DELECT"
 )
 
-func NewSqliteRepo(f string, logger *util.Logger) (*SqliteRepo, error) {
-	db, err := sql.Open("sqlite3", f)
+func NewSqliteRepo(logger *util.Logger) (*SqliteRepo, error) {
+	if _, err := os.Stat(dbName); errors.Is(err, os.ErrNotExist) {
+		//Try to initialize
+		err := InitializeDatabase()
+		if err != nil {
+			return nil, err
+		}
+	}
+	db, err := sql.Open("sqlite3", dbName)
 	if err != nil {
 		return nil, err
 	}
-	if _, err := db.Exec(createCampaignTable); err != nil {
-		return nil, err
-	}
-	if _, err := db.Exec(createAdventureTable); err != nil {
-		return nil, err
-	}
 	return &SqliteRepo{db: db, logger: logger}, nil
+}
+
+func InitializeDatabase() error {
+	if _, err := os.Stat(dbName); err == nil {
+		return &DatabaseExistsError{Err: fmt.Errorf("database already exists")}
+	} else if !errors.Is(err, os.ErrNotExist) {
+		return err
+	}
+	_, err := os.Create(dbName)
+	if err != nil {
+		return err
+	}
+	db, err := sql.Open("sqlite3", dbName)
+	if err != nil {
+		return err
+	}
+	defer db.Close()
+	schema, ioErr := os.ReadFile("/database/version-0.1/database/version-0.1/2024-09-03-2100-CREATE-ALL-TABLES-AND-VIEWS.sql")
+	if ioErr != nil {
+		return ioErr
+	}
+	data, ioErr := os.ReadFile("/database/version-0.1/2024-09-03-2115-LOAD-ALL-INITIAL-DATA.sql")
+	if ioErr != nil {
+		return ioErr
+	}
+	_, err = db.Exec(string(schema))
+	if err != nil {
+		return err
+	}
+	_, err = db.Exec(string(data))
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 /*
