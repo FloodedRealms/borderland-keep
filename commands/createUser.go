@@ -10,7 +10,7 @@ import (
 
 func createApiUser(friendlyName string, campaignLimit bool) {
 	logger := util.NewLogger(true)
-	sqlRepo, err := repository.NewSqliteRepo("archivist.db", logger)
+	sqlRepo, err := repository.NewSqliteRepo(logger)
 	util.CheckErr(err)
 	userService := services.NewUserService(sqlRepo, *logger)
 	newUser, err := userService.CreateNewAPIUser(friendlyName, campaignLimit)
