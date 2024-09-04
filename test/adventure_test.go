@@ -4,8 +4,8 @@ package test
 import (
 	"testing"
 
-	"github.com/floodedrealms/adventure-archivist/internal/repository"
-	"github.com/floodedrealms/adventure-archivist/types"
+	"github.com/floodedrealms/borderland-keep/internal/repository"
+	"github.com/floodedrealms/borderland-keep/types"
 )
 
 func setup_adventureTests() repository.Repository {

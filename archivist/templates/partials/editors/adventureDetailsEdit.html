@@ -1,0 +1,41 @@
+<form onsubmit="return false;">
+    <input type="hidden" name="adventure-id" value="{{ .AdventureId }}" />
+            <table id="adventure-overview">
+                <tr>
+                    <td><label for="adventure-name">Name:</label></td>
+                    <td><input id="aventure-name" name="adventure-name" type="text" value="{{ .Name }}"></input></td>
+                </tr>
+                <tr>
+                    <td><label for="date">Adventure Date:</label></td>
+                    <td><input id="adventure-date" name="adventure-date" type="text" value="{{ .Date }}"></input></td>
+                </tr>
+        </table>
+    <h3>Editing {{ .DisplayType }}</h3>
+    <table class="xp-source" id="{{ .DisplayType}}List">
+        <thead>
+            <tr>
+                <th></th>
+                <th>Was on Adventure</th>
+                <th>Name</th>
+                <th>Character Type</th>
+            </tr>
+        </thead>
+        <tbody>
+            {{ range $index, $char := .Characters }}
+            <tr>
+                <td> <input name="character-id" type="hidden" value="{{ $char.Id }}" /></td>
+                <td> <input name="on-adventure-{{ $char.Id}}" type="checkbox" {{ if index $.Attendance $index }} checked {{ end }} />
+                </td>
+                <td>{{ $char.Name }}</td>
+                <td> <select name="character-type-{{ $char.Id}}">
+                        <option value="player-character">Player Character</option>
+                        <option value="henchmen">Henchmen</option>
+                    </select>
+                </td>
+            </tr>
+            {{ end }}
+        </tbody>
+    </table>
+    <button hx-post="{{ .Path.Display }}" hx-trigger="mousedown">Save Details</button>
+    <button hx-get="{{ .Path.Display }}" hx-trigger="mousedown">Cancel</button>
+</form>

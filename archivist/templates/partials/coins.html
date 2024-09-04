@@ -1,0 +1,37 @@
+<div class="box money" hx-target="this" hx-swap="outerHTML">
+    <h3>Coins - {{ .Coins.TotalXPAmount }} XP</h3>
+    <table>
+        <thead>
+            <th>Type</th>
+            <th>Amount</th>
+            <th>XP Amount</th>
+        </thead>
+        <tr id="Copper-summary" >
+            <td>Copper:</td>
+            <td>{{ .Coins.Copper.Number }}</td>
+            <td>{{ .Coins.Copper.TotalXPAmount }}</td>
+        </tr>
+        <tr>
+            <td>Silver:</td>
+            <td>{{ .Coins.Silver.Number }}</td>
+            <td>{{ .Coins.Silver.TotalXPAmount }}</td>
+        </tr>
+        <tr>
+            <td>Electrum:</td>
+            <td>{{ .Coins.Electrum.Number }}</td>
+            <td>{{ .Coins.Electrum.TotalXPAmount }}</td>
+
+        </tr>
+        <tr>
+            <td>Gold:</td>
+            <td>{{ .Coins.Gold.Number }}</td>
+            <td>{{ .Coins.Gold.TotalXPAmount }}</td>
+        </tr>
+        <tr>
+            <td>Platinum:</td>
+            <td>{{ .Coins.Platinum.Number }}</td>
+            <td>{{ .Coins.Platinum.TotalXPAmount }}</td>
+        </tr>
+    </table>
+    <button hx-trigger="mousedown" hx-get="{{ .CoinPath.Edit }}">Edit</button>
+</div>

@@ -3,7 +3,7 @@ package repository
 import (
 	"database/sql"
 
-	"github.com/floodedrealms/adventure-archivist/types"
+	"github.com/floodedrealms/borderland-keep/types"
 )
 
 type Repository interface {

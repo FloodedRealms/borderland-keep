@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <title>The Keep on the Internet</title>
+    <link rel="stylesheet" href="/static/css/borderlandkeep.css">
+    <link rel="icon" type="image/x-icon" href="/assets/images/favicon.png">
+    <script src="https://unpkg.com/htmx.org"></script>
+    <script>
+        htmx.on("htmx:swapError", function (evt) {
+            console.log(evt);
+        });
+    function handleRedirect(event) {
+    var redirectUrl = event.detail.xhr.getResponseHeader("HX-Redirect");
+    if (redirectUrl) {
+        console.log("redirecting")
+      window.location.href = redirectUrl;
+    }
+  }
+    </script>
+</head>
+
+<body>
+    <header>
+        {{ template "banner.html" }}
+    </header>
+    <nav>
+        {{ template "nav.html" }}
+    </nav>
+
+    <main>
+        <section class="content">
+            <hgroup id="campaign-details">
+                <h3>{{ .Name }}</h3>
+                <table>
+                    <tr>
+                        <td><b>Judge:</b></td>
+                        <td>{{ .Judge }}</td>
+                    </tr>
+                    <tr>
+                        <td>Looking for Players?</td>
+                        <td>{{ .Recruitment }}</td>
+                    </tr>
+                    <tr>
+                        <td>Last Adventure</td>
+                        <td>{{ .LastAdventure }}</td>
+                    </tr>
+                    <tr>
+                        <td> Time Keeping </td>
+                        <td> {{ .Timekeeping }} </td>
+                    </tr>
+                </table>
+            </hgroup>
+        </section>
+        <section class="growing-content">
+            <div id="characters" class="box" hx-target="this" hx-swap="innerHTML">
+                <h3>Characters</h3>
+                {{ if lt .NumberOfCharacters 1}}
+                <div class="box" id="proj">
+                    <span> No Characters Defined for this Campaign to Display </span>
+                </div> {{ else }} <table>
+                    <tr>
+                        <th>Name</th>
+                        <th>XP</th>
+                        <th>Class</th>
+                        <th>Level</th>
+                        <th>Bonus XP</th>
+                        <th>Status</th>
+                    </tr> {{ range .Characters }}
+                    <td>{{ .Name }}</td>
+                    <td>{{ .CurrentXP }}</td>
+                    <td>{{ .Class }}</td>
+                    <td>{{ .Level }}</td>
+                    <td>{{ .PrimeReqPercent }}%</td>
+                    <td>{{ .Status }}</td>
+                    </tr>
+                    {{ end}}
+                </table>
+                {{ end }}
+                <button hx-get="{{ .CharacterPath.Edit}}" hx-trigger="mousedown">Edit Characters</button>
+            </div>
+
+            <div id="adventures">
+                <div class="box">
+                    <h3>Adventures</h3>
+                    {{ if lt .NumberOfAdventures 1}}
+                    <div class="box" id="proj">
+                        <span> No Characters Defined for this Campaign to Display </span>
+                    </div>
+                    {{ else }}
+                    <table id="adventureList">
+                        <tr>
+                            <th>Adventure Name</th>
+                            <th>Date</th>
+                        </tr>
+                        {{ range .Adventures }}
+                        <tr>
+                            <td>{{ .Name }}</td>
+                            <td>{{ .AdventureDate }}</td>
+                            <td><a class="action-navigation" href="/adventure/{{ .Id }}">Edit Details</a></td>
+                            <td><button class="danger" hx-delete="/adventure/{{ .Id }}" hx-target="closest tr" hx-swap="delete">Delete Adventure</button></td>
+                        </tr>
+                        {{ end }}
+                    </table>
+                    {{ end }}
+                        <button hx-disinherit="true"  hx-trigger="mousedown" hx-post="{{ .AdventurePath.Display }}">Add New Adventure</button>
+                </div>
+            </div>
+        </section>
+        {{ template "sidebar.html" }}
+    </main>
+</body>
+
+</html>

@@ -3,7 +3,7 @@ package test
 import (
 	"testing"
 
-	"github.com/floodedrealms/adventure-archivist/types"
+	"github.com/floodedrealms/borderland-keep/types"
 )
 
 func TestCoins(t *testing.T) {
