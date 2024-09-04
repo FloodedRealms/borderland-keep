@@ -1,5 +1,6 @@
 package api
 
+/*
 import (
 	"errors"
 	"net/http"
@@ -9,7 +10,7 @@ import (
 )
 
 type User struct {
-	userService services.UserService
+	userService services.UserService2
 }
 
 func (ua User) ValidatePassword(w http.ResponseWriter, r *http.Request) {
@@ -47,3 +48,4 @@ func (ua User) RequirePassword(next http.Handler) http.Handler {
 	})
 
 }
+*/

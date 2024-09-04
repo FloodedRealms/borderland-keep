@@ -1,5 +1,6 @@
 package api
 
+/*
 import (
 	"errors"
 	"net/http"
@@ -9,10 +10,10 @@ import (
 )
 
 type Client struct {
-	userService services.UserService
+	userService services.UserService2
 }
 
-func NewClientAPI(userService services.UserService) *Client {
+func NewClientAPI(userService services.UserService2) *Client {
 	return &Client{userService: userService}
 }
 
@@ -51,3 +52,4 @@ func (ua Client) RequireValidClient(next http.Handler) http.Handler {
 	})
 
 }
+*/

@@ -64,3 +64,42 @@ func (au APIUser) DisplayUserName() string {
 func (au APIUser) Validate() (bool, error) {
 	return au.key.CompareKey()
 }
+
+type WebUser struct {
+	Id            string
+	Friendly_name string
+	Password      APIKey
+}
+
+func GenerateNewPasswordUser(name, password string) (*WebUser, error) {
+	key, err := NewPasswordKey(password)
+	if err != nil {
+		return nil, err
+	}
+	return &WebUser{
+		Friendly_name: name,
+		Password:      *key,
+	}, nil
+}
+
+func (au WebUser) DisplayUUID() string {
+	return au.Id
+}
+
+func (au WebUser) DisplayAPIKey() string {
+	return au.Password.ProvidedKey
+}
+func (au WebUser) RetreiveSalt() string {
+	return au.Password.Hash.Salt
+}
+func (au WebUser) RetreiveHash() string {
+	return au.Password.Hash.Hash
+}
+
+func (au WebUser) DisplayUserName() string {
+	return au.Friendly_name
+}
+
+func (au WebUser) Validate() (bool, error) {
+	return au.Password.CompareKey()
+}

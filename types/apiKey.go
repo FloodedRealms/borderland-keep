@@ -27,6 +27,19 @@ func NewApiKey() (*APIKey, error) {
 	}, nil
 }
 
+func NewPasswordKey(password string) (*APIKey, error) {
+	hash, err := DefaultArgonGenerator().GenerateHash([]byte(password), make([]byte, 0))
+	if err != nil {
+		return nil, err
+	}
+	return &APIKey{
+		HashGenerator: *DefaultArgonGenerator(),
+		Hash:          hash,
+		ProvidedKey:   password,
+		ProvidedSalt:  hash.Salt,
+	}, nil
+}
+
 func NewApiKeyFromDatabase(userProvidedKey, hashedKey, databaseSalt string) *APIKey {
 	return &APIKey{
 		HashGenerator: DefaultArgonGenerator(),

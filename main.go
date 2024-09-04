@@ -7,7 +7,7 @@ import (
 	"net/http"
 
 	"github.com/floodedrealms/borderland-keep/archivist"
-	"github.com/floodedrealms/borderland-keep/commands"
+	"github.com/floodedrealms/borderland-keep/guardsman"
 	"github.com/floodedrealms/borderland-keep/internal/repository"
 	"github.com/floodedrealms/borderland-keep/internal/services"
 	"github.com/floodedrealms/borderland-keep/internal/util"
@@ -23,7 +23,8 @@ func main() {
 	}
 	operation := flag.Arg(0)
 	switch operation {
-
+	default:
+		fmt.Printf("Unrecgonized Comman: %s", operation)
 	case "create-user":
 		if len(flags) == 1 {
 			fmt.Println("usage: archivist create-user [friendly-name]")
@@ -31,10 +32,41 @@ func main() {
 		}
 		friendlyName := flag.Arg(1)
 		if len(flags) == 3 {
-			commands.CreateUser("api", friendlyName, false)
+			guardsman.CreateUser("api", friendlyName, "", "")
+		} else if len(flags) == 4 {
+			email := flag.Arg(2)
+			password := flag.Arg(3)
+			guardsman.CreateUser("web", friendlyName, email, password)
 		} else {
-			commands.CreateUser("api", friendlyName, true)
+			fmt.Println("make your code better 5head")
 		}
+	case "unlimit-user":
+		if len(flags) == 1 {
+			fmt.Println("usage: archivist unlimit-user [user-id]")
+			return
+		}
+		id := flag.Arg(1)
+		err := guardsman.UnlimitUserCampaigns(id)
+		if err != nil {
+			fmt.Println("User not unlimted")
+			fmt.Println(err.Error())
+			return
+		}
+		fmt.Println("User unlimted")
+
+	case "limit-user":
+		if len(flags) == 1 {
+
+			return
+		}
+		id := flag.Arg(1)
+		err := guardsman.LimitUserCampaigns(id)
+		if err != nil {
+			fmt.Println("User not limted")
+			fmt.Println(err.Error())
+			return
+		}
+		fmt.Println("User limted")
 	case "server":
 		debug := false
 		if len(flags) == 2 {
