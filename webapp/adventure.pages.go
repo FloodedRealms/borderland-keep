@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/http"
 	"strconv"
+	"time"
 
 	"github.com/floodedrealms/adventure-archivist/internal/services"
 	"github.com/floodedrealms/adventure-archivist/types"
@@ -231,6 +232,7 @@ func (a AdventurePage) RegisterRoutes(m *http.ServeMux) {
 	adventureDetailsPath := newAdventurePathToRegister("/adventure-details")
 
 	m.HandleFunc(mainPath.Display, a.AdventureOverview)
+	m.HandleFunc("DELETE "+mainPath.Display, a.deleteAdventure)
 
 	m.HandleFunc(detailsPath.Display, a.updateDetails)
 
@@ -321,6 +323,7 @@ func (a AdventurePage) updateDetails(w http.ResponseWriter, r *http.Request) {
 		HalfShareXP:   adventure.HalfShareXP,
 		Characters:    adventure.Characters,
 		Name:          adventure.Name,
+		AdventureDate: adventure.AdventureDate,
 	}
 	output, err := a.renderer.RenderPartial("adventureOverview.html", pdata)
 	if err != nil {
@@ -570,6 +573,7 @@ func (a AdventurePage) openAdventureEditor(w http.ResponseWriter, r *http.Reques
 		return
 	}
 	pData := struct {
+		AdventureId int
 		Name        string
 		Date        string
 		Characters  []types.AdventureCharacter
@@ -577,6 +581,7 @@ func (a AdventurePage) openAdventureEditor(w http.ResponseWriter, r *http.Reques
 		Path        path
 		DisplayType string
 	}{
+		AdventureId: adventureInfo.Id,
 		Name:        adventureInfo.Name,
 		Date:        adventureInfo.AdventureDate.Format("2006-01-02"),
 		Characters:  possibleCharacters,
@@ -807,12 +812,47 @@ func (a AdventurePage) saveCombat(w http.ResponseWriter, r *http.Request) {
 
 func (a AdventurePage) saveAdventureDetails(w http.ResponseWriter, r *http.Request) {
 	id, _ := a.extractAdventureId(r)
-	data, _ := parseCharacterForm(r)
-	err := a.adventureService.ModifyCharacters(id, data)
+	formErr := r.ParseForm()
+	if formErr != nil {
+		a.renderer.MustRenderErrorPage(w, "", formErr)
+		return
+	}
+	adventureData, err := parseAdventureMetaData(*r)
 	if err != nil {
 		a.renderer.MustRenderErrorPage(w, "", err)
+		return
+	}
+	err = a.adventureService.ModifyMetadata(*adventureData)
+	if err != nil {
+		a.renderer.MustRenderErrorPage(w, "", err)
+		return
+	}
+	charData, err := parseCharacterForm(*r)
+	if err != nil {
+		a.renderer.MustRenderErrorPage(w, "", err)
+		return
+	}
+	err = a.adventureService.ModifyCharacters(id, charData)
+	if err != nil {
+		a.renderer.MustRenderErrorPage(w, "", err)
+		return
 	}
 	a.updateDetails(w, r)
+}
+
+func (a AdventurePage) deleteAdventure(w http.ResponseWriter, r *http.Request) {
+	id, err := a.extractAdventureId(r)
+	if err != nil {
+		a.renderer.MustRenderErrorPage(w, "", err)
+		return
+	}
+	err = a.adventureService.DeleteAdventure(id)
+	if err != nil {
+		a.renderer.MustRenderErrorPage(w, "", err)
+		return
+	}
+	w.WriteHeader(http.StatusOK)
+
 }
 
 func parseForm(r *http.Request) ([]map[string]string, error) {
@@ -836,11 +876,7 @@ func parseForm(r *http.Request) ([]map[string]string, error) {
 	return data, nil
 }
 
-func parseCharacterForm(r *http.Request) ([]types.AdventureCharacter, error) {
-	formErr := r.ParseForm()
-	if formErr != nil {
-		return nil, formErr
-	}
+func parseCharacterForm(r http.Request) ([]types.AdventureCharacter, error) {
 
 	var characters = make([]types.AdventureCharacter, 0)
 	for _, id := range r.Form["character-id"] {
@@ -861,6 +897,28 @@ func parseCharacterForm(r *http.Request) ([]types.AdventureCharacter, error) {
 
 	}
 	return characters, nil
+}
+func parseAdventureMetaData(r http.Request) (*types.AdventureRecord, error) {
+	idStr := r.Form["adventure-id"][0]
+	id, err := strconv.Atoi(idStr)
+	if err != nil {
+		return nil, err
+	}
+	name := r.Form["adventure-name"][0]
+	dateString := r.Form["adventure-date"][0]
+	date, err := time.Parse("2006-01-02", dateString)
+	if err != nil {
+		return &types.AdventureRecord{
+			Id:            id,
+			Name:          name,
+			AdventureDate: types.ArcvhistDate(date),
+		}, err
+	}
+	return &types.AdventureRecord{
+		Id:            id,
+		Name:          name,
+		AdventureDate: types.ArcvhistDate(date),
+	}, nil
 }
 
 func validateLootForm(data []map[string]string, lt types.GenericLootType, aId int) (bool, []LootPageModel) {

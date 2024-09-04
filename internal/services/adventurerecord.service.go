@@ -63,6 +63,18 @@ func (a *AdventureService) CreateNewAdventureRecordForCampaign(campaignId int) (
 	return adventures[0], nil
 }
 
+func (a *AdventureService) ModifyMetadata(ad types.AdventureRecord) error {
+	selectNewQ := fmt.Sprintf("UPDATE %s set name=?, adventure_date=? WHERE id=?;", adventureTable)
+	_, err := a.repo.ExecuteQuery(selectNewQ, ad.Name, ad.AdventureDate.String(), ad.Id)
+	return err
+}
+
+func (a *AdventureService) DeleteAdventure(id int) error {
+	q := fmt.Sprintf("DELETE FROM %s WHERE id=?;", adventureTable)
+	_, err := a.repo.ExecuteQuery(q, id)
+	return err
+}
+
 func (a *AdventureService) UpdateAdventureRecord(r *types.AdventureRecord) (*types.AdventureRecord, error) {
 	adventureToUpdate, err := a.repo.GetAdventureRecordById(r)
 	if err != nil {

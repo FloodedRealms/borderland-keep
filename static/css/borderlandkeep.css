@@ -148,6 +148,32 @@ a {
   color: var(--yellow1)
 }
 
+a.action-navigation {
+    float: left;
+    appearance: none;
+    -webkit-appearance: none;
+   /* padding: 0.4em 0.6em;*/
+    border-radius: 0px;
+
+    --text-color: var(--yellow2)
+      /* rgba(100, 100, 100)*/
+    ;
+    --shadow-color: gray;
+    --background: var(--background);
+
+    color: var(--text-color, var(--shadow-color));
+    background: var(--background);
+    border: 1px solid var(--shadow-color);
+    box-shadow: 4px 6px 1px 0px var(--shadow-color);
+
+
+    display: block;
+    text-align: center;
+
+  /* Change the link color to #111 (black) on hover */
+    background-color: #111;
+}
+
 button {
   appearance: none;
   -webkit-appearance: none;

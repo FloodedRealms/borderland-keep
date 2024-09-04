@@ -98,7 +98,8 @@
                         <tr>
                             <td>{{ .Name }}</td>
                             <td>{{ .AdventureDate }}</td>
-                            <td><a href="/adventure/{{ .Id }}">Edit Details</a></td>
+                            <td><a class="action-navigation" href="/adventure/{{ .Id }}">Edit Details</a></td>
+                            <td><button class="danger" hx-delete="/adventure/{{ .Id }}" hx-target="closest tr" hx-swap="delete">Delete Adventure</button></td>
                         </tr>
                         {{ end }}
                     </table>
