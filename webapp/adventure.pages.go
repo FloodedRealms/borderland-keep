@@ -33,8 +33,8 @@ type AdventurePageModel struct {
 	MagicItems    []LootPageModel
 	Characters    []types.AdventureCharacter
 	//These will hold the paths to the various editors
+	ReturnPath    string
 	DetailsPath   path
-	CharacterPath path
 	CoinPath      path
 	GemPath       path
 	JewelleryPath path
@@ -150,8 +150,8 @@ func newAdventurePageModel(a types.AdventureRecord) AdventurePageModel {
 		GameDays:      a.GameDays,
 		Coins:         a.Coins,
 		Characters:    a.Characters,
-		DetailsPath:   newPhysicalAdventurePath("/details", a.Id),
-		CharacterPath: newPhysicalAdventurePath("/characters", a.Id),
+		ReturnPath:    fmt.Sprintf("/campaign/%d", a.CampaignId),
+		DetailsPath:   newPhysicalAdventurePath("/adventure-details", a.Id),
 		CoinPath:      newPhysicalAdventurePath("/coin", a.Id),
 		GemPath:       newPhysicalAdventurePath("/gems", a.Id),
 		JewelleryPath: newPhysicalAdventurePath("/jewellery", a.Id),
@@ -228,7 +228,7 @@ func (a AdventurePage) RegisterRoutes(m *http.ServeMux) {
 	magicItemPath := newAdventurePathToRegister("/magic-item")
 	newLootPath := newAdventurePathToRegister("/new-loot")
 	goldTogglePath := newAdventurePathToRegister("/gold-toggle")
-	characterPath := newAdventurePathToRegister("/characters")
+	adventureDetailsPath := newAdventurePathToRegister("/adventure-details")
 
 	m.HandleFunc(mainPath.Display, a.AdventureOverview)
 
@@ -281,9 +281,9 @@ func (a AdventurePage) RegisterRoutes(m *http.ServeMux) {
 	m.HandleFunc("POST "+magicItemPath.Display, a.saveMagicItems)
 	m.HandleFunc("DELETE "+magicItemPath.Display, sendEmptyResponse)
 
-	m.HandleFunc("GET "+characterPath.Edit, a.openCharacterEditor)
-	m.HandleFunc("GET "+characterPath.Display, a.updateDetails)
-	m.HandleFunc("POST "+characterPath.Display, a.saveCharacters)
+	m.HandleFunc("GET "+adventureDetailsPath.Edit, a.openAdventureEditor)
+	m.HandleFunc("GET "+adventureDetailsPath.Display, a.updateDetails)
+	m.HandleFunc("POST "+adventureDetailsPath.Display, a.saveAdventureDetails)
 
 }
 
@@ -315,13 +315,12 @@ func (a AdventurePage) updateDetails(w http.ResponseWriter, r *http.Request) {
 	aid, _ := a.extractAdventureId(r)
 	adventure, _ := a.adventureService.GetAdventureRecordById(aid)
 	pdata := AdventurePageModel{
-		DetailsPath:   newPhysicalAdventurePath("/details", aid),
+		DetailsPath:   newPhysicalAdventurePath("/adventure-details", aid),
 		TotalXPAmount: adventure.TotalXPAmount(),
 		FullShareXP:   adventure.FullShareXP,
 		HalfShareXP:   adventure.HalfShareXP,
 		Characters:    adventure.Characters,
 		Name:          adventure.Name,
-		CharacterPath: newPhysicalAdventurePath("/characters", aid),
 	}
 	output, err := a.renderer.RenderPartial("adventureOverview.html", pdata)
 	if err != nil {
@@ -554,30 +553,39 @@ func (a AdventurePage) openMagicItemEditor(w http.ResponseWriter, r *http.Reques
 	w.Write([]byte(output))
 }
 
-func (a AdventurePage) openCharacterEditor(w http.ResponseWriter, r *http.Request) {
+func (a AdventurePage) openAdventureEditor(w http.ResponseWriter, r *http.Request) {
 	aId, err := a.extractAdventureId(r)
 	if err != nil {
 		a.renderer.MustRenderErrorPage(w, "", err)
 		return
 	}
-	adata, attendance, err := a.adventureService.GetPossibleCharactersForAdventure(aId)
+	possibleCharacters, attendance, err := a.adventureService.GetPossibleCharactersForAdventure(aId)
+	if err != nil {
+		a.renderer.MustRenderErrorPage(w, "", err)
+		return
+	}
+	adventureInfo, err := a.adventureService.GetAdventureRecordById(aId)
 	if err != nil {
 		a.renderer.MustRenderErrorPage(w, "", err)
 		return
 	}
 	pData := struct {
+		Name        string
+		Date        string
 		Characters  []types.AdventureCharacter
 		Attendance  []bool
 		Path        path
 		DisplayType string
 	}{
-		Characters:  adata,
+		Name:        adventureInfo.Name,
+		Date:        adventureInfo.AdventureDate.Format("2006-01-02"),
+		Characters:  possibleCharacters,
 		Attendance:  attendance,
-		Path:        newPhysicalAdventurePath("/characters", aId),
+		Path:        newPhysicalAdventurePath("/adventure-details", aId),
 		DisplayType: "Characters",
 	}
 
-	output, err := a.renderer.RenderEditor("characterTableEdit.html", pData)
+	output, err := a.renderer.RenderEditor("adventureDetailsEdit.html", pData)
 	if err != nil {
 		a.renderer.MustRenderErrorPage(w, "", err)
 		return
@@ -797,7 +805,7 @@ func (a AdventurePage) saveCombat(w http.ResponseWriter, r *http.Request) {
 	a.displayCombatList(w, r)
 }
 
-func (a AdventurePage) saveCharacters(w http.ResponseWriter, r *http.Request) {
+func (a AdventurePage) saveAdventureDetails(w http.ResponseWriter, r *http.Request) {
 	id, _ := a.extractAdventureId(r)
 	data, _ := parseCharacterForm(r)
 	err := a.adventureService.ModifyCharacters(id, data)
@@ -805,12 +813,6 @@ func (a AdventurePage) saveCharacters(w http.ResponseWriter, r *http.Request) {
 		a.renderer.MustRenderErrorPage(w, "", err)
 	}
 	a.updateDetails(w, r)
-}
-
-func (a AdventurePage) displayErrorPage(partial string, err error) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		a.renderer.MustRenderErrorPage(w, partial, err)
-	})
 }
 
 func parseForm(r *http.Request) ([]map[string]string, error) {
@@ -905,15 +907,6 @@ func validateLootForm(data []map[string]string, lt types.GenericLootType, aId in
 		loot[i] = item
 	}
 	return valid, loot
-}
-
-func (a AdventurePage) renderEditor(w http.ResponseWriter, editorPage string, pData EditorPage) {
-	output, err := a.renderer.RenderEditor(editorPage, pData)
-	if err != nil {
-		a.renderer.MustRenderErrorPage(w, "", err)
-		return
-	}
-	w.Write([]byte(output))
 }
 
 func (a AdventurePage) extractAdventureId(r *http.Request) (int, error) {

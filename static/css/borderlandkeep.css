@@ -1,86 +1,151 @@
 :root {
-	--black: #2b303b;
-	--red1: #bf616a;
-	--green1: #a3be8c;
-	--yellow1: #ebcb8b;
-	--blue1: #8fa1b3;
-	--magenta1: #b48ead;
-	--teal1: #96b5b4;
-	--lightgrey: #c0c5ce;
-	--grey: #65737e;
-	--red2: #bf616a;
-	--green2: #a3be8c;
-	--yellow2: #ebcb8b;
-	--blue2: #8fa1b3;
-	--magenta2: #b48ead;
-	--teal2: #96b5b4;
-	--white: #eff1f5;
-	--foreground: #eff1f5;
-	--background: #4f5d66;
-	color: var(--foreground);
-	--main-color: var(--grey);
-	--main-color-dk: var(--lightgrey);
-	--accent-1:var(--teal);
-	--accent-2:var(blue1);
-	--content-spacing:5px;
-	--text-color:white;
-	--link-color:var(--green1);
-	--border:1px solid black;
-	--main-bg: #000000a8;
+  --black: #2b303b;
+  --red1: #bf616a;
+  --green1: #a3be8c;
+  --yellow1: #ebcb8b;
+  --blue1: #8fa1b3;
+  --magenta1: #b48ead;
+  --teal1: #96b5b4;
+  --lightgrey: #c0c5ce;
+  --grey: #65737e;
+  --red2: #bf616a;
+  --green2: #a3be8c;
+  --yellow2: #ebcb8b;
+  --blue2: #8fa1b3;
+  --magenta2: #b48ead;
+  --teal2: #96b5b4;
+  --white: #eff1f5;
+  --foreground: #eff1f5;
+  --background: #4f5d66;
+  color: var(--foreground);
+  --main-color: var(--grey);
+  --main-color-dk: var(--lightgrey);
+  --accent-1: var(--teal);
+  --accent-2: var(blue1);
+  --content-spacing: 5px;
+  --text-color: white;
+  --link-color: var(--green1);
+  --border: 1px solid black;
+  --main-bg: #000000a8;
 }
 
-header{
+header {
   background-color: var(--main-bg);
   border: solid, 2px, red;
+
   & pre {
     border: dotted, 2px, red;
   }
 }
 
-html,body {
-	margin:0;
-	box-sizing:border-box;
-	font-family:"Courier";
+html,
+body {
+  margin: 0;
+  box-sizing: border-box;
+  font-family: "Courier";
   background-color: var(--main-bg);
 }
 
-main{
+main {
+  display: flex;
+  flex-direction: row;
   border: solid, 2px, green;
-	color:var(--text-color);
-	background-attachment:fixed;
-  float:left;
 }
 
+section {
+  border: solid, 2px, red;
+  color: var(--text-color);
+  background-attachment: fixed;
+
+  & button {
+    position: relative;
+    bottom: 0;
+  }
+}
+
+.content, .sidebar {
+  display: flex;
+  flex-direction: column;
+  }
+
+.sidebar {
+  flex-grow: 1;
+  min-width: 15%;
+  max-width: 20%;
+  float: right;
+}
+
+.content {
+  flex-grow: 5;
+  min-width: 20%;
+  width: 25%;
+}
+
+.growing-content {
+  display: flex;
+  flex-direction: column;
+   flex-grow: 5;
+  min-width: 850px;
+}
+
+.campaign-box {
+  background: #333;
+  color: #fff;
+  border-radius: 4px;
+  border:1px solid #777;
+
+}
 aside {
   border: solid, 2px, purple;
   width: 200px;
   float: right;
 }
+
 nav {
   border: solid, 2px, blue;
   background-color: black;
-    & ul {
-        list-style-type: none;
-        margin: 0;
-        padding: 0;
-        overflow: hidden;
-      }
-      
-      & li {
-        float: left;
-      }
-      
-      & li a {
-        display: block;
-        color: white;
-        text-align: center;
-        padding: 10px;
-      }
-      
-      /* Change the link color to #111 (black) on hover */
-      & li a:hover {
-        background-color: #111;
-      }
+
+  & ul {
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+  }
+
+  & li {
+    float: left;
+    appearance: none;
+    -webkit-appearance: none;
+   /* padding: 0.4em 0.6em;*/
+    border-radius: 0px;
+
+    --text-color: black
+      /* rgba(100, 100, 100)*/
+    ;
+    --shadow-color: gray;
+    --background: var(--background);
+
+    color: var(--text-color, var(--shadow-color));
+    background: var(--background);
+    border: 1px solid var(--shadow-color);
+    box-shadow: 4px 6px 1px 0px var(--shadow-color);
+
+  }
+
+  & li a {
+    display: block;
+    text-align: center;
+    padding: 10px;
+  }
+
+  /* Change the link color to #111 (black) on hover */
+  & li a:hover {
+    background-color: #111;
+  }
+}
+
+a {
+  color: var(--yellow1)
 }
 
 button {
@@ -88,11 +153,13 @@ button {
   -webkit-appearance: none;
   padding: 0.4em 0.6em;
   border-radius: 0px;
-  
-  --text-color: black /* rgba(100, 100, 100)*/;
+
+  --text-color: black
+    /* rgba(100, 100, 100)*/
+  ;
   --shadow-color: gray;
   --background: var(--white);
-  
+
   color: var(--text-color, var(--shadow-color));
   background: var(--background);
   border: 1px solid var(--shadow-color);
@@ -100,25 +167,25 @@ button {
 }
 
 button.danger {
-    --shadow-color: red;
+  --shadow-color: red;
   /*--text-color: rgba(200,0,0,1);*/
-  --background: rgba(255,0,0,0.5);
+  --background: rgba(255, 0, 0, 0.5);
 }
 
 button.add {
-  --text-color: rgba(0,100,0,1);
+  --text-color: rgba(0, 100, 0, 1);
   --shadow-color: green;
-  --background: rgba(0,255,0, 0.5);
+  --background: rgba(0, 255, 0, 0.5);
 }
 
 button.success {
   /*--text-color: rgba(0,100,0,1) black; */
   --shadow-color: green;
-  --background: rgba(0,255,0, 0.15);
+  --background: rgba(0, 255, 0, 0.15);
 }
 
 button.warning {
- /* --text-color: rgba(150, 90, 16, 1);*/
+  /* --text-color: rgba(150, 90, 16, 1);*/
   --shadow-color: orange;
   --background: rgba(255, 124, 10, 0.1);
 }

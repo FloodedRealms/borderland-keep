@@ -13,7 +13,14 @@
             <option value="5">5%</option>
             <option value="10">10%</option>
         </select>
-
+                <td>
+                    <select name="new-character-status" disabled>
+                        <option value="1" selected>Alive</option>
+                        <option value="2">Retired</option>
+                        <option value="3">Crippled</option>
+                        <option value="4">Dead</option>
+                    </select>
+                </td>
     </td>
     <td><button hx-disinherit="true" class="danger" hx-target="closest tr" hx-swap="outerHTML"
             hx-delete="{{ .DeletePath.Display }}" hx-trigger="mousedown">Delete</button></td>

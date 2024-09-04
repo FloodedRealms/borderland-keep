@@ -8,63 +8,58 @@
     <link rel="icon" type="image/x-icon" href="/assets/images/favicon.png">
     <script src="https://unpkg.com/htmx.org"></script>
 </head>
-    
+
 <body>
     <header>
         {{ template "banner.html" }}
     </header>
     {{ template "nav.html" }}
     <main>
-        <section>
-            Welcome to Borderlandkeep.com! This is a play-focused campaign recruitment tool. Feel Free to browse the list of campaigns below!
-        </section>
-       {{ range .Campaigns }}
-            <section>
-              <h4>{{ .Name }}</h4>
-                    <table>
-                        <tr>
-                            <td><b>Judge:</b></td>
-                            <td>{{ .Judge }}</td>
-                        </tr>
-                        <tr>
-                            <td>Looking for Players?</td>
-                            <td>{{ .Recruitment }}</td>
-                        </tr>
-                        <tr>
-                            <td>Last Adventure</td>
-                            <td>{{ .LastAdventure }}</td>
-                        </tr>
-                        <tr>
-                            <td> Time Keeping </td>
-                            <td> {{ .Timekeeping }} </td>
-                        </tr>
-                        <tr>
-                            <td><a href="/campaign/{{ .Id }}">View</a></td> 
-                        </tr>
-                    </table>
-            </section>
-       {{ end }}
-        {{ if .EndOfCampaigns }}
-        <small>
-            End of Campaign List
-        </small>
-        {{ else }}
+        <section class="content">
+            Welcome to Borderlandkeep.com! This is a play-focused campaign recruitment tool. Feel Free to browse the
+            list of campaigns below!
+            {{ range .Campaigns }}
+            <hgroup class="campaign-box">
+                <h4>{{ .Name }}</h4>
+                <table>
+                    <tr>
+                        <td><b>Judge:</b></td>
+                        <td>{{ .Judge }}</td>
+                    </tr>
+                    <tr>
+                        <td>Looking for Players?</td>
+                        <td>{{ .Recruitment }}</td>
+                    </tr>
+                    <tr>
+                        <td>Last Adventure</td>
+                        <td>{{ .LastAdventure }}</td>
+                    </tr>
+                    <tr>
+                        <td> Time Keeping </td>
+                        <td> {{ .Timekeeping }} </td>
+                    </tr>
+                    <tr>
+                        <td><a href="/campaign/{{ .Id }}">View</a></td>
+                    </tr>
+                </table>
+            </hgroup>
+                {{ end }}
+                {{ if .EndOfCampaigns }}
+                <small>
+                    End of Campaign List
+                </small>
+                {{ else }}
+                <div>
+                    <button class='btn primary' hx-get="/campaign-list?page=2" hx-target="closest div"
+                        hx-swap="outerHTML">
+                        Load more campaigns
+                    </button>
+                </div>
+                {{ end }}
 
-<div>
-    <button class='btn primary' hx-get="/campaign-list?page=2"
-                              hx-target="closest div"
-                              hx-swap="outerHTML">
-               Load more campaigns
-          </button>
-          </div>
-{{ end }}
-     </main>
-    <aside>
-        <h2>People who Participate</h2>
-        <ul>
-            <li>Flooded Realms</li>
-        </ul>
-    </aside>
+        </section>
+        {{ template "sidebar.html" }}
+         </main>
 </body>
 
 </html>

@@ -20,18 +20,26 @@
                     {{ (index $.Errors $i).Name }}
                 </small>
                 {{end}}
-                <td> <select name="character-class-{{ $c.Id}}">
+                <td> <select name="character-class-{{ $c.Id}}" disabled>
                         {{ range $.ClassOptions }}
-                        <option value="{{ .ClassId }}" {{ if eq $c.Class .ClassName}} selected {{ end }}>{{ .ClassName
+                        <option value="{{ .ClassId }}" {{ if eq $c.ClassId .ClassId}} selected {{ end }}>{{ .ClassName
                             }}</option>
                         {{ end }}
                     </select>
                 </td>
                 <td>
-                    <select name="character-preq-{{ .Id }}">
+                    <select name="character-preq-{{ .Id }}" disabled>
                         <option value="0" {{ if eq $c.PrimeReqPercent 0}} selected {{ end }}>0%</option>
                         <option value="5" {{ if eq $c.PrimeReqPercent 5}} selected {{ end }}>5%</option>
                         <option value="10" {{ if eq $c.PrimeReqPercent 10}} selected {{ end }}>10%</option>
+                    </select>
+                </td>
+                <td>
+                    <select name="character-status-{{ .Id }}">
+                        <option value="1" {{ if eq $c.StatusId 1}} selected {{ end }}>Alive</option>
+                        <option value="2" {{ if eq $c.StatusId 2}} selected {{ end }}>Retired</option>
+                        <option value="3" {{ if eq $c.StatusId 3}} selected {{ end }}>Crippled</option>
+                        <option value="4" {{ if eq $c.StatusId 4}} selected {{ end }}>Dead</option>
                     </select>
                 </td>
                 <td><button hx-disinherit="true" class="danger" hx-target="closest tr" hx-swap="outerHTML"

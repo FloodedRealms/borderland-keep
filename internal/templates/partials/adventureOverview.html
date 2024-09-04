@@ -1,44 +1,46 @@
-<div class="box" id="adventure-and-characters" hx-get="{{ .DetailsPath.Display }}" hx-trigger="updateOverview from:body"
-    hx-target="this" hx-swap="outerHTML">
-    <div class="box" id="adventure-details">
-        <h3>{{ .Name }}</h3>
-        <table id="adventure-overview">
-            <tr>
-                <td><label for="xp-recovered">Amount of XP Recovered:</label></td>
-                <td><span id="xp-recovered">{{ .TotalXPAmount }}</span></td>
-            </tr>
-            <tr>
-                <td><label for="xp-fullshare">Amount of a Full Share:</label></td>
-                <td><span id="xp-fullshare">{{ .FullShareXP }}</span> </td>
-            </tr>
-            <tr>
-                <td><label for="xp-halfshare">Amount of a Half Share:</label></td>
-                <td><span id="xp-halfshare">{{ .HalfShareXP }}</span> </td>
-            </tr>
-        </table>
-    </div>
-    <div class="box">
-        <h3>Characters</h3>
-        <table id="CharacterList">
-            <thead>
+<section class="box" id="adventure-and-characters" hx-get="{{ .DetailsPath.Display }}"
+            hx-trigger="updateOverview from:body" hx-target="this" hx-swap="outerHTML">
+            <table id="adventure-overview">
                 <tr>
-                    <th>Name</th>
-                    <th>Type</th>
-                    <th>XP Earned</th>
+                    <td><h3>{{ .Name }}</h3></td>
                 </tr>
-            </thead>
-            <tbody>
-                {{ range .Characters}}
                 <tr>
-                    <td>{{ .Name }}</td>
-                    <td>{{ if .Halfshare}} Henchmen {{ else }} Player Character {{ end }}</td>
-                    <td>{{ if .Halfshare}} {{ $.HalfShareXP }} {{ else }} {{ $.FullShareXP }} {{ end }}
-                    </td>
+                    <td><label for="date">Adventure Date:</label></td>
+                    <td><span id="date">{{ .AdventureDate}}</span></td>
                 </tr>
-                {{ end }}
-            </tbody>
-        </table>
-<button hx-disinherit="true" hx-target="closest div" hx-swap="innerHTML" hx-get="{{ .CharacterPath.Edit}}">Edit Characters</button>
-
-    </div>
-</div>
+                <tr>
+                    <td><label for="xp-recovered">Amount of XP Recovered:</label></td>
+                    <td><span id="xp-recovered">{{ .TotalXPAmount }}</span></td>
+                </tr>
+                <tr>
+                    <td><label for="xp-fullshare">Amount of a Full Share:</label></td>
+                    <td><span id="xp-fullshare">{{ .FullShareXP }}</span> </td>
+                </tr>
+                <tr>
+                    <td><label for="xp-halfshare">Amount of a Half Share:</label></td>
+                    <td><span id="xp-halfshare">{{ .HalfShareXP }}</span> </td>
+                </tr>
+            </table>
+            <h3>Characters</h3>
+            <table id="CharacterList">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Type</th>
+                        <th>XP Earned</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {{ range .Characters}}
+                    <tr>
+                        <td>{{ .Name }}</td>
+                        <td>{{ if .Halfshare}} Henchmen {{ else }} Player Character {{ end }}</td>
+                        <td>{{ if .Halfshare}} {{ $.HalfShareXP }} {{ else }} {{ $.FullShareXP }} {{ end }}
+                        </td>
+                    </tr>
+                    {{ end }}
+                </tbody>
+            </table>
+            <button hx-disinherit="true" hx-target="closest section" hx-swap="innerHTML"
+                hx-get="{{ .DetailsPath.Edit}}">Edit Details</button>
+        </section>

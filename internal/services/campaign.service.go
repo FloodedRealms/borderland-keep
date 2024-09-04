@@ -42,16 +42,54 @@ func (c *CampaignService) UpdateCampaign(ur *types.CampaignRecord) (*types.Campa
 	return c.repo.UpdateCampaign(ur)
 }
 
-func (c *CampaignService) GetCampaign(id string) (*types.CampaignRecord, error) {
-	campaignId, err := strconv.Atoi(id)
-	if err != nil {
-		return nil, err
-	}
-	campaign, err := c.repo.GetCampaign(campaignId)
+func (c *CampaignService) GetCampaign(id int) (*types.CampaignRecord, error) {
+	campaign, err := c.repo.GetCampaign(id)
 	if err != nil {
 		return nil, err
 	}
 	return campaign, nil
+}
+
+func (c *CampaignService) CampaignSummary(id int) (*types.CampaignRecord, error) {
+	tableq := fmt.Sprintf("SELECT c.id, c.name, c.recruitment, c.judge, c.timekeeping, c.cadence, c.last_adventure FROM %s c where c.id =?;", campaignTable)
+	//tableq1 := fmt.Sprintf("SELECT * FROM %s c where c.id = ?", campaignTable)
+	rows, err := c.repo.RunQuery(tableq, id)
+	util.CheckErr(err)
+	defer rows.Close()
+	var (
+		campaignRows []*types.CampaignRecord
+	)
+	for rows.Next() {
+		var current types.CampaignRecord
+		err := rows.Scan(&current.Id, &current.Name, &current.Recruitment, &current.Judge, &current.Timekeeping, &current.Cadence, &current.LastAdventure)
+		util.CheckErr(err)
+		util.CheckErr(err)
+		campaignRows = append(campaignRows, &current)
+	}
+	result := campaignRows[0]
+	return result, nil
+
+}
+
+func (c *CampaignService) CampaignAdventuresSummary(id int) ([]types.AdventureRecord, error) {
+	tableq := fmt.Sprintf("SELECT c.id, c.name, c.adventure_date FROM %s c where c.campaign_id =?;", adventureTable)
+	//tableq1 := fmt.Sprintf("SELECT * FROM %s c where c.id = ?", campaignTable)
+	rows, err := c.repo.RunQuery(tableq, id)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var results []types.AdventureRecord
+	for rows.Next() {
+		var current types.AdventureRecord
+		err := rows.Scan(&current.Id, &current.Name, &current.AdventureDate)
+		if err != nil {
+			return nil, err
+		}
+		results = append(results, current)
+	}
+	return results, nil
+
 }
 
 func (c *CampaignService) ListCampaigns() ([]*types.CampaignRecord, error) {

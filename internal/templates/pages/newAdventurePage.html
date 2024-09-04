@@ -15,12 +15,6 @@
     <nav>
         {{ template "nav.html" }}
     </nav>
-    <nav>
-        <ul>
-        <li><a href="{{ .ReturnPath }}">Back to Campaign</a></li>
-    </ul>
-
-    </nav>
     <main>
         <section class="box" id="adventure-and-characters" hx-get="{{ .DetailsPath.Display }}"
             hx-trigger="updateOverview from:body" hx-target="this" hx-swap="outerHTML">
@@ -66,7 +60,7 @@
                 </tbody>
             </table>
             <button hx-disinherit="true" hx-target="closest section" hx-swap="innerHTML"
-                hx-get="{{ .DetailsPath.Edit}}">Edit Details</button>
+                hx-get="{{ .DetailPath.Edit}}">Edit Details</button>
         </section>
         <section class="box" id="coins" hx-target="this" hx-swap="outerHTML">
             <h3>Coins - {{.Coins.TotalXPAmount }} XP</h3>

@@ -16,6 +16,9 @@ type CharacterRecord struct {
 	PrimeReqPercent int    `json:"prime_req"`
 	Level           int    `json:"level"`
 	Class           string `json:"class"`
+	ClassId         int
+	Status          string
+	StatusId        int
 }
 
 func (c CharacterRecord) GenerateInsertAttributes() (name string, currentXP int, primeReq int, level int, class string) {

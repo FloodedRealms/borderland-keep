@@ -69,8 +69,8 @@ func main() {
 
 		//pages
 		homePages := webapp.NewHomePage(*renderer, *campaignService)
-		campaignPages := webapp.NewCampaignPage(*campaignService, characterService, *renderer)
-		adventurePages := webapp.NewAdventurePage(*adventureRecordService, characterService, *renderer)
+		campaignPages := webapp.NewCampaignPage(*campaignService, *characterService, *adventureRecordService, *renderer)
+		adventurePages := webapp.NewAdventurePage(*adventureRecordService, *characterService, *renderer)
 
 		//router
 		router := http.NewServeMux()

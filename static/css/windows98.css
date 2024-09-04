@@ -1,0 +1,72 @@
+/* Windows 98-style CSS */
+
+:root {
+    --win98-bg: #c0c0c0;
+    --win98-text: #000000;
+    --win98-highlight: #000080;
+    --win98-highlight-text: #ffffff;
+    --win98-button-face: #c0c0c0;
+    --win98-button-shadow: #808080;
+    --win98-button-highlight: #ffffff;
+  }
+  
+  body {
+    font-family: 'MS Sans Serif', 'Microsoft Sans Serif', sans-serif;
+    background-color: var(--win98-bg);
+    color: var(--win98-text);
+  }
+  
+  .window {
+    border: 2px solid;
+    border-top-color: var(--win98-button-highlight);
+    border-left-color: var(--win98-button-highlight);
+    border-right-color: var(--win98-button-shadow);
+    border-bottom-color: var(--win98-button-shadow);
+    background-color: var(--win98-bg);
+    box-shadow: 1px 1px 0 1px #000000;
+  }
+  
+  .window-title {
+    background-color: var(--win98-highlight);
+    color: var(--win98-highlight-text);
+    font-weight: bold;
+    padding: 2px 4px;
+  }
+  
+  .button {
+    border: 2px solid;
+    border-top-color: var(--win98-button-highlight);
+    border-left-color: var(--win98-button-highlight);
+    border-right-color: var(--win98-button-shadow);
+    border-bottom-color: var(--win98-button-shadow);
+    background-color: var(--win98-button-face);
+    padding: 4px 8px;
+    font-size: 12px;
+  }
+  
+  .button:active {
+    border-top-color: var(--win98-button-shadow);
+    border-left-color: var(--win98-button-shadow);
+    border-right-color: var(--win98-button-highlight);
+    border-bottom-color: var(--win98-button-highlight);
+  }
+  
+  input[type="text"], textarea {
+    border: 2px inset var(--win98-button-shadow);
+    background-color: #ffffff;
+    color: var(--win98-text);
+  }
+  
+  .menu {
+    background-color: var(--win98-bg);
+    border: 1px solid var(--win98-button-shadow);
+  }
+  
+  .menu-item {
+    padding: 2px 10px;
+  }
+  
+  .menu-item:hover {
+    background-color: var(--win98-highlight);
+    color: var(--win98-highlight-text);
+  }
