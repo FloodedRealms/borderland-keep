@@ -1,5 +1,6 @@
 package api
 
+/*
 import (
 	"errors"
 	"net/http"
@@ -122,3 +123,4 @@ func (ca *CampaignApi) EditCampaignPassword(w http.ResponseWriter, r *http.Reque
 	sendSuccessResponse(w, "password successfuly updated")
 
 }
+*/

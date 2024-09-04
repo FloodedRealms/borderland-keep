@@ -14,32 +14,49 @@
             <tr>
                 <td> <input name="character-id" type="hidden" value="{{ $c.Id }}" /></td>
                 <td><input name="character-name-{{ $c.Id }}" type="text" value="{{ $c.Name }}"></input></td>
-                    {{ if (index $.Errors $i).Name }}
-                    <br>
-                    <small class="form-text text-danger">
-                        {{ (index $.Errors $i).Name }}
-                    </small>
-                    {{end}}
-                <td> <select name="character-class-{{ $c.Id}}">
+                {{ if (index $.Errors $i).Name }}
+                <br>
+                <small class="form-text text-danger">
+                    {{ (index $.Errors $i).Name }}
+                </small>
+                {{end}}
+                <td> <select name="character-class-{{ $c.Id}}" disabled>
                         {{ range $.ClassOptions }}
-                        <option value="{{ .ClassId }}">{{ .ClassName }}</option>
+                        <option value="{{ .ClassId }}" {{ if eq $c.ClassId .ClassId}} selected {{ end }}>{{ .ClassName
+                            }}</option>
                         {{ end }}
                     </select>
                 </td>
-            <td>
-                 <select name="character-preq-{{ .Id}}">
-                        <option value="0">0%</option>
-                        <option value="5">5%</option>
-                        <option value="10">10%</option>
+                <td>
+                    <select name="character-preq-{{ .Id }}" disabled>
+                        <option value="0" {{ if eq $c.PrimeReqPercent 0}} selected {{ end }}>0%</option>
+                        <option value="5" {{ if eq $c.PrimeReqPercent 5}} selected {{ end }}>5%</option>
+                        <option value="10" {{ if eq $c.PrimeReqPercent 10}} selected {{ end }}>10%</option>
                     </select>
                 </td>
+                <td>
+                    <select name="character-status-{{ .Id }}">
+                        <option value="1" {{ if eq $c.StatusId 1}} selected {{ end }}>Alive</option>
+                        <option value="2" {{ if eq $c.StatusId 2}} selected {{ end }}>Retired</option>
+                        <option value="3" {{ if eq $c.StatusId 3}} selected {{ end }}>Crippled</option>
+                        <option value="4" {{ if eq $c.StatusId 4}} selected {{ end }}>Dead</option>
+                    </select>
+                </td>
+                <td><button hx-disinherit="true" class="danger" hx-target="closest tr" hx-swap="outerHTML"
+                        hx-delete="{{ $.Path.Display }}?char-id={{ $c.Id }}" hx-trigger="mousedown">Delete</button></td>
             </tr>
             {{ end }}
             <tr>
-                <td><button hx-target="closest tr" hx-swap="beforebegin" hx-get="{{ .NewCharacterPath.Display }}"> Add New Character</button></td>
+                <td></td>
+                <td><button hx-disinherit="true" hx-target="closest tr" hx-swap="beforebegin"
+                        hx-get="{{ .NewCharacterPath.Display }}" hx-trigger="mousedown"> Add New Character</button></td>
+                <td></td>
+                <td></td>
             </tr>
         </tbody>
     </table>
-    <button class="success" hx-post="{{ .Path.Display }}" hx-trigger="mousedown" hx-swap="outerHTML" hx-target="closest form">Save Characters</button>
-    <button class="danger" hx-get="{{ .Path.Display }}" hx-trigger="mousedown" hx-swap="outerHTML" hx-target="closest form">Cancel</button>
+    <button class="success" hx-post="{{ .Path.Display }}" hx-trigger="mousedown" hx-swap="outerHTML"
+        hx-target="closest form">Save Characters</button>
+    <button class="danger" hx-get="{{ .Path.Display }}" hx-trigger="mousedown" hx-swap="outerHTML"
+        hx-target="closest form">Cancel</button>
 </form>

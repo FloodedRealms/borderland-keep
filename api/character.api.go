@@ -1,5 +1,6 @@
 package api
 
+/*
 import (
 	"net/http"
 	"strconv"
@@ -49,7 +50,7 @@ func (c CharacterApi) UpdateCharacter(w http.ResponseWriter, r *http.Request) {
 	sendGoodResponseWithObject(w, created)
 }
 
-/*
+
 	func (c CharacterApi) ManageCharactersForAdventure(w http.ResponseWriter, r *http.Request) {
 		adventureId, err := strconv.Atoi(r.PathValue("advnetureId"))
 		if err != nil {
@@ -72,7 +73,7 @@ func (c CharacterApi) UpdateCharacter(w http.ResponseWriter, r *http.Request) {
 		}
 		sendGoodResponseWithObject(w, status)
 	}
-*/
+
 func (c CharacterApi) GetCharacterById(w http.ResponseWriter, r *http.Request) {
 	http.Error(w, util.NotYetImplmented().Error(), http.StatusNotImplemented)
 }
@@ -107,3 +108,4 @@ func (c CharacterApi) AddCampaignActivityForCharacter(w http.ResponseWriter, r *
 	sendGoodResponseWithObject(w, true)
 
 }
+*/

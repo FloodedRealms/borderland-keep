@@ -34,6 +34,47 @@ func (a *AdventureService) CreateAdventureRecordForCampaign(r *types.AdventureRe
 	return a.repo.CreateAdventureRecordForCampaign(r)
 }
 
+func (a *AdventureService) CreateNewAdventureRecordForCampaign(campaignId int) (*types.AdventureRecord, error) {
+	stmt := fmt.Sprintf("INSERT INTO %s(name, campaign_id, adventure_date, created_at, updated_at) values(?,?,?,?,?);", adventureTable)
+	time := time.Now()
+	result, err := a.repo.ExecuteQuery(stmt, "New Adventure", campaignId, time, time, time)
+	if err != nil {
+		return nil, err
+	}
+	id, err := result.LastInsertId()
+	if err != nil {
+		return nil, err
+	}
+	selectNewQ := fmt.Sprintf("SELECT a.id, a.campaign_id, a.name, a.adventure_date FROM %s a where a.id = ?;", adventureTable)
+	rows, err := a.repo.RunQuery(selectNewQ, id)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	adventures := make([]*types.AdventureRecord, 0)
+	for rows.Next() {
+		current := &types.AdventureRecord{}
+		err := rows.Scan(&current.Id, &current.CampaignId, &current.Name, &current.AdventureDate)
+		if err != nil {
+			return nil, err
+		}
+		adventures = append(adventures, current)
+	}
+	return adventures[0], nil
+}
+
+func (a *AdventureService) ModifyMetadata(ad types.AdventureRecord) error {
+	selectNewQ := fmt.Sprintf("UPDATE %s set name=?, adventure_date=? WHERE id=?;", adventureTable)
+	_, err := a.repo.ExecuteQuery(selectNewQ, ad.Name, ad.AdventureDate.String(), ad.Id)
+	return err
+}
+
+func (a *AdventureService) DeleteAdventure(id int) error {
+	q := fmt.Sprintf("DELETE FROM %s WHERE id=?;", adventureTable)
+	_, err := a.repo.ExecuteQuery(q, id)
+	return err
+}
+
 func (a *AdventureService) UpdateAdventureRecord(r *types.AdventureRecord) (*types.AdventureRecord, error) {
 	adventureToUpdate, err := a.repo.GetAdventureRecordById(r)
 	if err != nil {
