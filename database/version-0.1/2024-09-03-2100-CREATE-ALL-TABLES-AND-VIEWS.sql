@@ -1,20 +1,3 @@
-CREATE TABLE api_users (
-id TEXT NOT NULL PRIMARY KEY,
-api_key TEXT NOT NULL DEFAULT "",
-friendly_name TEXT NOT NULL DEFAULT "",
-campaign_number_limited INTEGER NOT NULL CHECK (campaign_number_limited IN (0,1)) DEFAULT 1,
-salt TEXT,
-UNIQUE(api_key)
-);
-CREATE TABLE adventures (
-id INTEGER NOT NULL PRIMARY KEY,
-campaign_id INTEGER,
-name TEXT,
-adventure_date DATETIME,
-created_at DATETIME NOT NULL,
-updated_at DATETIME NOT NULL, copper INTEGER DEFAULT 0, silver INTEGER DEFAULT 0, electrum INTEGER DEFAULT 0, gold INTEGER DEFAULT 0, platinum INTEGER DEFAULT 0, duration INT DEFAULT 1,
-FOREIGN KEY(campaign_id) REFERENCES "_table1_old"(id)
-);
 CREATE TABLE adventures_to_characters (
 id INTEGER NOT NULL PRIMARY KEY,
 adventure_id INTEGER,
@@ -102,7 +85,6 @@ taken_at_level INTEGER,
 xp_gained INTEGER,
 FOREIGN KEY(character_id) REFERENCES characters(id)
 );
-CREATE TABLE sqlite_sequence(name,seq);
 CREATE VIEW adventures_to_character_name AS SELECT atc.*, c.name FROM adventures_to_characters atc
 JOIN "characters" c ON c.id = atc.character_id
 /* adventures_to_character_name(id,adventure_id,character_id,half_share,xp_gained,name) */;

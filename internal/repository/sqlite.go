@@ -79,11 +79,11 @@ func InitializeDatabase() error {
 		return err
 	}
 	defer db.Close()
-	schema, ioErr := os.ReadFile("/database/version-0.1/database/version-0.1/2024-09-03-2100-CREATE-ALL-TABLES-AND-VIEWS.sql")
+	schema, ioErr := os.ReadFile("database/version-0.1/2024-09-03-2100-CREATE-ALL-TABLES-AND-VIEWS.sql")
 	if ioErr != nil {
 		return ioErr
 	}
-	data, ioErr := os.ReadFile("/database/version-0.1/2024-09-03-2115-LOAD-ALL-INITIAL-DATA.sql")
+	data, ioErr := os.ReadFile("database/version-0.1/2024-09-03-2115-LOAD-ALL-INITIAL-DATA.sql")
 	if ioErr != nil {
 		return ioErr
 	}
