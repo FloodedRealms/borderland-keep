@@ -1,12 +1,12 @@
-package webapp
+package archivist
 
 import (
 	"fmt"
 	"net/http"
 	"strconv"
 
-	"github.com/floodedrealms/adventure-archivist/internal/services"
-	"github.com/floodedrealms/adventure-archivist/types"
+	"github.com/floodedrealms/borderland-keep/internal/services"
+	"github.com/floodedrealms/borderland-keep/types"
 )
 
 const baseCampaignPath = "/campaign"

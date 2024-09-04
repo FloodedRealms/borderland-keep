@@ -1,4 +1,4 @@
-package webapp
+package archivist
 
 import (
 	"fmt"
@@ -6,8 +6,8 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/floodedrealms/adventure-archivist/internal/services"
-	"github.com/floodedrealms/adventure-archivist/types"
+	"github.com/floodedrealms/borderland-keep/internal/services"
+	"github.com/floodedrealms/borderland-keep/types"
 )
 
 const baseAdventurePath = "/adventure"

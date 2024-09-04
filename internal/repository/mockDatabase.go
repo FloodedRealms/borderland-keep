@@ -3,7 +3,7 @@ package repository
 import (
 	"time"
 
-	"github.com/floodedrealms/adventure-archivist/types"
+	"github.com/floodedrealms/borderland-keep/types"
 )
 
 type MockDB struct {

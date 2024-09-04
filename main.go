@@ -6,12 +6,12 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/floodedrealms/adventure-archivist/api"
-	"github.com/floodedrealms/adventure-archivist/commands"
-	"github.com/floodedrealms/adventure-archivist/internal/repository"
-	"github.com/floodedrealms/adventure-archivist/internal/services"
-	"github.com/floodedrealms/adventure-archivist/internal/util"
-	"github.com/floodedrealms/adventure-archivist/webapp"
+	"github.com/floodedrealms/borderland-keep/api"
+	"github.com/floodedrealms/borderland-keep/archivist"
+	"github.com/floodedrealms/borderland-keep/commands"
+	"github.com/floodedrealms/borderland-keep/internal/repository"
+	"github.com/floodedrealms/borderland-keep/internal/services"
+	"github.com/floodedrealms/borderland-keep/internal/util"
 )
 
 func main() {
@@ -49,7 +49,7 @@ func main() {
 		logger := util.NewLogger(debug)
 
 		//Turn on renderer for webpages (will panic if templates are wrong)
-		renderer := webapp.NewRenderer()
+		renderer := archivist.NewRenderer()
 
 		sqlRepo, err := repository.NewSqliteRepo("archivist.db", logger)
 		util.CheckErr(err)
@@ -68,9 +68,9 @@ func main() {
 		userApi := api.NewClientAPI(userService)
 
 		//pages
-		homePages := webapp.NewHomePage(*renderer, *campaignService)
-		campaignPages := webapp.NewCampaignPage(*campaignService, *characterService, *adventureRecordService, *renderer)
-		adventurePages := webapp.NewAdventurePage(*adventureRecordService, *characterService, *renderer)
+		homePages := archivist.NewHomePage(*renderer, *campaignService)
+		campaignPages := archivist.NewCampaignPage(*campaignService, *characterService, *adventureRecordService, *renderer)
+		adventurePages := archivist.NewAdventurePage(*adventureRecordService, *characterService, *renderer)
 
 		//router
 		router := http.NewServeMux()
@@ -121,11 +121,11 @@ func main() {
 		fs := http.FileServer(http.Dir("./static"))
 		router.Handle("/static/", http.StripPrefix("/static/", fs))
 
-		// Webapp Pages
+		// archivist Pages
 		router.HandleFunc("/", homePages.Index)
 		router.HandleFunc("/guild", homePages.GuildLanding)
 		router.HandleFunc("/tavern", homePages.TavernLanding)
-		router.HandleFunc("/crier", homePages.Campaigns)
+		router.HandleFunc("/archivist", homePages.Campaigns)
 		router.HandleFunc("/campaign-list", homePages.LoadNextCampaignSet)
 		router.HandleFunc("/about", homePages.About)
 		campaignPages.RegisterRoutes(router)

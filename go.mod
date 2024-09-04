@@ -1,4 +1,4 @@
-module github.com/floodedrealms/adventure-archivist
+module github.com/floodedrealms/borderland-keep
 
 go 1.22.1
 

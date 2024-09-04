@@ -1,4 +1,4 @@
-package webapp
+package archivist
 
 import (
 	"encoding/json"

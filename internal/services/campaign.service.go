@@ -6,9 +6,9 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/floodedrealms/adventure-archivist/internal/repository"
-	"github.com/floodedrealms/adventure-archivist/internal/util"
-	"github.com/floodedrealms/adventure-archivist/types"
+	"github.com/floodedrealms/borderland-keep/internal/repository"
+	"github.com/floodedrealms/borderland-keep/internal/util"
+	"github.com/floodedrealms/borderland-keep/types"
 )
 
 type CampaignService struct {
