@@ -104,7 +104,7 @@ func (p *PasswordForm) validateLoginForm(r *http.Request) (bool, string, string)
 
 func (g Guardsman) StoreSession(w http.ResponseWriter, u WebUser) error {
 	sessionToken := uuid.NewString()
-	expiresAt := time.Now().Add(120 * time.Second)
+	expiresAt := time.Now().Add(2 * time.Hour)
 
 	// Set the token in the session map, along with the session information
 	err := g.userService.StoreSession(sessionToken, u.Id, u.Friendly_name, expiresAt)
@@ -205,6 +205,7 @@ func (g Guardsman) SimpleLoginCheck(r *http.Request) WebUser {
 
 func (g Guardsman) UserMustBeLoggedIn(next http.HandlerFunc) http.HandlerFunc {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+
 		c, err := r.Cookie(sessionCookie)
 		if err != nil {
 			if err == http.ErrNoCookie {
@@ -226,7 +227,7 @@ func (g Guardsman) UserMustBeLoggedIn(next http.HandlerFunc) http.HandlerFunc {
 			w.WriteHeader(http.StatusUnauthorized)
 			return
 		}
-		if expiry.After(time.Now()) {
+		if expiry.Before(time.Now()) {
 			w.WriteHeader(http.StatusUnauthorized)
 			return
 		}

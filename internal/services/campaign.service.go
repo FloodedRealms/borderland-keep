@@ -114,6 +114,34 @@ func (c *CampaignService) TenMostRecentlyActiveCampaigns(page int) []types.Campa
 	return results
 }
 
+func (c *CampaignService) CampaignsForUser(userId string) []types.CampaignRecord {
+	stmtStr := fmt.Sprintf("SELECT id, name, recruitment, judge, timekeeping, cadence, last_adventure FROM %s WHERE user_id=?;", campaignTable)
+	rows, err := c.repo.RunQuery(stmtStr, userId)
+	if err != nil {
+		return nil
+	}
+	results := make([]types.CampaignRecord, 0)
+	defer rows.Close()
+	for rows.Next() {
+		cur := types.CampaignRecord{}
+		rows.Scan(&cur.Id, &cur.Name, &cur.Recruitment, &cur.Judge, &cur.Timekeeping, &cur.Cadence, &cur.LastAdventure)
+		results = append(results, cur)
+	}
+	return results
+}
+
+func (c *CampaignService) CreateCampaignForUser(userId string) (*types.CampaignRecord, error) {
+	stmt := fmt.Sprintf("INSERT INTO %s(user_id, name, created_at, updated_at, last_adventure) values(?, ?, ?, ?, ?)", campaignTable)
+	time := time.Now()
+	results, err := c.repo.ExecuteQuery(stmt, userId, "New Campaign", time, time, time)
+	if err != nil {
+		return nil, err
+	}
+	id, _ := results.LastInsertId()
+	return c.CampaignSummary(int(id))
+
+}
+
 func (c CampaignService) GetClassOptionsForCampaign(id int) ([]types.CampaignClassOption, error) {
 	stmtStr := fmt.Sprintf("SELECT cl.class_id, cl.class_name FROM %s cl WHERE campaign_id = %d", "campaign_to_class_options", id)
 	rows, err := c.repo.RunQuery(stmtStr)

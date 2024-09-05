@@ -128,6 +128,9 @@ func main() {
 		router.HandleFunc("/about", homePages.About)
 		campaignPages.RegisterRoutes(router)
 		adventurePages.RegisterRoutes(router)
+		router.HandleFunc("/user/{userId}/campaigns", guardsman.UserMustBeLoggedIn(homePages.MyCampaigns))
+		router.HandleFunc("/user/{userId}/campaign/{campaignId}", guardsman.UserMustBeLoggedIn(campaignPages.CampaignPageForUser))
+		router.HandleFunc("POST /user/{userId}/campaign", guardsman.UserMustBeLoggedIn(campaignPages.CampaignPageForUser))
 
 		// guardsmen pages
 		guardsman.RegisterRoutes(router)

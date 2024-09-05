@@ -63,6 +63,40 @@ func (c CampaignPage) RegisterRoutes(m *http.ServeMux) {
 	m.HandleFunc("POST "+adventurePath.Display, c.createNewAdventure)
 }
 
+func (ca CampaignPage) CampaignPageForUser(w http.ResponseWriter, r *http.Request) {
+	userId := r.PathValue("userId")
+	switch r.Method {
+	case http.MethodPost:
+		campaign, _ := ca.campaignService.CreateCampaignForUser(userId)
+		newPage := fmt.Sprintf("/user/1/campaign/%d?edit=true", campaign.Id)
+		w.Header().Set("HX-Redirect", newPage)
+		w.Header().Set("location", newPage)
+		w.WriteHeader(http.StatusNoContent)
+
+	case http.MethodGet:
+		campaignId, _ := strconv.Atoi(r.PathValue("campaignId"))
+		editor := r.URL.Query()["edit"][0]
+		openEditor := false
+		if editor == "true" {
+			openEditor = true
+		}
+		campaign, _ := ca.campaignService.CampaignSummary(campaignId)
+		pageData := struct {
+			types.CampaignRecord
+			OpenCampaignEditor bool
+			UserId             string
+			CampaignId         int
+		}{
+			*campaign,
+			openEditor,
+			userId,
+			campaign.Id,
+		}
+		output, _ := ca.renderer.RenderPage("campaignPage.html", pageData)
+		w.Write([]byte(output))
+	}
+}
+
 func (ca CampaignPage) CampaignOverview(w http.ResponseWriter, r *http.Request) {
 	//applyCorsHeaders(w)
 	id := ca.mustExtractCampaignId(w, r)
@@ -246,7 +280,6 @@ func (ca CampaignPage) createNewAdventure(w http.ResponseWriter, r *http.Request
 	w.Header().Set("HX-Redirect", newPage)
 	w.Header().Set("location", newPage)
 	w.WriteHeader(http.StatusNoContent)
-
 }
 
 /* UTILITY FUNCTIONS */

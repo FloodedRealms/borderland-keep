@@ -32,6 +32,9 @@
     <main>
         <section class="content">
             <hgroup id="campaign-details">
+            {{ if .OpenCampaignEditor }}
+            {{ template "campaignEditor.html" . }}
+            {{ else }}
                 <h3>{{ .Name }}</h3>
                 <table>
                     <tr>
@@ -51,6 +54,7 @@
                         <td> {{ .Timekeeping }} </td>
                     </tr>
                 </table>
+                {{ end }}
             </hgroup>
         </section>
         <section class="growing-content">

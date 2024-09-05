@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+
+{{ template "head.html" }}
+<body>
+    <header>
+        {{ template "banner.html" }}
+    </header>
+    <nav>
+        {{ template "nav.html" . }}
+    </nav>
+    <main>
+        <section class="content">
+            <hgroup class="box" id="proj">
+                <h2 style="display:inline">Campaigns for user</h2>
+                {{ template "campaigns.html" .}}
+                <button hx-post="/user/{{ .User.Id }}/campaign" hx-trigger="mousedown">Add New Campaign</button>
+            </hgroup>
+        </section>
+        {{ template "sidebar.html" }}
+    </main>
+</body>
+
+</html>

@@ -1,42 +1,42 @@
-
-            {{ range .Campaigns }}
-            <hgroup class="campaign-box">
-                <h4>{{ .Name }}</h4>
-                <table>
-                    <tr>
-                        <td><b>Judge:</b></td>
-                        <td>{{ .Judge }}</td>
-                    </tr>
-                    <tr>
-                        <td>Looking for Players?</td>
-                        <td>{{ .Recruitment }}</td>
-                    </tr>
-                    <tr>
-                        <td>Last Adventure</td>
-                        <td>{{ .LastAdventure }}</td>
-                    </tr>
-                    <tr>
-                        <td> Time Keeping </td>
-                        <td> {{ .Timekeeping }} </td>
-                    </tr>
-                    <tr>
-                        <td><a href="/campaign/{{ .Id }}">View</a></td>
-                    </tr>
-                </table>
-            </hgroup>
-                {{ end }}
-                {{ if .EndOfCampaigns }}
-                <br>
-                <small>
-                    End of Campaign List
-                </small>
-                {{ else }}
-                <div>
-                    <button class='btn primary' hx-get="/campaign-list?page=2" hx-target="closest div"
-                        hx-swap="outerHTML">
-                        Load more campaigns
-                    </button>
-                </div>
-                {{ end }}
-
-        </section>
+{{ range .Campaigns }}
+<hgroup class="campaign-box">
+    <h4>{{ .Name }}</h4>
+    <table>
+        <tr>
+            <td><b>Judge:</b></td>
+            <td>{{ .Judge }}</td>
+        </tr>
+        <tr>
+            <td>Looking for Players?</td>
+            <td>{{ .Recruitment }}</td>
+        </tr>
+        <tr>
+            <td>Last Adventure</td>
+            <td>{{ .LastAdventure }}</td>
+        </tr>
+        <tr>
+            <td> Time Keeping </td>
+            <td> {{ .Timekeeping }} </td>
+        </tr>
+        <tr>
+            {{ if $.User.LoggedIn }}
+            <td><a href="/me/campaign/{{ .Id }}">View and Edit</a></td>
+            {{ else }}
+            <td><a href="/campaign/{{ .Id }}">View</a></td>
+            {{ end }}
+        </tr>
+    </table>
+</hgroup>
+{{ end }}
+{{ if .EndOfCampaigns }}
+<br>
+<small>
+    End of Campaign List
+</small>
+{{ else }}
+<div>
+    <button class='btn primary' hx-get="/campaign-list?page=2" hx-target="closest div" hx-swap="outerHTML">
+        Load more campaigns
+    </button>
+</div>
+{{ end }}

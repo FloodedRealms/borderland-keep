@@ -61,7 +61,6 @@ func (h HomePage) Index(w http.ResponseWriter, r *http.Request) {
 		EndOfCampaigns: len(campaigns) < 10,
 		User:           u,
 	}
-	h.guard.RefreshSession(w, r)
 	output, err := h.renderer.RenderPage("index.html", pdata)
 	if err != nil {
 		h.renderer.MustRenderErrorPage(w, "error.html", err)
@@ -82,6 +81,26 @@ func (h HomePage) Campaigns(w http.ResponseWriter, r *http.Request) {
 	}
 
 	output, err := h.renderer.RenderPage("campaigns.html", pdata)
+	if err != nil {
+		h.renderer.MustRenderErrorPage(w, "error.html", err)
+	}
+	w.Write([]byte(output))
+}
+
+func (h HomePage) MyCampaigns(w http.ResponseWriter, r *http.Request) {
+	userId := r.PathValue("userId")
+	campaigns := h.cs.CampaignsForUser(userId)
+	pdata := struct {
+		Campaigns      []types.CampaignRecord
+		EndOfCampaigns bool
+		User           guardsman.WebUser
+	}{
+		Campaigns:      campaigns,
+		EndOfCampaigns: len(campaigns) < 10,
+		User:           guardsman.WebUser{Id: userId, LoggedIn: true},
+	}
+
+	output, err := h.renderer.RenderPage("myCampaigns.html", pdata)
 	if err != nil {
 		h.renderer.MustRenderErrorPage(w, "error.html", err)
 	}
