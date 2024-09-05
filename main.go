@@ -11,6 +11,7 @@ import (
 	"github.com/floodedrealms/borderland-keep/internal/repository"
 	"github.com/floodedrealms/borderland-keep/internal/services"
 	"github.com/floodedrealms/borderland-keep/internal/util"
+	"github.com/floodedrealms/borderland-keep/renderer"
 )
 
 const dbName = "keep.db"
@@ -23,15 +24,15 @@ func main() {
 		fmt.Print("usage: archivist [operation] <args>")
 		return
 	}
-	repo, _ := repository.NewSqliteRepo(util.NewLogger(true), dbName)
-	guardsman := guardsman.Guardsman{
-		Repo: repo,
-	}
+
 	operation := flag.Arg(0)
 	switch operation {
 	default:
 		fmt.Printf("Unrecgonized Command: %s", operation)
 	case "create-user":
+		repo, _ := repository.NewSqliteRepo(util.NewLogger(true), dbName)
+		userService := services.NewUserService(repo, *util.NewLogger(true))
+		guardsman := guardsman.NewGuardsman(repo, *userService, nil)
 		if len(flags) == 1 {
 			fmt.Println("usage: archivist create-user [friendly-name]")
 			return
@@ -47,6 +48,9 @@ func main() {
 			fmt.Println("make your code better 5head")
 		}
 	case "unlimit-user":
+		repo, _ := repository.NewSqliteRepo(util.NewLogger(true), dbName)
+		userService := services.NewUserService(repo, *util.NewLogger(true))
+		guardsman := guardsman.NewGuardsman(repo, *userService, nil)
 		if len(flags) == 1 {
 			fmt.Println("usage: archivist unlimit-user [user-id]")
 			return
@@ -61,6 +65,9 @@ func main() {
 		fmt.Println("User unlimted")
 
 	case "limit-user":
+		repo, _ := repository.NewSqliteRepo(util.NewLogger(true), dbName)
+		userService := services.NewUserService(repo, *util.NewLogger(true))
+		guardsman := guardsman.NewGuardsman(repo, *userService, nil)
 		if len(flags) == 1 {
 
 			return
@@ -84,7 +91,7 @@ func main() {
 		logger := util.NewLogger(debug)
 
 		//Turn on renderer for webpages (will panic if templates are wrong)
-		renderer := archivist.NewRenderer()
+		renderer := renderer.NewRenderer()
 
 		sqlRepo, err := repository.NewSqliteRepo(logger, dbName)
 		util.CheckErr(err)
@@ -93,11 +100,12 @@ func main() {
 		campaignService := services.NewCampaignService(sqlRepo, logger, context.TODO())
 		characterService := services.NewCharacterService(sqlRepo, logger, context.TODO())
 		adventureRecordService := services.NewAdventureRecordService(sqlRepo, context.TODO())
-		// userService := services.NewUserService(sqlRepo, *logger)
+		userService := services.NewUserService(sqlRepo, *logger)
 		// campaignActionService := services.NewCampaignActionService(sqlRepo)
 
 		//pages
-		homePages := archivist.NewHomePage(*renderer, *campaignService)
+		guardsman := guardsman.NewGuardsman(sqlRepo, *userService, renderer)
+		homePages := archivist.NewHomePage(*renderer, *campaignService, *guardsman)
 		campaignPages := archivist.NewCampaignPage(*campaignService, *characterService, *adventureRecordService, *renderer)
 		adventurePages := archivist.NewAdventurePage(*adventureRecordService, *characterService, *renderer)
 
@@ -120,6 +128,9 @@ func main() {
 		router.HandleFunc("/about", homePages.About)
 		campaignPages.RegisterRoutes(router)
 		adventurePages.RegisterRoutes(router)
+
+		// guardsmen pages
+		guardsman.RegisterRoutes(router)
 
 		server := &http.Server{
 			Addr:    ":9090",

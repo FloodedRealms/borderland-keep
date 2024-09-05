@@ -1,0 +1,12 @@
+<nav>
+    <ul>
+        <li><a href="/home">Home</a></li>
+        <li><a href="/about">About</a></li>
+        {{ if .User.LoggedIn }}
+        <li style="float:right"><button hx-post="/depart">Logout</a></li>
+        <li style="float:right"><a class="user-action" href="/my-campaigns">Your Campaigns</a></li>
+        {{ else }}
+        <!--<li style="float:right"><a class="login" href="/gate"></a></li>-->
+        {{ end }}
+    </ul>
+</nav>

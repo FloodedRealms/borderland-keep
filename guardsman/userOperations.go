@@ -5,7 +5,6 @@ import (
 	"log"
 	"strconv"
 
-	"github.com/floodedrealms/borderland-keep/internal/repository"
 	"github.com/floodedrealms/borderland-keep/internal/services"
 	"github.com/floodedrealms/borderland-keep/internal/util"
 )
@@ -22,14 +21,8 @@ import (
 	}
 */
 
-type Guardsman struct {
-	Repo repository.Repository
-}
-
 func (g Guardsman) createWebUser(username, email, password string) {
-	logger := util.NewLogger(true)
-	userService := services.NewUserService(g.Repo, *logger)
-	nameTaken, err := userService.IsNameTaken(username)
+	nameTaken, err := g.userService.IsNameTaken(username)
 	if err != nil {
 		fmt.Println(err.Error())
 		return
@@ -41,7 +34,7 @@ func (g Guardsman) createWebUser(username, email, password string) {
 	user, err := GenerateNewPasswordUser(username, password)
 	util.CheckErr(err)
 	user.Email = email
-	err = userService.InsertWebUser(user.Friendly_name, user.Email, user.RetreiveHash(), user.RetreiveSalt())
+	err = g.userService.InsertWebUser(user.Friendly_name, user.Email, user.RetreiveHash(), user.RetreiveSalt())
 	util.CheckErr(err)
 	log.Printf("New User created with. Friendly name is: %s", username)
 }
@@ -64,7 +57,7 @@ func (g Guardsman) UnlimitUserCampaigns(id string) error {
 		return err
 	}
 	logger := util.NewLogger(true)
-	userService := services.NewUserService(g.Repo, *logger)
+	userService := services.NewUserService(g.repo, *logger)
 	return userService.UnlimitUserCampaigns(userId)
 }
 
@@ -74,6 +67,6 @@ func (g Guardsman) LimitUserCampaigns(id string) error {
 		return err
 	}
 	logger := util.NewLogger(true)
-	userService := services.NewUserService(g.Repo, *logger)
+	userService := services.NewUserService(g.repo, *logger)
 	return userService.LimitUserCampaigns(userId)
 }

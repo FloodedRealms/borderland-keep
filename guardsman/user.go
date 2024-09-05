@@ -70,6 +70,7 @@ type WebUser struct {
 	Friendly_name string
 	Email         string
 	Password      APIKey
+	LoggedIn      bool
 }
 
 func GenerateNewPasswordUser(name, password string) (*WebUser, error) {

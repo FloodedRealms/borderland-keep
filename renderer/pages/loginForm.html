@@ -1,0 +1,29 @@
+<form onsubmit="return false;">
+                <table>
+                    <tbody>
+                        <tr>
+                            <td>
+                                <label> <b>Username:</b> </label>
+                                <input type="text" name="username">
+                                {{ if .NameError }}
+                                <small>
+                                    {{ .NameError }}
+                                </small>
+                                {{ end }}
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <label> <b>Password:</b> </label>
+                                <input type="password" name="password">
+                                {{ if .PasswordError }}
+                                <small>
+                                    {{ .PasswordError }}
+                                </small>
+                                {{ end }}
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+                <button hx-post="/gate" hx-target="closest form" >Login</button>
+            </form>

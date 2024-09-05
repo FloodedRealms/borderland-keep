@@ -1,4 +1,4 @@
-package archivist
+package renderer
 
 import (
 	"bytes"
@@ -27,9 +27,9 @@ func NewRenderer() *Renderer {
 
 func (r *Renderer) mustLoadTemplates() {
 	wd, _ := os.Getwd()
-	pageDir := filepath.Join(wd, "/templates/pages/*.html")
-	partialsDir := filepath.Join(wd, "/templates/partials/*.html")
-	partialEditorsDir := filepath.Join(wd, "/templates/partials/editors/*.html")
+	pageDir := filepath.Join(wd, "/renderer/pages/*.html")
+	partialsDir := filepath.Join(wd, "/renderer/partials/*.html")
+	partialEditorsDir := filepath.Join(wd, "/renderer/partials/editors/*.html")
 
 	r.pageTemplates = template.Must(template.ParseGlob(pageDir))
 	r.partialTemplates = template.Must(template.ParseGlob(partialsDir))

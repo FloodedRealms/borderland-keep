@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/floodedrealms/borderland-keep/internal/services"
+	"github.com/floodedrealms/borderland-keep/renderer"
 	"github.com/floodedrealms/borderland-keep/types"
 )
 
@@ -15,7 +16,7 @@ const baseAdventurePath = "/adventure"
 type AdventurePage struct {
 	adventureService services.AdventureService
 	characterService services.CharacterService
-	renderer         Renderer
+	renderer         renderer.Renderer
 }
 
 type AdventurePageModel struct {
@@ -211,7 +212,7 @@ func NewLootPageModelFromMagicItem(adata types.MagicItem, adventureId int) LootP
 	return *m
 }
 
-func NewAdventurePage(cs services.AdventureService, ch services.CharacterService, r Renderer) *AdventurePage {
+func NewAdventurePage(cs services.AdventureService, ch services.CharacterService, r renderer.Renderer) *AdventurePage {
 	return &AdventurePage{
 		adventureService: cs,
 		characterService: ch,

@@ -1,23 +1,4 @@
-<!DOCTYPE html>
-<html lang="en">
 
-<head>
-    <meta charset="utf-8" />
-    <title>The Keep on the Internet</title>
-    <link rel="stylesheet" href="/static/css/borderlandkeep.css">
-    <link rel="icon" type="image/x-icon" href="/assets/images/favicon.png">
-    <script src="https://unpkg.com/htmx.org"></script>
-</head>
-
-<body>
-    <header>
-        {{ template "banner.html" }}
-    </header>
-    {{ template "nav.html" }}
-    <main>
-        <section class="content">
-            Welcome to Borderlandkeep.com! This is a play-focused campaign recruitment tool. Feel Free to browse the
-            list of campaigns below!
             {{ range .Campaigns }}
             <hgroup class="campaign-box">
                 <h4>{{ .Name }}</h4>
@@ -45,6 +26,7 @@
             </hgroup>
                 {{ end }}
                 {{ if .EndOfCampaigns }}
+                <br>
                 <small>
                     End of Campaign List
                 </small>
@@ -58,8 +40,3 @@
                 {{ end }}
 
         </section>
-        {{ template "sidebar.html" }}
-         </main>
-</body>
-
-</html>

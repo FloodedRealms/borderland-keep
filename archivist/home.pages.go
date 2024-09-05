@@ -4,17 +4,23 @@ import (
 	"net/http"
 	"strconv"
 
+	"github.com/floodedrealms/borderland-keep/guardsman"
 	"github.com/floodedrealms/borderland-keep/internal/services"
+	"github.com/floodedrealms/borderland-keep/renderer"
+
 	"github.com/floodedrealms/borderland-keep/types"
 )
 
+const sessionCookie = "session_token"
+
 type HomePage struct {
-	renderer Renderer
+	renderer renderer.Renderer
 	cs       services.CampaignService
+	guard    guardsman.Guardsman
 }
 
-func NewHomePage(r Renderer, cs services.CampaignService) *HomePage {
-	return &HomePage{renderer: r, cs: cs}
+func NewHomePage(r renderer.Renderer, cs services.CampaignService, g guardsman.Guardsman) *HomePage {
+	return &HomePage{renderer: r, cs: cs, guard: g}
 }
 
 func (h HomePage) About(w http.ResponseWriter, r *http.Request) {
@@ -39,16 +45,28 @@ func (h HomePage) TavernLanding(w http.ResponseWriter, r *http.Request) {
 		h.renderer.MustRenderErrorPage(w, "error.html", err)
 	}
 	w.Write([]byte(output))
-
 }
 
 func (h HomePage) Index(w http.ResponseWriter, r *http.Request) {
-	output, err := h.renderer.RenderPageWithNoData("index.html")
+	u := h.guard.SimpleLoginCheck(r)
+	campaigns := h.cs.TenMostRecentlyActiveCampaigns(1)
+	pdata := struct {
+		Campaigns      []types.CampaignRecord
+		Page           int
+		EndOfCampaigns bool
+		User           guardsman.WebUser
+	}{
+		Campaigns:      campaigns,
+		Page:           2,
+		EndOfCampaigns: len(campaigns) < 10,
+		User:           u,
+	}
+	h.guard.RefreshSession(w, r)
+	output, err := h.renderer.RenderPage("index.html", pdata)
 	if err != nil {
 		h.renderer.MustRenderErrorPage(w, "error.html", err)
 	}
 	w.Write([]byte(output))
-
 }
 
 func (h HomePage) Campaigns(w http.ResponseWriter, r *http.Request) {
@@ -56,9 +74,11 @@ func (h HomePage) Campaigns(w http.ResponseWriter, r *http.Request) {
 	pdata := struct {
 		Campaigns      []types.CampaignRecord
 		EndOfCampaigns bool
+		User           guardsman.WebUser
 	}{
 		Campaigns:      campaigns,
 		EndOfCampaigns: len(campaigns) < 10,
+		User:           guardsman.WebUser{LoggedIn: false},
 	}
 
 	output, err := h.renderer.RenderPage("campaigns.html", pdata)
@@ -90,5 +110,4 @@ func (h HomePage) LoadNextCampaignSet(w http.ResponseWriter, r *http.Request) {
 		h.renderer.MustRenderErrorPage(w, "error.html", err)
 	}
 	w.Write([]byte(output))
-
 }

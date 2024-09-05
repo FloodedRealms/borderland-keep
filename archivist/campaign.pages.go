@@ -6,6 +6,7 @@ import (
 	"strconv"
 
 	"github.com/floodedrealms/borderland-keep/internal/services"
+	"github.com/floodedrealms/borderland-keep/renderer"
 	"github.com/floodedrealms/borderland-keep/types"
 )
 
@@ -15,11 +16,11 @@ type CampaignPage struct {
 	campaignService  services.CampaignService
 	characterService services.CharacterService
 	adventureService services.AdventureService
-	renderer         Renderer
+	renderer         renderer.Renderer
 	CharacterPath    path
 }
 
-func NewCampaignPage(cs services.CampaignService, ch services.CharacterService, as services.AdventureService, r Renderer) *CampaignPage {
+func NewCampaignPage(cs services.CampaignService, ch services.CharacterService, as services.AdventureService, r renderer.Renderer) *CampaignPage {
 	return &CampaignPage{
 		campaignService:  cs,
 		characterService: ch,

@@ -3,7 +3,6 @@ package guardsman
 import (
 	"bytes"
 	"crypto/rand"
-	"errors"
 
 	"golang.org/x/crypto/argon2"
 )
@@ -64,6 +63,12 @@ func (a Argon2idHash) GenerateHash(password, salt []byte) (*HashSalt, error) {
 	return &HashSalt{Hash: string(hash), Salt: string(salt)}, nil
 }
 
+type BadPasswordError struct{}
+
+func (b BadPasswordError) Error() string {
+	return "hash doesn't match"
+}
+
 // Compare generated hash with store hash.
 func (a Argon2idHash) Compare(hash, salt, password []byte) (bool, error) {
 	// Generate hash for comparison.
@@ -74,7 +79,7 @@ func (a Argon2idHash) Compare(hash, salt, password []byte) (bool, error) {
 	// Compare the generated hash with the stored hash.
 	// If they don't match return error.
 	if !bytes.Equal(hash, []byte(hashSalt.Hash)) {
-		return false, errors.New("hash doesn't match")
+		return false, BadPasswordError{}
 	}
 	return true, nil
 }
