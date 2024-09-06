@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+{{ template "head.html" }}
+<body>
+    <header>
+        {{ template "banner.html" }}
+    </header>
+    <nav>
+        {{ template "nav.html" }}
+    </nav>
+    <main>
+        <section class="box" id="hello">
+            <h2 style="display:inline">Welcome...</h2>
+            <p>The Guild is the matrix homeserver of Borderland Keep. Matrix is a text and voice* service that seeks to
+                replace things like discord, guilded, telegram and other such messaging platforms. The main appeal of
+                matrix is that similiar to email (and the irc of yore) it is decentralized. That means a signup on any
+                matrix Homeserver will allow a user to access <i>all</i> matrix spaces and pages. No need to maintain
+                multiple logins for various services and clients. If you wish to use the Borderland Keep homeserver,
+                this guide will show you how. </p>
+            <h3>How to join</h3>
+            <p> Joining the Borderland Keep matrix space is very simple. Just click on <a
+                    href="https://matrix.to/#/#borderland-keep-guildhall:guild.borderlandkeep.com"> this link </a> or
+                use the one in the side bar. You will be greeted by a page similiar to the one shown here. You may use
+                <i>any</i> of the suggested clients, but Element will be the most familiar to users of discord/guilded.
+                After selecting a client, you will be asked to sign up. You may simply use the matrix.org homeserver.
+                Sign up is free, and you will then be linked to the Space. That simple really </p>
+            <img src="static/matrix-reference.png" alt="Landing Page" class="inline-image" />
+            <p> The sign up page looks like this: <img src="static/account-creation.png" alt="Account Creation screen"
+                    class="inline-image" />
+            <h3> What is the "homeserver" </h3>
+            <p>A homeserver is exactly what is sounds like, it is the server where your matrix account lives, and where
+                spaces are hosted. You may notice that your username after sign up looks somewhat like a twitter handle,
+                with the form <code>
+								@username:matrix.org
+						</code> this means that your account is tied to the matrix.org homeserver, hosted by Element's dev team. Once
+                that is done, you are free to access <b>any</b> space or dm <b>any</b> account on other homeservers that
+                talk to the matrix one. Many spaces are hosted directly in matrix, including some other ttrpg and hobby
+                ones.</p>
+            <h3>What about the Borderland Keep Homeserver?</h3>
+            <p>There is a unique homeserver for Borderland Keep: guild.borderlandkeep.com. You may notice some users
+                have this as their homeserver instead of matrix.org. Currently, account creation on the homeserver is
+                invite-only, meaning an account has to be made on the server directly by an admin. To get an invite at
+                the moment, you will need to be able to contribute to the project in some capacity, however in the
+                future there will likely be a semi-public way to allow signups (likely through a subscription). The
+                reasons behind this are many, but the main two are:
+            <ol>
+                <li>Running this serivice costs money and time. The more accounts on the homeserver, the more money it
+                    costs. Keeping homeserver invite only to start with keeps costs low.</li>
+                <li>Maintaining good account security is difficult, and I am a single developer. The team that maintains
+                    the matrix.org homeserver is much bigger and they take their jobs very seriously.</li>
+            </ol>
+            However, because of the nature of matrix, your homeserver of choice is largely irrelevant, as you are free
+            to interact with the whole ecosytem at once.
+        </section>
+    {{ template "sidebar.html" }}
+    </main>
+</body>
+
+</html>

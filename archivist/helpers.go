@@ -7,6 +7,8 @@ import (
 	"io"
 	"net/http"
 	"strings"
+
+	"github.com/floodedrealms/borderland-keep/guardsman"
 )
 
 type malformedRequest struct {
@@ -79,4 +81,10 @@ func decodeJSONBody(w http.ResponseWriter, r *http.Request, dst interface{}) err
 }
 func sendEmptyResponse(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
+}
+
+func ExtractGuardsmanHeaders(r *http.Request) (loggedIn, canEdit bool) {
+	loggedIn = r.Header.Get(http.CanonicalHeaderKey(guardsman.LoggedInHeader)) == "true"
+	canEdit = r.Header.Get(http.CanonicalHeaderKey(guardsman.EditAccessHeader)) == "true"
+	return loggedIn, canEdit
 }

@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+{{ template "head.html" }}
+
+<body>
+    <header>
+        {{ template "banner.html" }}
+    </header>
+    <nav>
+        {{ template "nav.html" }}
+    </nav>
+    <main>
+
+        <section id="Software">
+            <hgroup>
+                <h3>Purpose</h3>
+                <p>This is a passion project. Originally intended to be a landing site and url for several services (mastodon, matrix among other), it
+                    has ballooned out into a full campaign management platform, currently focus on the Adventure Conqueror King II system. With this has come
+                    some new idea, which are current in progess. Namely, a new take on the rpg forum and recruiting tool as a whole. In the future I will be accepting 
+                    user signups to start maintiaing their own campaigns, and using this as a tool to see other campaigns currently in progress. The end goal is to
+                    bring back a sort of semi-public method of campaign management. Similiar to seeing an ongoing campaign in the wild.
+                Please take a look around, and enjoy your stay.</p>
+
+            </hgroup>
+            <hgroup>
+                <h3>Software</h3>
+                <p>Proudly made with golang and htmx. You may see the source code <a href="https://github.com/FloodedRealms/borderland-keep">here.</a> 
+                Be warned, it is not for the faint of heart. The source code is licensed under AGPL 3.0</p>
+                <img alt="Made with htmx" src="/static/img/createdwith.jpeg" width="680" height="168">
+            </hgroup>
+            <hgroup>
+                <h3>Contact and Contribute</h3>
+                <p>I can be contacted via email at <a href="mailto:shocktohp@floodedrealms.com">shocktohp@floodedrealms.com</a> I can also be found at various places online 
+                such as <a href="https://floodedrealms.com/">my homepage</a> and on <a href="https://floodedrealms.substack.com/">substack</a>. I also hang out in various 
+                OSR and adjacent discords and on twitter. 
+                If you want to support my work, and help me pay for a UI designer, you may do so by either <a href="https://www.drivethrurpg.com/en/publisher/21168/flooded-realms-adventure-press">buying something I've written</a>
+                or donating to <a href="patreon.com/user?u=24144585">my patreon</a>
+                
+                Finally, if you are software inclined, you may contribute via a pull request to the github repo.</p>
+            </hgroup>
+            <hgroup>
+                <h3>FAQ</h3>
+                <h4>Are you the handsome and very intellegent author of Wavestone Keep?</h4>
+                <p>yes</p>
+                <h4>Do you have brain damage? This UI is awful</h4>
+                <p>I am not a front end developer, nor do I claim to be. It is a known issue and being worked on.</p>
+            </hgroup>
+        </section>
+        {{ template "sidebar.html" }}
+    </main>
+</body>
+
+</html>

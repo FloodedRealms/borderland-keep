@@ -6,16 +6,19 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/floodedrealms/borderland-keep/guardsman"
 	"github.com/floodedrealms/borderland-keep/internal/services"
+	"github.com/floodedrealms/borderland-keep/renderer"
 	"github.com/floodedrealms/borderland-keep/types"
 )
 
 const baseAdventurePath = "/adventure"
+const DATE_DISPLAY = "2006-01-02"
 
 type AdventurePage struct {
 	adventureService services.AdventureService
 	characterService services.CharacterService
-	renderer         Renderer
+	renderer         renderer.Renderer
 }
 
 type AdventurePageModel struct {
@@ -25,7 +28,7 @@ type AdventurePageModel struct {
 	TotalXPAmount int
 	FullShareXP   int
 	HalfShareXP   int
-	AdventureDate types.ArcvhistDate
+	AdventureDate string
 	GameDays      int
 	Coins         types.Coins
 	Gems          []LootPageModel
@@ -42,6 +45,8 @@ type AdventurePageModel struct {
 	CombatPath    path
 	MagicItemPath path
 	NewLootPath   path
+	User          guardsman.WebUser
+	HasEditAccess bool
 }
 
 type formError struct {
@@ -139,7 +144,7 @@ func newAdventurePathToRegister(appendedPath string, additionalPathParams ...str
 	return newPath(path)
 }
 
-func newAdventurePageModel(a types.AdventureRecord) AdventurePageModel {
+func newAdventurePageModel(a types.AdventureRecord, loggedIn, canEdit bool) AdventurePageModel {
 	return AdventurePageModel{
 		Id:            a.Id,
 		CampaignId:    a.CampaignId,
@@ -147,7 +152,7 @@ func newAdventurePageModel(a types.AdventureRecord) AdventurePageModel {
 		TotalXPAmount: a.TotalXPAmount(),
 		FullShareXP:   a.FullShareXP,
 		HalfShareXP:   a.HalfShareXP,
-		AdventureDate: a.AdventureDate,
+		AdventureDate: a.AdventureDate.Format(DATE_DISPLAY),
 		GameDays:      a.GameDays,
 		Coins:         a.Coins,
 		Characters:    a.Characters,
@@ -159,6 +164,8 @@ func newAdventurePageModel(a types.AdventureRecord) AdventurePageModel {
 		CombatPath:    newPhysicalAdventurePath("/combat", a.Id),
 		MagicItemPath: newPhysicalAdventurePath("/magic-item", a.Id),
 		NewLootPath:   newPhysicalAdventurePath("/new-loot", a.Id),
+		User:          guardsman.WebUser{LoggedIn: loggedIn},
+		HasEditAccess: canEdit,
 	}
 }
 
@@ -211,7 +218,7 @@ func NewLootPageModelFromMagicItem(adata types.MagicItem, adventureId int) LootP
 	return *m
 }
 
-func NewAdventurePage(cs services.AdventureService, ch services.CharacterService, r Renderer) *AdventurePage {
+func NewAdventurePage(cs services.AdventureService, ch services.CharacterService, r renderer.Renderer) *AdventurePage {
 	return &AdventurePage{
 		adventureService: cs,
 		characterService: ch,
@@ -219,7 +226,7 @@ func NewAdventurePage(cs services.AdventureService, ch services.CharacterService
 	}
 }
 
-func (a AdventurePage) RegisterRoutes(m *http.ServeMux) {
+func (a AdventurePage) RegisterRoutes(m *http.ServeMux, g guardsman.Guardsman) {
 	mainPath := newAdventurePathToRegister("")
 	detailsPath := newAdventurePathToRegister("/details")
 	coinPath := newAdventurePathToRegister("/coin")
@@ -231,7 +238,7 @@ func (a AdventurePage) RegisterRoutes(m *http.ServeMux) {
 	goldTogglePath := newAdventurePathToRegister("/gold-toggle")
 	adventureDetailsPath := newAdventurePathToRegister("/adventure-details")
 
-	m.HandleFunc(mainPath.Display, a.AdventureOverview)
+	m.HandleFunc(mainPath.Display, g.UserLoggedInAndHasEditAccessToAdventure(a.AdventureOverview))
 	m.HandleFunc("DELETE "+mainPath.Display, a.deleteAdventure)
 
 	m.HandleFunc(detailsPath.Display, a.updateDetails)
@@ -292,16 +299,17 @@ func (a AdventurePage) RegisterRoutes(m *http.ServeMux) {
 func (a AdventurePage) AdventureOverview(w http.ResponseWriter, r *http.Request) {
 	id, _ := a.extractAdventureId(r)
 	adventure, err := a.adventureService.GetAdventureRecordById(id)
+	l, c := ExtractGuardsmanHeaders(r)
 
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	a.renderAdventurePage(w, *adventure)
+	a.renderAdventurePage(w, *adventure, l, c)
 }
 
-func (a AdventurePage) renderAdventurePage(w http.ResponseWriter, data types.AdventureRecord) {
-	model := newAdventurePageModel(data)
+func (a AdventurePage) renderAdventurePage(w http.ResponseWriter, data types.AdventureRecord, loggedin, canedit bool) {
+	model := newAdventurePageModel(data, loggedin, canedit)
 	model.Gems = createGemPageModels(data.Gems, data.Id)
 	model.Jewellery = createJewelleryPageModels(data.Jewellery, data.Id)
 	model.Combat = createCombatPageModels(data.Combat, data.Id)
@@ -323,7 +331,7 @@ func (a AdventurePage) updateDetails(w http.ResponseWriter, r *http.Request) {
 		HalfShareXP:   adventure.HalfShareXP,
 		Characters:    adventure.Characters,
 		Name:          adventure.Name,
-		AdventureDate: adventure.AdventureDate,
+		AdventureDate: adventure.AdventureDate.Format(DATE_DISPLAY),
 	}
 	output, err := a.renderer.RenderPartial("adventureOverview.html", pdata)
 	if err != nil {
@@ -336,7 +344,8 @@ func (a AdventurePage) updateDetails(w http.ResponseWriter, r *http.Request) {
 func (a AdventurePage) CoinDisplay(w http.ResponseWriter, r *http.Request) {
 	id, _ := a.extractAdventureId(r)
 	adata, err := a.adventureService.GetAdventureRecordById(id)
-	adventure := newAdventurePageModel(*adata)
+	l, c := ExtractGuardsmanHeaders(r)
+	adventure := newAdventurePageModel(*adata, l, c)
 	if err != nil {
 		a.renderer.MustRenderErrorPage(w, "", err)
 	}
@@ -350,7 +359,8 @@ func (a AdventurePage) CoinDisplay(w http.ResponseWriter, r *http.Request) {
 func (a AdventurePage) CoinEditHandler(w http.ResponseWriter, r *http.Request) {
 	id, _ := a.extractAdventureId(r)
 	adata, err := a.adventureService.GetAdventureRecordById(id)
-	adventure := newAdventurePageModel(*adata)
+	l, c := ExtractGuardsmanHeaders(r)
+	adventure := newAdventurePageModel(*adata, l, c)
 	if err != nil {
 		a.renderer.MustRenderErrorPage(w, "", err)
 	}
@@ -371,14 +381,19 @@ func (a AdventurePage) SaveAndDisplayCoins(w http.ResponseWriter, r *http.Reques
 	for key, value := range r.Form {
 		data[key] = value[0]
 	}
-	adata, err := a.adventureService.UpdateAdventureCoins(id, data)
-	adventure := newAdventurePageModel(*adata)
-
-	//coins, err := a.adventureService.GetCoinsForAdventure(id)
+	coins, err := a.adventureService.UpdateAdventureCoins(id, data)
+	aid, _ := strconv.Atoi(id)
+	pageData := struct {
+		types.Coins
+		CoinPath path
+	}{
+		*coins,
+		newPhysicalAdventurePath("coins", aid),
+	}
 	if err != nil {
 		a.renderer.MustRenderErrorPage(w, "", err)
 	}
-	output, err := a.renderer.RenderPartial("coins.html", adventure)
+	output, err := a.renderer.RenderPartial("coins.html", pageData)
 	if err != nil {
 		a.renderer.MustRenderErrorPage(w, "", err)
 	}
@@ -852,7 +867,6 @@ func (a AdventurePage) deleteAdventure(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	w.WriteHeader(http.StatusOK)
-
 }
 
 func parseForm(r *http.Request) ([]map[string]string, error) {
@@ -898,6 +912,7 @@ func parseCharacterForm(r http.Request) ([]types.AdventureCharacter, error) {
 	}
 	return characters, nil
 }
+
 func parseAdventureMetaData(r http.Request) (*types.AdventureRecord, error) {
 	idStr := r.Form["adventure-id"][0]
 	id, err := strconv.Atoi(idStr)
@@ -911,13 +926,13 @@ func parseAdventureMetaData(r http.Request) (*types.AdventureRecord, error) {
 		return &types.AdventureRecord{
 			Id:            id,
 			Name:          name,
-			AdventureDate: types.ArcvhistDate(date),
+			AdventureDate: date,
 		}, err
 	}
 	return &types.AdventureRecord{
 		Id:            id,
 		Name:          name,
-		AdventureDate: types.ArcvhistDate(date),
+		AdventureDate: date,
 	}, nil
 }
 

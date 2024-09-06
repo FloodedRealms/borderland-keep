@@ -1,0 +1,28 @@
+<form onsubmit="return false">
+<table>
+    <tr>
+        <td><label>Campaign Name:</label><input type="text" name="campaign-name" value="{{ .Name }}"/></td>
+    </tr>
+    <tr>
+        <td><label>Judge:</label><input type="text" name="campaign-judge" value="{{ .Judge }}"/></td>
+    </tr>
+    <tr>
+        <td><label for="campaign-recruiting">Looking For PlayersXD</label>
+            <select name="campaign-recruiting">
+            <option value="yes" selected>Yes</option>
+            <option value="no">No</option>
+        </select>
+    </td>
+    </tr>
+    <tr>
+        <td><label for="campaign-timekeeping">Timekeeping:</label>
+            <select name="campaign-timekeeping">
+                <option value="Pause" selected>Pause</option>
+                <option value="Hybrid">Hybrid</option>
+                <option value="Reference">Reference</option>
+            </select>
+        </td>
+    </tr>
+</table>
+<button hx-patch="/campaign/{{ .CampaignId }}" hx-target="closest form" hx-swap="outerHTML">Save</button>
+</form>

@@ -65,7 +65,7 @@ func (a *AdventureService) CreateNewAdventureRecordForCampaign(campaignId int) (
 
 func (a *AdventureService) ModifyMetadata(ad types.AdventureRecord) error {
 	selectNewQ := fmt.Sprintf("UPDATE %s set name=?, adventure_date=? WHERE id=?;", adventureTable)
-	_, err := a.repo.ExecuteQuery(selectNewQ, ad.Name, ad.AdventureDate.String(), ad.Id)
+	_, err := a.repo.ExecuteQuery(selectNewQ, ad.Name, ad.AdventureDate, ad.Id)
 	return err
 }
 
@@ -86,12 +86,6 @@ func (a *AdventureService) UpdateAdventureRecord(r *types.AdventureRecord) (*typ
 		err := a.repo.UpdateAdventureName(adventureToUpdate, r.Name)
 		if err != nil {
 			return nil, util.UnableToUpdateAdventure("Name", err.Error())
-		}
-	}
-	if r.AdventureDate != types.NewAdventureRecordById(r.Id).AdventureDate && r.AdventureDate != adventureToUpdate.AdventureDate {
-		err := a.repo.UpdateAdventureDate(adventureToUpdate, r.AdventureDate)
-		if err != nil {
-			return nil, util.UnableToUpdateAdventure("DATE", err.Error())
 		}
 	}
 	err = a.updateAdventureCoins(adventureToUpdate, &r.Coins)
@@ -124,9 +118,11 @@ func (a *AdventureService) UpdateAdventureRecord(r *types.AdventureRecord) (*typ
 }
 
 func (a AdventureService) updateAdventureCoins(ad *types.AdventureRecord, coins *types.Coins) error {
-	_, err := a.repo.UpdateCoinsForAdventure(ad, coins)
+	stmt := fmt.Sprintf("UPATE %s set copper=?, silver=? electrum=? gold=? platinum=? WHERE id=?", adventureTable)
+	_, err := a.repo.ExecuteQuery(stmt, coins.Copper.Number, coins.Silver.Number, coins.Electrum.Number, coins.Gold.Number, coins.Platinum.Number, ad.Id)
 	return err
 }
+
 func (a AdventureService) updateAdventureGems(ad *types.AdventureRecord, gems []types.Gem) error {
 	err := a.repo.DeleteGemsForAdventure(ad)
 	if err != nil {
@@ -140,6 +136,7 @@ func (a AdventureService) updateAdventureGems(ad *types.AdventureRecord, gems []
 	}
 	return err
 }
+
 func (a AdventureService) updateAdventureJewellery(ad *types.AdventureRecord, jewellery []types.Jewellery) error {
 	err := a.repo.DeleteJewelleryForAdventure(ad)
 	if err != nil {
@@ -153,6 +150,7 @@ func (a AdventureService) updateAdventureJewellery(ad *types.AdventureRecord, je
 	}
 	return err
 }
+
 func (a AdventureService) updateAdventureMagicItems(ad *types.AdventureRecord, gems []types.MagicItem) error {
 	err := a.repo.DeleteMagicItemsForAdventure(ad)
 	if err != nil {
@@ -166,6 +164,7 @@ func (a AdventureService) updateAdventureMagicItems(ad *types.AdventureRecord, g
 	}
 	return err
 }
+
 func (a AdventureService) updateAdventureCombat(ad *types.AdventureRecord, gems []types.MonsterGroup) error {
 	err := a.repo.DeleteCombatForAdventure(ad)
 	if err != nil {
@@ -179,6 +178,7 @@ func (a AdventureService) updateAdventureCombat(ad *types.AdventureRecord, gems 
 	}
 	return err
 }
+
 func (a AdventureService) updateAdventureCharacters(ad *types.AdventureRecord, chars []types.AdventureCharacter, fullShareAmount, halfShareAmount int, campChars []types.CharacterRecord) error {
 	charMap := map[int]types.CharacterRecord{}
 	for _, c := range campChars {
@@ -237,12 +237,26 @@ func (a *AdventureService) GetAdventureRecordById(id int) (*types.AdventureRecor
 			platinum  int
 		)
 		err := adventureResults.Scan(&adventureToReturn.Id, &adventureToReturn.CampaignId, &adventureToReturn.Name, &adventureToReturn.AdventureDate, &trashDate, &trashDate, &copper, &silver, &electrum, &gold, &platinum, &adventureToReturn.GameDays)
-
+		if err != nil {
+			return nil, err
+		}
 		adventureToReturn.Coins = *types.NewCoins(copper, silver, electrum, gold, platinum)
 		g, err := a.GetGemsForAdventure(id)
+		if err != nil {
+			return nil, err
+		}
 		j, err := a.GetJewelleryForAdventure(id)
+		if err != nil {
+			return nil, err
+		}
 		mi, err := a.GetMagicItemsForAdventure(id)
+		if err != nil {
+			return nil, err
+		}
 		c, err := a.GetCombatForAdventure(id)
+		if err != nil {
+			return nil, err
+		}
 		chars, err := a.GetCharactersForAdventure(id)
 		if err != nil {
 			return nil, err
@@ -274,7 +288,7 @@ func (a AdventureService) GetCoinsForAdventure(i string) (*types.Coins, error) {
 	return coins, nil
 }
 
-func (a AdventureService) UpdateAdventureCoins(id string, data map[string]string) (*types.AdventureRecord, error) {
+func (a AdventureService) UpdateAdventureCoins(id string, data map[string]string) (*types.Coins, error) {
 	i, _ := strconv.Atoi(id)
 	copper, _ := stripGoodNumberValueFromFormData("copper", data)
 	silver, _ := stripGoodNumberValueFromFormData("silver", data)
@@ -283,7 +297,7 @@ func (a AdventureService) UpdateAdventureCoins(id string, data map[string]string
 	platinum, _ := stripGoodNumberValueFromFormData("platinum", data)
 	stmtStr := fmt.Sprintf("UPDATE %s set copper=?, silver=?, electrum=?, gold=?, platinum=? WHERE ID =?", adventureTable)
 	a.repo.ExecuteQuery(stmtStr, copper, silver, electrum, gold, platinum, id)
-	return a.repo.GetAdventureRecordById(types.NewAdventureRecordById(i))
+	return a.repo.GetCoinsForAdventure(types.NewAdventureRecordById(i))
 }
 
 func stripGoodNumberValueFromFormData(field string, data map[string]string) (int, error) {

@@ -24,18 +24,6 @@ func NewCampaignService(repo repository.Repository, logger *util.Logger, ctx con
 	return &CampaignService{repo, *logger, ctx}
 }
 
-func (c *CampaignService) CreateCampaign(cr types.CampaignRecord, pass types.Password) (*types.CampaignRecord, error) {
-	ca, err := c.repo.CreateCampaign(&cr)
-	if err != nil {
-		return nil, err
-	}
-	err = c.repo.UpdateCampaignPassword(ca.Id, pass)
-	if err != nil {
-		return nil, err
-	}
-	return ca, nil
-}
-
 func (c *CampaignService) UpdateCampaign(ur *types.CampaignRecord) (*types.CampaignRecord, error) {
 	ur.UpdatedAt = time.Now()
 
@@ -43,11 +31,28 @@ func (c *CampaignService) UpdateCampaign(ur *types.CampaignRecord) (*types.Campa
 }
 
 func (c *CampaignService) GetCampaign(id int) (*types.CampaignRecord, error) {
-	campaign, err := c.repo.GetCampaign(id)
+	tableq := fmt.Sprintf("SELECT c.name, c.judge, c.timekeeping, c.recruitment FROM %s c where c.id =?;", campaignTable)
+	//tableq1 := fmt.Sprintf("SELECT * FROM %s c where c.id = ?", campaignTable)
+	rows, err := c.repo.RunQuery(tableq, id)
 	if err != nil {
 		return nil, err
 	}
-	return campaign, nil
+	defer rows.Close()
+	var (
+		campaignRows []*types.CampaignRecord
+	)
+	for rows.Next() {
+		var current types.CampaignRecord
+		err := rows.Scan(&current.Name, &current.Judge, &current.Timekeeping, &current.Recruitment)
+		if err != nil {
+			return nil, err
+		}
+		campaignRows = append(campaignRows, &current)
+	}
+	if len(campaignRows) < 1 {
+		return nil, fmt.Errorf("campaign %d not found", id)
+	}
+	return campaignRows[0], nil
 }
 
 func (c *CampaignService) CampaignSummary(id int) (*types.CampaignRecord, error) {
@@ -109,16 +114,6 @@ func (c *CampaignService) DeleteCampaign(id string) (bool, error) {
 	return c.repo.DeleteCampaign(campaignToDelete)
 }
 
-func (c *CampaignService) UpdateCampaignPassword(id, password string) (string, error) {
-	campaignId, err := strconv.Atoi(id)
-	if err != nil {
-		return "Password update failed", err
-	}
-	hashedPassword, _ := types.NewPassword(password)
-	return password, c.repo.UpdateCampaignPassword(campaignId, *hashedPassword)
-
-}
-
 func (c *CampaignService) TenMostRecentlyActiveCampaigns(page int) []types.CampaignRecord {
 	pageToOffeset := (page - 1) * PAGE_SIZE
 	stmtStr := fmt.Sprintf("SELECT id, name, recruitment, judge, timekeeping, cadence, last_adventure FROM %s ORDER BY last_adventure DESC LIMIT %d OFFSET %d ;", campaignTable, PAGE_SIZE, pageToOffeset)
@@ -134,6 +129,41 @@ func (c *CampaignService) TenMostRecentlyActiveCampaigns(page int) []types.Campa
 		results = append(results, cur)
 	}
 	return results
+}
+
+func (c *CampaignService) CampaignsForUser(userId string) []types.CampaignRecord {
+	stmtStr := fmt.Sprintf("SELECT id, name, recruitment, judge, timekeeping, cadence, last_adventure FROM %s WHERE user_id=?;", campaignTable)
+	rows, err := c.repo.RunQuery(stmtStr, userId)
+	if err != nil {
+		return nil
+	}
+	results := make([]types.CampaignRecord, 0)
+	defer rows.Close()
+	for rows.Next() {
+		cur := types.CampaignRecord{}
+		rows.Scan(&cur.Id, &cur.Name, &cur.Recruitment, &cur.Judge, &cur.Timekeeping, &cur.Cadence, &cur.LastAdventure)
+		results = append(results, cur)
+	}
+	return results
+}
+
+func (c *CampaignService) CreateCampaignForUser(userId string) (*types.CampaignRecord, error) {
+	stmt := fmt.Sprintf("INSERT INTO %s(user_id, name, created_at, updated_at, last_adventure) values(?, ?, ?, ?, ?)", campaignTable)
+	time := time.Now()
+	results, err := c.repo.ExecuteQuery(stmt, userId, "New Campaign", time, time, time)
+	if err != nil {
+		return nil, err
+	}
+	id, _ := results.LastInsertId()
+	return c.CampaignSummary(int(id))
+
+}
+
+func (c *CampaignService) UpdateCampaignDetails(id int, name, judge, timekeeping string, isRecruiting bool) error {
+	stms := fmt.Sprintf("UPDATE %s set name=?, judge=?, timekeeping=?, recruitment=?, updated_at=? WHERE id=?;", campaignTable)
+	time := time.Now()
+	_, err := c.repo.ExecuteQuery(stms, name, judge, timekeeping, isRecruiting, time, id)
+	return err
 }
 
 func (c CampaignService) GetClassOptionsForCampaign(id int) ([]types.CampaignClassOption, error) {

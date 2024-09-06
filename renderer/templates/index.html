@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+
+{{ template "head.html" }}
+<body>
+    <header>
+        {{ template "banner.html" }}
+    </header>
+    <nav>
+        {{ template "nav.html" . }}
+    </nav>
+    <main>
+        <section class="content">
+
+            <hgroup class="box">
+                <h2 style="display:inline">Welcome {{ if .User.LoggedIn }}{{ .User.Friendly_name }}{{ else }} Guest {{ end }}!</h2>
+                <h3 style="display:inline">Recent Campaigns</h3>
+                {{ template "campaigns.html" .}}
+            </hgroup>
+        </section>
+        {{ template "sidebar.html" }}
+    </main>
+</body>
+
+</html>
