@@ -1,7 +1,7 @@
 {{ range .Data.Campaigns }}
 <hgroup class="campaign-box">
     <h4>{{ .Name }}</h4>
-    <table>
+    <!--  <table>
         <tr>
             <td><b>Judge:</b></td>
             <td>{{ .Judge }}</td>
@@ -21,7 +21,30 @@
         <tr>
             <td><a href="/campaign/{{ .Id }}">View</a></td>
         </tr>
-    </table>
+    </table> -->
+    <ul style="list-style: none;">
+        <li>
+            <span>Judge: {{ .Judge }}</span>
+        </li>
+        <li>
+            <span>
+            Looking for Players? {{ call $.BoolToString .Recruitment }}
+            </span>
+        </li>
+        <li>
+            <span>
+            Last Adventure {{ call $.NaturalDate .LastAdventure }}
+            </span>
+        </li>
+        <li>
+            <span>
+            Time Keeping             {{ .Timekeeping }}
+            </span>
+        </li>
+        <li>
+            <a href="/campaign/{{ .Id }}">View Details</a>
+        </li>
+    </ul>
 </hgroup>
 {{ end }}
 {{ if .Data.EndOfCampaigns }}

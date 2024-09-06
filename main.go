@@ -120,10 +120,9 @@ func main() {
 		router.Handle("/static/", http.StripPrefix("/static/", fs))
 
 		// archivist Pages
-		router.HandleFunc("/", homePages.Index)
-		router.HandleFunc("/guild", homePages.GuildLanding)
-		router.HandleFunc("/tavern", homePages.TavernLanding)
-		router.HandleFunc("/archivist", homePages.Campaigns)
+		router.HandleFunc("/", guardsman.CheckLoggedIn(homePages.Index))
+		router.HandleFunc("/guild", guardsman.CheckLoggedIn(homePages.GuildLanding))
+		router.HandleFunc("/tavern", guardsman.CheckLoggedIn(homePages.TavernLanding))
 		router.HandleFunc("/campaign-list", homePages.LoadNextCampaignSet)
 		router.HandleFunc("/about", homePages.About)
 		campaignPages.RegisterRoutes(router, *guardsman)

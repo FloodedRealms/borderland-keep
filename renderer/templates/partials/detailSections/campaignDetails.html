@@ -1,24 +1,24 @@
         <hgroup id="campaign-details">
-                <h3>{{ .Name }}</h3>
-                <table>
-                    <tr>
-                        <td><b>Judge:</b></td>
-                        <td>{{ .Judge }}</td>
-                    </tr>
-                    <tr>
-                        <td>Looking for Players?</td>
-                        <td>{{ .Recruitment }}</td>
-                    </tr>
-                    <tr>
-                        <td>Last Adventure</td>
-                        <td>{{ .LastAdventure }}</td>
-                    </tr>
-                    <tr>
-                        <td> Time Keeping </td>
-                        <td> {{ .Timekeeping }} </td>
-                    </tr>
-                </table>
+                <h3>{{ .Data.Name }}</h3>  
+                This campaign is an Adventurer Conqueror King II game, judged by {{ .Data.Judge }}. It's last adventure was on {{ call .NaturalDate .Data.LastAdventure }}
+<!--
+                <ul style="list-style: none;">
+                    <li>
+                       <label>Judge</label>{{ .Data.Judge }}
+                    </li>
+                    <li>
+                        Looking for Players?
+                        {{ .Data.Recruitment }}
+                    </li>
+                    <li>
+                        Last Adventure</td>
+                    </li>
+                    <li>
+                         Time Keeping 
+                         {{ .Data.Timekeeping }} 
+                    </li>
+                    </ul>-->
                 {{ if .HasEditAccess }}
-                <button hx-get="{{ .MainPath.Edit}}" hx-trigger="mousedown" hx-target="closest section" hx-swap="innerHTML">Edit Campaign</button>
+                <button hx-get="{{ .Data.MainPath.Edit}}" hx-trigger="mousedown" hx-target="closest section" hx-swap="innerHTML">Edit Campaign</button>
                 {{ end }}
             </hgroup>

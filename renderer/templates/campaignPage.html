@@ -31,36 +31,11 @@
 
     <main>
         <section class="content">
-            <hgroup id="campaign-details">
             {{ if .Data.OpenCampaignEditor }}
             {{ template "campaignEditor.html" . }}
             {{ else }}
-                <h3>{{ .Data.Name }}</h3>
-                <table>
-                    <tr>
-                        <td><b>Judge:</b></td>
-                        <td>{{ .Data.Judge }}</td>
-                    </tr>
-                    <tr>
-                        <td>Looking for Players?</td>
-                        <td>{{ .Data.Recruitment }}</td>
-                    </tr>
-                    <tr>
-                        <td>Last Adventure</td>
-                        <td>{{ .Data.LastAdventure }}</td>
-                    </tr>
-                    <tr>
-                        <td> Time Keeping </td>
-                        <td> {{ .Data.Timekeeping }} </td>
-                    </tr>
-                </table>
-                {{ end }}
-                {{ if .Data.HasEditAccess }}
-                <button hx-get="{{ .MainPath.Edit}}" hx-trigger="mousedown" hx-target="closest section" hx-swap="innerHTML">Edit Campaign</button>
-                {{ end }}
-            </hgroup>
-        </section>
-        <section class="growing-content">
+            {{ template "campaignDetails.html" . }}
+            {{ end }}
             <div id="characters" class="box" hx-target="this" hx-swap="innerHTML">
                 <h3>Characters</h3>
                 {{ if lt .Data.NumberOfCharacters 1}}
@@ -98,20 +73,7 @@
                         <span> No Characters Defined for this Campaign to Display </span>
                     </div>
                     {{ else }}
-                    <table id="adventureList">
-                        <tr>
-                            <th>Adventure Name</th>
-                            <th>Date</th>
-                        </tr>
-                        {{ range .Data.Adventures }}
-                        <tr>
-                            <td>{{ .Name }}</td>
-                            <td>{{ .AdventureDate }}</td>
-                            <td><a class="action-navigation" href="/adventure/{{ .Id }}"> {{ if $.Data.HasEditAccess }}Edit{{ else }}View{{end}} Details</a></td>
-                            {{ if $.HasEditAccess }}<td><button class="danger" hx-delete="/adventure/{{ .Id }}" hx-target="closest tr" hx-swap="delete">Delete Adventure</button></td>{{end}}
-                        </tr>
-                        {{ end }}
-                    </table>
+                    {{ template "adventureList.html" . }}
                     {{ end }}
                     {{ if .Data.HasEditAccess }}
                         <button hx-disinherit="true"  hx-trigger="mousedown" hx-post="{{ .Data.AdventurePath.Display }}">Add New Adventure</button>

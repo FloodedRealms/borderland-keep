@@ -144,3 +144,14 @@ func (h HomePage) LoadNextCampaignSet(w http.ResponseWriter, r *http.Request) {
 	}
 	w.Write([]byte(output))
 }
+
+func (g HomePage) DisplayLoginPage(w http.ResponseWriter, r *http.Request) {
+	lang := util.ExtractLangageCookie(r)
+	login, edt := false, false
+	output, err := g.renderer.RenderPage("login.html", nil, lang, login, edt)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+	w.Write([]byte(output))
+}
