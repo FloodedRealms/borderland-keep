@@ -19,7 +19,7 @@
             <td> {{ .Timekeeping }} </td>
         </tr>
         <tr>
-            {{ if $.User.LoggedIn }}
+            {{ if and $.User.LoggedIn (not $.IsIndex) }}
             <td><a href="/me/campaign/{{ .Id }}">View and Edit</a></td>
             {{ else }}
             <td><a href="/campaign/{{ .Id }}">View</a></td>

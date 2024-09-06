@@ -31,11 +31,28 @@ func (c *CampaignService) UpdateCampaign(ur *types.CampaignRecord) (*types.Campa
 }
 
 func (c *CampaignService) GetCampaign(id int) (*types.CampaignRecord, error) {
-	campaign, err := c.repo.GetCampaign(id)
+	tableq := fmt.Sprintf("SELECT c.name, c.judge, c.timekeeping, c.recruitment FROM %s c where c.id =?;", campaignTable)
+	//tableq1 := fmt.Sprintf("SELECT * FROM %s c where c.id = ?", campaignTable)
+	rows, err := c.repo.RunQuery(tableq, id)
 	if err != nil {
 		return nil, err
 	}
-	return campaign, nil
+	defer rows.Close()
+	var (
+		campaignRows []*types.CampaignRecord
+	)
+	for rows.Next() {
+		var current types.CampaignRecord
+		err := rows.Scan(&current.Name, &current.Judge, &current.Timekeeping, &current.Recruitment)
+		if err != nil {
+			return nil, err
+		}
+		campaignRows = append(campaignRows, &current)
+	}
+	if len(campaignRows) < 1 {
+		return nil, fmt.Errorf("campaign %d not found", id)
+	}
+	return campaignRows[0], nil
 }
 
 func (c *CampaignService) CampaignSummary(id int) (*types.CampaignRecord, error) {
@@ -140,6 +157,13 @@ func (c *CampaignService) CreateCampaignForUser(userId string) (*types.CampaignR
 	id, _ := results.LastInsertId()
 	return c.CampaignSummary(int(id))
 
+}
+
+func (c *CampaignService) UpdateCampaignDetails(id int, name, judge, timekeeping string, isRecruiting bool) error {
+	stms := fmt.Sprintf("UPDATE %s set name=?, judge=?, timekeeping=?, recruitment=?, updated_at=? WHERE id=?;", campaignTable)
+	time := time.Now()
+	_, err := c.repo.ExecuteQuery(stms, name, judge, timekeeping, isRecruiting, time, id)
+	return err
 }
 
 func (c CampaignService) GetClassOptionsForCampaign(id int) ([]types.CampaignClassOption, error) {

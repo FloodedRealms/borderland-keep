@@ -13,7 +13,7 @@
         {{ template "banner.html" }}
     </header>
     <nav>
-        {{ template "nav.html" }}
+        {{ template "nav.html" . }}
     </nav>
     <nav>
         <ul>
@@ -65,8 +65,10 @@
                     {{ end }}
                 </tbody>
             </table>
+            {{ if .HasEditAccess }}
             <button hx-disinherit="true" hx-target="closest section" hx-swap="innerHTML"
                 hx-get="{{ .DetailsPath.Edit}}">Edit Details</button>
+            {{ end }}
         </section>
         <section class="box" id="coins" hx-target="this" hx-swap="outerHTML">
             <h3>Coins - {{.Coins.TotalXPAmount }} XP</h3>
@@ -103,7 +105,9 @@
                     <td>{{ .Coins.Platinum.TotalXPAmount }}</td>
                 </tr>
             </table>
+                {{ if .HasEditAccess }}
             <button hx-get="{{ .CoinPath.Edit }}">Edit</button>
+            {{ end }}
         </section>
         <section class="box">
             <h3>Non-coin loot</h3>
@@ -128,7 +132,9 @@
                         {{ end }}
                     </tbody>
                 </table>
+                {{ if .HasEditAccess }}
                 <button hx-get="{{ .GemPath.Edit }}" hx-trigger="mousedown">Edit Gems</button>
+                {{ end }}
             </hgroup>
             <hgroup hx-target="this" hx-swap="innerHTML">
                 <h4>Jewellery Recovered</h4>
@@ -151,7 +157,9 @@
                         {{ end }}
                     </tbody>
                 </table>
+                {{ if .HasEditAccess }}
                 <button hx-get="{{ .JewelleryPath.Edit }}" hx-trigger="mousedown">Edit Jewellery</button>
+                {{ end }}
             </hgroup>
                         <hgroup hx-target="this" hx-swap="innerHTML">
                 <h4>Magic Items</h4>
@@ -175,7 +183,10 @@
                         {{ end }}
                     </tbody>
                 </table>
+{{ if .HasEditAccess }}
+
                 <button hx-get="{{ .MagicItemPath.Edit }}" hx-trigger="mousedown">Edit Magic Items</button>
+                {{ end }}
             </hgroup>
 
         </section>
@@ -202,12 +213,16 @@
                         {{ end }}
                     </tbody>
                 </table>
+{{ if .HasEditAccess }}
+
                 <button hx-get="{{ .CombatPath.Edit }}" hx-trigger="mousedown">Edit Combat</button>
+                {{ end }}
             </hgroup>
 
         </section>
+
+    {{ template "sidebar.html".}}
     </main>
-    <div class="side-bar"></div>
 </body>
 
 </html>

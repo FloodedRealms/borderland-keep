@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/floodedrealms/borderland-keep/internal/services"
+	"github.com/floodedrealms/borderland-keep/internal/util"
 	"github.com/golang-jwt/jwt"
 	"github.com/google/uuid"
 )
@@ -233,6 +234,117 @@ func (g Guardsman) UserMustBeLoggedIn(next http.HandlerFunc) http.HandlerFunc {
 		}
 		next.ServeHTTP(w, r)
 	})
+}
+
+func (g Guardsman) CheckLoggedIn(next http.HandlerFunc) http.HandlerFunc {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		r.Header.Set(LoggedInHeader, "false")
+
+		c, err := r.Cookie(sessionCookie)
+		if err != nil {
+			if err == http.ErrNoCookie {
+				next.ServeHTTP(w, r)
+				return
+			}
+			// For any other type of error, return a bad request status
+			w.WriteHeader(http.StatusBadRequest)
+			return
+		}
+		sessionToken := c.Value
+		_, _, expiry, exists, err := g.userService.RetrieveSession(sessionToken)
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+		if !exists {
+			next.ServeHTTP(w, r)
+			return
+		}
+		if expiry.Before(time.Now()) {
+			next.ServeHTTP(w, r)
+			return
+		}
+		r.Header.Set(LoggedInHeader, "true")
+		next.ServeHTTP(w, r)
+	})
+}
+
+// TODO: This could likely be modified to make only a single database request by adjusting the resources view to have
+// expiry information as well
+func (g Guardsman) CheckUserhasEditAccessToCampaign(next http.HandlerFunc) http.HandlerFunc {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		r.Header.Set(EditAccessHeader, "false")
+
+		c, err := r.Cookie(sessionCookie)
+		if err != nil {
+			if err == http.ErrNoCookie {
+				next.ServeHTTP(w, r)
+				return
+			}
+			// For any other type of error, return a bad request status
+			w.WriteHeader(http.StatusBadRequest)
+			return
+		}
+		sessionToken := c.Value
+		campaignId, err := util.ExtractCampaignId(r)
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+		canEdit, err := g.userService.UserhasEditAccessToCampaign(sessionToken, campaignId)
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+		if !canEdit {
+			next.ServeHTTP(w, r)
+			return
+		}
+		r.Header.Set(EditAccessHeader, "true")
+		next.ServeHTTP(w, r)
+	})
+}
+
+func (g Guardsman) CheckUserhasEditAccessToAdventure(next http.HandlerFunc) http.HandlerFunc {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		r.Header.Set(EditAccessHeader, "false")
+
+		c, err := r.Cookie(sessionCookie)
+		if err != nil {
+			if err == http.ErrNoCookie {
+				next.ServeHTTP(w, r)
+				return
+			}
+			// For any other type of error, return a bad request status
+			w.WriteHeader(http.StatusBadRequest)
+			return
+		}
+		sessionToken := c.Value
+		adventureId, err := util.ExtractAdventureId(r)
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+		canEdit, err := g.userService.UserhasEditAccessToAdventure(sessionToken, adventureId)
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+		if !canEdit {
+			next.ServeHTTP(w, r)
+			return
+		}
+		r.Header.Set(EditAccessHeader, "true")
+		next.ServeHTTP(w, r)
+	})
+}
+
+func (g Guardsman) UserLoggedInAndHasEditAccessToCampaign(next http.HandlerFunc) http.HandlerFunc {
+	return g.CheckLoggedIn(g.CheckUserhasEditAccessToCampaign(next))
+}
+
+func (g Guardsman) UserLoggedInAndHasEditAccessToAdventure(next http.HandlerFunc) http.HandlerFunc {
+	return g.CheckLoggedIn(g.CheckUserhasEditAccessToAdventure(next))
 }
 
 // TODO: remove JWT stuff. Going to use sessions for now

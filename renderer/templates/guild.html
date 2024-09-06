@@ -1,13 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
-
-<head>
-    <meta charset="utf-8" />
-    <title>The Keep on the Internet</title>
-    <link rel="stylesheet" href="css/style.css">
-    <link rel="icon" type="image/x-icon" href="/assets/images/favicon.png">
-</head>
-
+{{ template "head.html" }}
 <body>
     <header>
         {{ template "banner.html" }}
@@ -16,7 +9,7 @@
         {{ template "nav.html" }}
     </nav>
     <main>
-        <div class="box" id="hello">
+        <section class="box" id="hello">
             <h2 style="display:inline">Welcome...</h2>
             <p>The Guild is the matrix homeserver of Borderland Keep. Matrix is a text and voice* service that seeks to
                 replace things like discord, guilded, telegram and other such messaging platforms. The main appeal of
@@ -58,11 +51,9 @@
             </ol>
             However, because of the nature of matrix, your homeserver of choice is largely irrelevant, as you are free
             to interact with the whole ecosytem at once.
-        </div>
-        </div>
-
+        </section>
+    {{ template "sidebar.html" }}
     </main>
-    <aside></aside>
 </body>
 
 </html>

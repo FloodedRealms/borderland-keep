@@ -29,3 +29,8 @@ func (g Guardsman) RegisterRoutes(router *http.ServeMux) {
 	router.HandleFunc("POST /gate", g.HandleLogin)
 	router.HandleFunc("POST /depart", g.Logout)
 }
+
+const (
+	LoggedInHeader   = "x-borderland-keep-logged-in-status"
+	EditAccessHeader = "x-borderland-keep-can-edit"
+)

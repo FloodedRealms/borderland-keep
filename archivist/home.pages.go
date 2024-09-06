@@ -55,11 +55,13 @@ func (h HomePage) Index(w http.ResponseWriter, r *http.Request) {
 		Page           int
 		EndOfCampaigns bool
 		User           guardsman.WebUser
+		IsIndex        bool
 	}{
 		Campaigns:      campaigns,
 		Page:           2,
 		EndOfCampaigns: len(campaigns) < 10,
 		User:           u,
+		IsIndex:        true,
 	}
 	output, err := h.renderer.RenderPage("index.html", pdata)
 	if err != nil {
@@ -94,10 +96,12 @@ func (h HomePage) MyCampaigns(w http.ResponseWriter, r *http.Request) {
 		Campaigns      []types.CampaignRecord
 		EndOfCampaigns bool
 		User           guardsman.WebUser
+		IsIndex        bool
 	}{
 		Campaigns:      campaigns,
 		EndOfCampaigns: len(campaigns) < 10,
 		User:           guardsman.WebUser{Id: userId, LoggedIn: true},
+		IsIndex:        false,
 	}
 
 	output, err := h.renderer.RenderPage("myCampaigns.html", pdata)

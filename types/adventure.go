@@ -3,6 +3,7 @@ package types
 import (
 	"encoding/json"
 	"math"
+	"time"
 )
 
 type AdventureRecord struct {
@@ -11,7 +12,7 @@ type AdventureRecord struct {
 	Name          string               `json:"name"`
 	FullShareXP   int                  `json:"full_share"`
 	HalfShareXP   int                  `json:"half_share"`
-	AdventureDate ArcvhistDate         `json:"adventure_date"`
+	AdventureDate time.Time            `json:"adventure_date"`
 	GameDays      int                  `json:"duration"`
 	Coins         Coins                `json:"coins"`
 	Gems          []Gem                `json:"gems"`
@@ -25,7 +26,7 @@ func NewAdventureRecordById(id int) *AdventureRecord {
 	return &AdventureRecord{Id: id}
 }
 
-func NewAdventureRecord(id, cid, days int, coins Coins, g []Gem, j []Jewellery, c []MonsterGroup, m []MagicItem, char []AdventureCharacter, n string, date ArcvhistDate) *AdventureRecord {
+func NewAdventureRecord(id, cid, days int, coins Coins, g []Gem, j []Jewellery, c []MonsterGroup, m []MagicItem, char []AdventureCharacter, n string, date time.Time) *AdventureRecord {
 	a := &AdventureRecord{
 		Id:            id,
 		CampaignId:    cid,
@@ -68,7 +69,6 @@ func (a *AdventureRecord) UnmarshalJSON(data []byte) error {
 	a.Id = incomingRequest.Id
 	a.CampaignId = incomingRequest.CampaignId
 	a.Name = incomingRequest.Name
-	a.AdventureDate = incomingRequest.AdventureDate
 	a.GameDays = incomingRequest.GameDays
 	a.Coins = incomingRequest.Coins
 	a.Gems = incomingRequest.Gems

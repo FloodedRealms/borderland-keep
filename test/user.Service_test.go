@@ -1,11 +1,14 @@
 package test
 
 import (
+	"fmt"
 	"testing"
+	"time"
 
 	"github.com/floodedrealms/borderland-keep/internal/repository"
 	"github.com/floodedrealms/borderland-keep/internal/services"
 	"github.com/floodedrealms/borderland-keep/internal/util"
+	"github.com/google/uuid"
 )
 
 func TestIsNameTaken(t *testing.T) {
@@ -48,4 +51,36 @@ func TestIsNameTaken(t *testing.T) {
 		t.Errorf("Username should NOT have been taken")
 	}
 
+}
+
+func TestUserhasEditAccessToCampaign(t *testing.T) {
+	username := "testAccessUser"
+	userId := "1"
+	uuid := uuid.New().String()
+	accessibleCampaign := 1
+	inaccessibleCampaign := 2
+	logger := util.NewLogger(true)
+	sqlRepo, err := repository.NewSqliteRepo(logger, "test.db")
+	if err != nil {
+		t.Errorf("Unable to get test DB: %s", err.Error())
+	}
+	service := services.NewUserService(sqlRepo, *logger)
+	service.StoreSession(uuid, userId, username, time.Now().Add(120*time.Second))
+
+	expected := true
+	got, err := service.UserhasEditAccessToCampaign(uuid, accessibleCampaign)
+	if err != nil {
+		t.Errorf("Unable to get test DB: %s", err.Error())
+	}
+	if expected != got {
+		t.Error(fmt.Sprintf("Expected userId %s to have access to campaignId %d!", userId, accessibleCampaign))
+	}
+	expected = false
+	got, err = service.UserhasEditAccessToCampaign(uuid, inaccessibleCampaign)
+	if err != nil {
+		t.Errorf("Unable to get test DB: %s", err.Error())
+	}
+	if expected != got {
+		t.Error(fmt.Sprintf("Expected userId %s to NOT have access to campaignId %d!", userId, inaccessibleCampaign))
+	}
 }

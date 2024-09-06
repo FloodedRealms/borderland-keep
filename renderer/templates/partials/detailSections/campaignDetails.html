@@ -1,0 +1,24 @@
+        <hgroup id="campaign-details">
+                <h3>{{ .Name }}</h3>
+                <table>
+                    <tr>
+                        <td><b>Judge:</b></td>
+                        <td>{{ .Judge }}</td>
+                    </tr>
+                    <tr>
+                        <td>Looking for Players?</td>
+                        <td>{{ .Recruitment }}</td>
+                    </tr>
+                    <tr>
+                        <td>Last Adventure</td>
+                        <td>{{ .LastAdventure }}</td>
+                    </tr>
+                    <tr>
+                        <td> Time Keeping </td>
+                        <td> {{ .Timekeeping }} </td>
+                    </tr>
+                </table>
+                {{ if .HasEditAccess }}
+                <button hx-get="{{ .MainPath.Edit}}" hx-trigger="mousedown" hx-target="closest section" hx-swap="innerHTML">Edit Campaign</button>
+                {{ end }}
+            </hgroup>

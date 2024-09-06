@@ -223,7 +223,7 @@ func (s SqliteRepo) selectCampaignById(id int) (*types.CampaignRecord, error) {
 		)
 		err := rows.Scan(&current.Id, &current.Name, &current.Recruitment, &current.Judge, &current.Timekeeping, &current.Cadence, &current.CreatedAt, &current.UpdatedAt, &current.LastAdventure, &current.ClientId, &trashInt, &trashString, &trashString, &adId, &adName, &aDate)
 		util.CheckErr(err)
-		adventures = append(adventures, types.AdventureRecord{Id: adId, Name: adName, AdventureDate: types.ArcvhistDate(aDate)})
+		adventures = append(adventures, types.AdventureRecord{Id: adId, Name: adName, AdventureDate: aDate})
 		current.Characters, err = s.getCampaignCharacters(current.Id)
 		util.CheckErr(err)
 
@@ -284,11 +284,11 @@ func (s SqliteRepo) insertAdventureRecord(a types.AdventureRecord) (int, error) 
 	s.logger.Debug(stmt_string)
 	stmt, err := s.db.Prepare(stmt_string)
 	util.CheckErr(err)
-	res, err := stmt.Exec(a.CampaignId, a.Name, time.Now(), time.Now(), a.AdventureDate.Date())
+	res, err := stmt.Exec(a.CampaignId, a.Name, time.Now(), time.Now(), a.AdventureDate.Date)
 	util.CheckErr(err)
 	stmt2, err := s.db.Prepare(fmt.Sprintf("UPDATE %s SET last_adventure=? WHERE id=?", campaignTable))
 	util.CheckErr(err)
-	_, err = stmt2.Exec(a.AdventureDate.Date(), a.CampaignId)
+	_, err = stmt2.Exec(a.AdventureDate.Date, a.CampaignId)
 	util.CheckErr(err)
 
 	var id int64
@@ -340,7 +340,7 @@ func (s SqliteRepo) processAdventureRows(r *sql.Rows) []*types.AdventureRecord {
 		currentMagicItems := s.getMagicItemsForAdventure(id)
 		currentCombat := s.getCombatForAdventure(id)
 		currentCharacters, _ := s.getCharactersForAdventure(id)
-		current := types.NewAdventureRecord(id, campaignId, duration, *currentCoins, currentGems, currentJewellery, currentCombat, currentMagicItems, currentCharacters, name, types.ArcvhistDate(adventureDate))
+		current := types.NewAdventureRecord(id, campaignId, duration, *currentCoins, currentGems, currentJewellery, currentCombat, currentMagicItems, currentCharacters, name, adventureDate)
 		util.CheckErr(err)
 		adventures = append(adventures, current)
 	}

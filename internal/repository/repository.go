@@ -21,7 +21,6 @@ type Repository interface {
 	GetAdventureRecordById(*types.AdventureRecord) (*types.AdventureRecord, error)
 	UpdateCoinsForAdventure(a *types.AdventureRecord, c *types.Coins) (bool, error)
 	UpdateAdventureName(*types.AdventureRecord, string) error
-	UpdateAdventureDate(*types.AdventureRecord, types.ArcvhistDate) error
 	GetCoinsForAdventure(*types.AdventureRecord) (*types.Coins, error)
 
 	DeleteGemsForAdventure(a *types.AdventureRecord) error

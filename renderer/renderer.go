@@ -9,9 +9,7 @@ import (
 )
 
 type Renderer struct {
-	pageTemplates    *template.Template
-	partialTemplates *template.Template
-	editorTemplates  *template.Template
+	templates *template.Template
 }
 
 type partialRender struct {
@@ -27,18 +25,27 @@ func NewRenderer() *Renderer {
 
 func (r *Renderer) mustLoadTemplates() {
 	wd, _ := os.Getwd()
-	pageDir := filepath.Join(wd, "/renderer/pages/*.html")
-	partialsDir := filepath.Join(wd, "/renderer/partials/*.html")
-	partialEditorsDir := filepath.Join(wd, "/renderer/partials/editors/*.html")
 
-	r.pageTemplates = template.Must(template.ParseGlob(pageDir))
-	r.partialTemplates = template.Must(template.ParseGlob(partialsDir))
-	r.editorTemplates = template.Must(template.ParseGlob(partialEditorsDir))
+	pageDir := filepath.Join(wd, "/renderer/templates/")
+	var allFiles []string
+	err := filepath.WalkDir(pageDir, func(path string, d os.DirEntry, err error) error {
+		if err != nil {
+			return err
+		}
+		if !d.IsDir() && filepath.Ext(path) == ".html" {
+			allFiles = append(allFiles, path)
+		}
+		return nil
+	})
+	if err != nil {
+		panic(err)
+	}
+	r.templates = template.Must(template.ParseFiles(allFiles...))
 }
 
 func (r Renderer) RenderPageWithNoData(tmpl string) (string, error) {
 	var renderedOutput bytes.Buffer
-	if err := r.pageTemplates.ExecuteTemplate(&renderedOutput, tmpl, nil); err != nil {
+	if err := r.templates.ExecuteTemplate(&renderedOutput, tmpl, nil); err != nil {
 		return renderedOutput.String(), err
 	}
 	return renderedOutput.String(), nil
@@ -46,7 +53,7 @@ func (r Renderer) RenderPageWithNoData(tmpl string) (string, error) {
 
 func (r Renderer) RenderPage(tmpl string, data interface{}) (string, error) {
 	var renderedOutput bytes.Buffer
-	if err := r.pageTemplates.ExecuteTemplate(&renderedOutput, tmpl, data); err != nil {
+	if err := r.templates.ExecuteTemplate(&renderedOutput, tmpl, data); err != nil {
 		return renderedOutput.String(), err
 	}
 	return renderedOutput.String(), nil
@@ -54,7 +61,7 @@ func (r Renderer) RenderPage(tmpl string, data interface{}) (string, error) {
 
 func (r Renderer) RenderPartial(tmpl string, data interface{}) (string, error) {
 	var renderedOutput bytes.Buffer
-	if err := r.partialTemplates.ExecuteTemplate(&renderedOutput, tmpl, data); err != nil {
+	if err := r.templates.ExecuteTemplate(&renderedOutput, tmpl, data); err != nil {
 		return renderedOutput.String(), err
 	}
 	return renderedOutput.String(), nil
@@ -62,7 +69,7 @@ func (r Renderer) RenderPartial(tmpl string, data interface{}) (string, error) {
 
 func (r Renderer) RenderEditor(tmpl string, data interface{}) (string, error) {
 	var renderedOutput bytes.Buffer
-	if err := r.editorTemplates.ExecuteTemplate(&renderedOutput, tmpl, data); err != nil {
+	if err := r.templates.ExecuteTemplate(&renderedOutput, tmpl, data); err != nil {
 		return renderedOutput.String(), err
 	}
 	return renderedOutput.String(), nil
@@ -74,7 +81,7 @@ func (r Renderer) MustRenderErrorPage(w http.ResponseWriter, partial string, e e
 		Rendered: partial,
 		E:        e,
 	}
-	if err := r.pageTemplates.ExecuteTemplate(w, "errorPage.html", data); err != nil {
+	if err := r.templates.ExecuteTemplate(w, "errorPage.html", data); err != nil {
 		panic(err)
 	}
 }

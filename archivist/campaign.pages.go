@@ -5,7 +5,9 @@ import (
 	"net/http"
 	"strconv"
 
+	"github.com/floodedrealms/borderland-keep/guardsman"
 	"github.com/floodedrealms/borderland-keep/internal/services"
+	"github.com/floodedrealms/borderland-keep/internal/util"
 	"github.com/floodedrealms/borderland-keep/renderer"
 	"github.com/floodedrealms/borderland-keep/types"
 )
@@ -39,23 +41,26 @@ func newCampaignPathToRegister(appendedPath string, additionalPathParams ...stri
 	}
 	return newPath(path)
 }
+
 func newPhysicalCampaignPath(resource string, id int) path {
 	path := fmt.Sprintf(baseCampaignPath+"/%d"+resource, id)
 	return newPath(path)
 }
 
-func (c CampaignPage) RegisterRoutes(m *http.ServeMux) {
+func (c CampaignPage) RegisterRoutes(m *http.ServeMux, g guardsman.Guardsman) {
 	mainPath := newCampaignPathToRegister("")
 	characterPath := newCampaignPathToRegister("/characters")
 	newCharacterPath := newCampaignPathToRegister("/new-character")
 	adventurePath := newCampaignPathToRegister("/adventures")
 
-	m.HandleFunc(mainPath.Display, c.CampaignOverview)
+	m.HandleFunc(mainPath.Display, g.UserLoggedInAndHasEditAccessToCampaign(c.CampaignOverview))
+	m.HandleFunc(mainPath.Edit, c.HandleEditCampaign)
+	m.HandleFunc("PATCH "+mainPath.Display, g.UserLoggedInAndHasEditAccessToCampaign(c.HandleEditCampaign))
 
-	m.HandleFunc("GET "+characterPath.Edit, c.openCharacterEditor)
+	m.HandleFunc("GET "+characterPath.Edit, g.UserMustBeLoggedIn(c.openCharacterEditor))
 	m.HandleFunc("GET "+characterPath.Display, c.displayCharacterList)
-	m.HandleFunc("POST "+characterPath.Display, c.saveCharacters)
-	m.HandleFunc("DELETE "+characterPath.Display, c.DeleteCharacter)
+	m.HandleFunc("POST "+characterPath.Display, g.UserMustBeLoggedIn(c.saveCharacters))
+	m.HandleFunc("DELETE "+characterPath.Display, g.UserMustBeLoggedIn(c.DeleteCharacter))
 
 	m.HandleFunc("GET "+newCharacterPath.Display, c.newCharacter)
 	m.HandleFunc("DELETE "+newCharacterPath.Display, c.DeleteUnSavedCharacter)
@@ -94,13 +99,109 @@ func (ca CampaignPage) CampaignPageForUser(w http.ResponseWriter, r *http.Reques
 		}
 		output, _ := ca.renderer.RenderPage("campaignPage.html", pageData)
 		w.Write([]byte(output))
+
+	case http.MethodPatch:
+		campaignId := ca.mustExtractCampaignId(w, r)
+		r.ParseForm()
+		name := r.Form["campaign-name"][0]
+		judge := r.Form["campaign-judge"][0]
+		rectuitingString := r.Form["campaign-recruiting"][0]
+		isRecruiting := false
+		if rectuitingString == "yes" {
+			isRecruiting = true
+		}
+		timekeepingString := r.Form["campaign-timekeeping"][0]
+		err := ca.campaignService.UpdateCampaignDetails(campaignId, name, judge, timekeepingString, isRecruiting)
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+		campaign, err := ca.campaignService.GetCampaign(campaignId)
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+		output, err := ca.renderer.RenderPartial("campaignDetails.html", campaign)
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+		w.Write([]byte(output))
+
+	}
+}
+
+func (ca CampaignPage) HandleEditCampaign(w http.ResponseWriter, r *http.Request) {
+	loggedIn := r.Header.Get(http.CanonicalHeaderKey(guardsman.LoggedInHeader)) == "true"
+	canEdit := r.Header.Get(http.CanonicalHeaderKey(guardsman.EditAccessHeader)) == "true"
+	switch r.Method {
+	case http.MethodGet:
+		campaignId, _ := util.ExtractCampaignId(r)
+		campaign, _ := ca.campaignService.CampaignSummary(campaignId)
+		pageData := struct {
+			types.CampaignRecord
+			CampaignId int
+			MainPath   path
+		}{
+			*campaign,
+			campaignId,
+			newPhysicalCampaignPath("", campaignId),
+		}
+		output, err := ca.renderer.RenderPage("campaignEditor.html", pageData)
+		if err != nil {
+			ca.renderer.MustRenderErrorPage(w, output, err)
+		}
+		w.Write([]byte(output))
+
+	case http.MethodPatch:
+		campaignId := ca.mustExtractCampaignId(w, r)
+		r.ParseForm()
+		name := r.Form["campaign-name"][0]
+		judge := r.Form["campaign-judge"][0]
+		rectuitingString := r.Form["campaign-recruiting"][0]
+		isRecruiting := false
+		if rectuitingString == "yes" {
+			isRecruiting = true
+		}
+		timekeepingString := r.Form["campaign-timekeeping"][0]
+		err := ca.campaignService.UpdateCampaignDetails(campaignId, name, judge, timekeepingString, isRecruiting)
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+		campaign, err := ca.campaignService.GetCampaign(campaignId)
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+		pdata := struct {
+			types.CampaignRecord
+			CampaignId    int
+			MainPath      path
+			HasEditAccess bool
+			User          guardsman.WebUser
+		}{
+			*campaign,
+			campaignId,
+			newPhysicalCampaignPath("", campaignId),
+			canEdit,
+			guardsman.WebUser{LoggedIn: loggedIn},
+		}
+		output, err := ca.renderer.RenderPartial("campaignDetails.html", pdata)
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+		w.Write([]byte(output))
+
 	}
 }
 
 func (ca CampaignPage) CampaignOverview(w http.ResponseWriter, r *http.Request) {
 	//applyCorsHeaders(w)
 	id := ca.mustExtractCampaignId(w, r)
-
+	loggedIn := r.Header.Get(http.CanonicalHeaderKey(guardsman.LoggedInHeader)) == "true"
+	canEdit := r.Header.Get(http.CanonicalHeaderKey(guardsman.EditAccessHeader)) == "true"
 	campaign, err := ca.campaignService.CampaignSummary(id)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -129,6 +230,10 @@ func (ca CampaignPage) CampaignOverview(w http.ResponseWriter, r *http.Request) 
 		AdventurePath      path
 		NumberOfCharacters int
 		NumberOfAdventures int
+		OpenCampaignEditor bool
+		HasEditAccess      bool
+		IsIndex            bool
+		User               guardsman.WebUser
 	}{
 		Name:               campaign.Name,
 		Judge:              campaign.Judge,
@@ -142,6 +247,10 @@ func (ca CampaignPage) CampaignOverview(w http.ResponseWriter, r *http.Request) 
 		AdventurePath:      newPhysicalCampaignPath("/adventures", campaign.Id),
 		NumberOfCharacters: len(campaign.Characters),
 		NumberOfAdventures: len(campaign.Adventures),
+		OpenCampaignEditor: false,
+		HasEditAccess:      canEdit,
+		IsIndex:            false,
+		User:               guardsman.WebUser{LoggedIn: loggedIn},
 	}
 	output, err := ca.renderer.RenderPage("campaignPage.html", pdata)
 	if err != nil {
@@ -214,8 +323,8 @@ func (ca CampaignPage) DeleteCharacter(w http.ResponseWriter, r *http.Request) {
 		ca.renderer.MustRenderErrorPage(w, "", err)
 	}
 	w.Write([]byte(output))
-
 }
+
 func (ca CampaignPage) DeleteUnSavedCharacter(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 }

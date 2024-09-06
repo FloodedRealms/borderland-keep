@@ -15,6 +15,7 @@ type UserService struct {
 
 const userTable = "users"
 const sessionTable = "sessions"
+const resourcesTable = "user_resources"
 
 func NewUserService(repo repository.Repository, logger util.Logger) *UserService {
 	return &UserService{repo: repo, logger: logger}
@@ -113,6 +114,30 @@ func (us UserService) RetrieveSession(sessionId string) (userId, userName string
 		return "", "", time.Now(), false, nil
 	}
 	return userId, userName, expiryTime, true, nil
+}
+
+func (us UserService) UserhasEditAccessToCampaign(sessionId string, campaignId int) (bool, error) {
+	selectStatment := fmt.Sprintf("SELECT campaign_id FROM %s WHERE session_id=? AND campaign_id=?;", resourcesTable)
+	rows, err := us.repo.RunQuery(selectStatment, sessionId, campaignId)
+	if err != nil {
+		return false, err
+	}
+	defer rows.Close()
+
+	canEdit := rows.Next()
+	return canEdit, nil
+}
+
+func (us UserService) UserhasEditAccessToAdventure(sessionId string, campaignId int) (bool, error) {
+	selectStatment := fmt.Sprintf("SELECT campaign_id FROM %s WHERE session_id=? AND adventure_id=?;", resourcesTable)
+	rows, err := us.repo.RunQuery(selectStatment, sessionId, campaignId)
+	if err != nil {
+		return false, err
+	}
+	defer rows.Close()
+
+	canEdit := rows.Next()
+	return canEdit, nil
 }
 
 func (us *UserService) LimitUserCampaigns(id int) error {
