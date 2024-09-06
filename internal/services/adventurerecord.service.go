@@ -688,7 +688,7 @@ func (a AdventureService) ModifyCharacters(aId int, data []types.AdventureCharac
 	params := [][]interface{}{firstParamList}
 	for _, formData := range data {
 		var paramList []interface{}
-		queries = append(queries, fmt.Sprintf("INSERT INTO %s(adventure_id, character_id, half_share, xp_earned) values(?,?,?,?)", adventureToCharactersTable))
+		queries = append(queries, fmt.Sprintf("INSERT INTO %s(adventure_id, character_id, half_share, xp_gained) values(?,?,?,?)", adventureToCharactersTable))
 		if formData.Halfshare {
 			paramList = []interface{}{aId, formData.Id, formData.Halfshare, halfshare}
 		} else {
