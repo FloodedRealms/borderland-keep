@@ -32,7 +32,7 @@
     <main>
         <section class="content">
             <hgroup id="campaign-details">
-            {{ if .OpenCampaignEditor }}
+            {{ if .Data.OpenCampaignEditor }}
             {{ template "campaignEditor.html" . }}
             {{ else }}
                 <h3>{{ .Data.Name }}</h3>
@@ -47,7 +47,7 @@
                     </tr>
                     <tr>
                         <td>Last Adventure</td>
-                        <td>{{ .LastAdventure }}</td>
+                        <td>{{ .Data.LastAdventure }}</td>
                     </tr>
                     <tr>
                         <td> Time Keeping </td>
@@ -119,7 +119,7 @@
                 </div>
             </div>
         </section>
-        {{ template "sidebar.html" }}
+        {{ template "sidebar.html" . }}
     </main>
 </body>
 

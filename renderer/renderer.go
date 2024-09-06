@@ -64,7 +64,6 @@ func (r Renderer) RenderPageWithNoData(tmpl string, language string, loggedIn, c
 
 	//try to render anglish version, if can't continue to default
 	if language == "anglish" {
-		pdata.Lang = "anglish"
 		err := r.templates.ExecuteTemplate(&renderedOutput, "ang-"+tmpl, pdata)
 		if err == nil {
 			return renderedOutput.String(), nil
@@ -86,7 +85,6 @@ func (r Renderer) RenderPage(tmpl string, data interface{}, language string, log
 	var renderedOutput bytes.Buffer
 	//try to render anglish version, if can't continue to default
 	if language == "anglish" {
-		pdata.Lang = "anglish"
 
 		err := r.templates.ExecuteTemplate(&renderedOutput, "ang-"+tmpl, pdata)
 		if err == nil {
