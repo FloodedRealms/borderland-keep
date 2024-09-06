@@ -20,7 +20,9 @@ type PasswordForm struct {
 }
 
 func (g Guardsman) DisplayLoginPage(w http.ResponseWriter, r *http.Request) {
-	output, err := g.renderer.RenderPage("login.html", PasswordForm{})
+	lang := util.ExtractLangageCookie(r)
+	login, edt := false, false
+	output, err := g.renderer.RenderPage("login.html", PasswordForm{}, lang, login, edt)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
@@ -29,10 +31,11 @@ func (g Guardsman) DisplayLoginPage(w http.ResponseWriter, r *http.Request) {
 }
 
 func (g Guardsman) HandleLogin(w http.ResponseWriter, r *http.Request) {
+	lang := util.ExtractLangageCookie(r)
 	errors := PasswordForm{}
 	isFormValid, username, providedPassword := errors.validateLoginForm(r)
 	if !isFormValid {
-		output, err := g.renderer.RenderPage("loginForm.html", errors)
+		output, err := g.renderer.RenderPage("loginForm.html", errors, lang, false, false)
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
 			return
@@ -46,7 +49,7 @@ func (g Guardsman) HandleLogin(w http.ResponseWriter, r *http.Request) {
 		_, isNotFoundError := err.(services.UserNotFoundError)
 		if isNotFoundError {
 			errors.NameError = "That name was not found in our database."
-			output, err := g.renderer.RenderPage("loginForm.html", errors)
+			output, err := g.renderer.RenderPage("loginForm.html", errors, lang, false, false)
 			if err != nil {
 				w.WriteHeader(http.StatusInternalServerError)
 				return
@@ -70,7 +73,7 @@ func (g Guardsman) HandleLogin(w http.ResponseWriter, r *http.Request) {
 		_, isBadPassword := err.(BadPasswordError)
 		if isBadPassword {
 			errors.PasswordError = "That password is incorrect"
-			output, err := g.renderer.RenderPage("loginForm.html", errors)
+			output, err := g.renderer.RenderPage("loginForm.html", errors, lang, false, false)
 			if err != nil {
 				w.WriteHeader(http.StatusInternalServerError)
 				return
@@ -149,7 +152,6 @@ func (g Guardsman) RefreshSession(w http.ResponseWriter, r *http.Request) {
 		HttpOnly: true,
 		SameSite: http.SameSiteLaxMode,
 	})
-
 }
 
 func (g Guardsman) Logout(w http.ResponseWriter, r *http.Request) {

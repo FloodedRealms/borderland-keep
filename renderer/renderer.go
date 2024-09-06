@@ -23,6 +23,15 @@ func NewRenderer() *Renderer {
 	return r
 }
 
+type PageData struct {
+	Data interface{}
+	Lang string
+	User struct {
+		LoggedIn bool
+	}
+	HasEditAccess bool
+}
+
 func (r *Renderer) mustLoadTemplates() {
 	wd, _ := os.Getwd()
 
@@ -43,17 +52,46 @@ func (r *Renderer) mustLoadTemplates() {
 	r.templates = template.Must(template.ParseFiles(allFiles...))
 }
 
-func (r Renderer) RenderPageWithNoData(tmpl string) (string, error) {
+func (r Renderer) RenderPageWithNoData(tmpl string, language string, loggedIn, canEdit bool) (string, error) {
+
 	var renderedOutput bytes.Buffer
-	if err := r.templates.ExecuteTemplate(&renderedOutput, tmpl, nil); err != nil {
+	pdata := PageData{
+		Data:          nil,
+		User:          struct{ LoggedIn bool }{LoggedIn: loggedIn},
+		Lang:          language,
+		HasEditAccess: canEdit,
+	}
+
+	//try to render anglish version, if can't continue to default
+	if language == "anglish" {
+		err := r.templates.ExecuteTemplate(&renderedOutput, "ang-"+tmpl, pdata)
+		if err == nil {
+			return renderedOutput.String(), nil
+		}
+	}
+	if err := r.templates.ExecuteTemplate(&renderedOutput, tmpl, pdata); err != nil {
 		return renderedOutput.String(), err
 	}
 	return renderedOutput.String(), nil
 }
 
-func (r Renderer) RenderPage(tmpl string, data interface{}) (string, error) {
+func (r Renderer) RenderPage(tmpl string, data interface{}, language string, loggedIn, canEdit bool) (string, error) {
+	pdata := PageData{
+		Data:          data,
+		Lang:          language,
+		User:          struct{ LoggedIn bool }{LoggedIn: loggedIn},
+		HasEditAccess: canEdit,
+	}
 	var renderedOutput bytes.Buffer
-	if err := r.templates.ExecuteTemplate(&renderedOutput, tmpl, data); err != nil {
+	//try to render anglish version, if can't continue to default
+	if language == "anglish" {
+
+		err := r.templates.ExecuteTemplate(&renderedOutput, "ang-"+tmpl, pdata)
+		if err == nil {
+			return renderedOutput.String(), nil
+		}
+	}
+	if err := r.templates.ExecuteTemplate(&renderedOutput, tmpl, pdata); err != nil {
 		return renderedOutput.String(), err
 	}
 	return renderedOutput.String(), nil
