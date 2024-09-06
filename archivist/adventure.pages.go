@@ -847,7 +847,7 @@ func (a AdventurePage) saveAdventureDetails(w http.ResponseWriter, r *http.Reque
 		a.renderer.MustRenderErrorPage(w, "", err)
 		return
 	}
-	err = a.adventureService.ModifyCharacters(id, charData)
+	err = a.adventureService.ModifyCharacters(id, charData, adventureData.HalfShareXP, adventureData.FullShareXP)
 	if err != nil {
 		a.renderer.MustRenderErrorPage(w, "", err)
 		return
