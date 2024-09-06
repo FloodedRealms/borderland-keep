@@ -1,0 +1,35 @@
+<tr>
+    <td><input name="name" type="text" value="{{ .Data.Name }}"></input></td>
+    {{ if .Data.Errors.Name }}
+    <br>
+    <small class="form-text text-danger">
+        {{ .Data.Errors.Name }}
+    </small>
+    {{end}}
+    <td><input name="number" type="text" value="{{ .Data.Number }}"></input>
+        {{ if .Data.Errors.Number }}
+        <br>
+        <small class="form-text text-danger">
+            {{ .Data.Errors.Number }}
+        </small>
+        {{end}}
+    </td>
+    <td><input name="xp-value" type="text" value="{{ .Data.XPValue }}"></input>
+
+        {{ if .Data.Errors.XPValue }}
+        <br>
+        <small class="form-text text-danger">
+            {{ .Data.Errors.XPValue }}
+        </small>
+        {{end}}
+    </td>
+    <!--
+    <td hx-target="this" hx-swap="outerHTML">
+        <input type="checkbox" name="sep_gp_value" hx-trigger="mousedown" hx-get="{{ .Data.GPPath.Edit }}" />
+        <label for="sep_gp_value">GP != XP</label>
+        <input name="gp-value" type="text" value="" disabled />
+    </td>
+-->
+    <td><button hx-target="closest tr" hx-swap="outerHTML" hx-trigger="mousedown"
+            hx-delete="{{ .Data.Path.Display }}">Delete</button></td>
+</tr>

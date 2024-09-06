@@ -19,6 +19,7 @@ type CharacterRecord struct {
 	ClassId         int
 	Status          string
 	StatusId        int
+	ShowAdjustedXP  func(int) int
 }
 
 func (c CharacterRecord) GenerateInsertAttributes() (name string, currentXP int, primeReq int, level int, class string) {
@@ -33,14 +34,16 @@ func (c CharacterRecord) GenerateUpdateStatement() string {
 }
 
 func NewCharacter(id, currentXp, primeReq, level int, name, class string) *CharacterRecord {
-	return &CharacterRecord{
+	c := &CharacterRecord{
 		Id:              id,
 		Name:            name,
 		CurrentXP:       currentXp,
 		PrimeReqPercent: primeReq,
 		Level:           level,
 		Class:           class,
+		ShowAdjustedXP:  CreateXPFunc(primeReq),
 	}
+	return c
 }
 
 func BlankCharacter() *CharacterRecord {
@@ -56,15 +59,28 @@ func (c *CharacterRecord) AddXP(xpGained int) {
 	adjustedXPAmount := math.RoundToEven(float64(xpGained) + (float64(xpGained) * (float64(c.PrimeReqPercent) / 100)))
 	c.CurrentXP += int(adjustedXPAmount)
 }
+
+func CreateXPFunc(primReq int) func(int) int {
+	return func(xpGained int) int {
+		adjustedXPAmount := math.RoundToEven(float64(xpGained) + (float64(xpGained) * (float64(primReq) / 100)))
+		return int(adjustedXPAmount)
+	}
+}
 func (c CharacterRecord) ApplyPrimeReq(xpGained int) int {
 	adjustedXPAmount := math.RoundToEven(float64(xpGained) + (float64(xpGained) * (float64(c.PrimeReqPercent) / 100)))
 	return int(adjustedXPAmount)
 }
 
 type AdventureCharacter struct {
-	Id        int  `json:"id"`
-	Halfshare bool `json:"halfshare"`
-	Name      string
+	Id             int  `json:"id"`
+	Halfshare      bool `json:"halfshare"`
+	Name           string
+	Preq           int
+	ShowAdjustedXP func(int) int
+}
+
+func (a *AdventureCharacter) CreateXPFunc() {
+	a.ShowAdjustedXP = CreateXPFunc(a.Preq)
 }
 
 func NewAdventureCharacter(halfshare bool, id int) *AdventureCharacter {

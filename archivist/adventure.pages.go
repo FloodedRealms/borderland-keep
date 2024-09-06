@@ -320,10 +320,6 @@ func (a AdventurePage) AdventureOverview(w http.ResponseWriter, r *http.Request)
 	w.Write([]byte(output))
 }
 
-func (a AdventurePage) renderAdventurePage(w http.ResponseWriter, data types.AdventureRecord, loggedin, canedit bool) {
-
-}
-
 func (a AdventurePage) updateDetails(w http.ResponseWriter, r *http.Request) {
 	aid, _ := a.extractAdventureId(r)
 	adventure, _ := a.adventureService.GetAdventureRecordById(aid)

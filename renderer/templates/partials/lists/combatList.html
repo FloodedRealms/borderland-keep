@@ -10,7 +10,7 @@
         </tr>
     </thead>
     <tbody>
-        {{ range .Items }}
+        {{ range .Data.Items }}
         <tr>
             <td>{{ .Name }}</td>
             <td>{{ .Number }}</td>
@@ -20,4 +20,4 @@
         {{ end }}
     </tbody>
 </table>
-<button hx-get="{{ .Path.Edit }}" hx-trigger="mousedown">Edit Combat</button>
+<button hx-get="{{ .Data.Path.Edit }}" hx-trigger="mousedown">Edit Combat</button>
