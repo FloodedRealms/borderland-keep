@@ -1,5 +1,15 @@
 <section class="sidebar">
-    future sidebar space
+    <form onsubmit="return false" hx-post="/lang">
+       <fieldset >
+        <legend>Select a language</legend>
+        <select name="lang"   >
+            <option value="english">English</option>
+            <option value="anglish" {{ if eq .Lang "anglish" }}  selected {{end}}>Anglish</option>
+        </select>
+        <button  hx-trigger="mousdown">Save</button>
+       </fieldset> 
+
+    </form>
     <!--<hgroup>
         <h4>People who Participate</h4>
         <ul>

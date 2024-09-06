@@ -21,3 +21,11 @@ func ExtractAdventureId(r *http.Request) (int, error) {
 func ExtractUserId(r *http.Request) (int, error) {
 	return strconv.Atoi(r.PathValue("userId"))
 }
+
+func ExtractLangageCookie(r *http.Request) string {
+	lang, err := r.Cookie("lang")
+	if err != nil {
+		return "english"
+	}
+	return lang.Value
+}

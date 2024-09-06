@@ -6,6 +6,7 @@ import (
 
 	"github.com/floodedrealms/borderland-keep/guardsman"
 	"github.com/floodedrealms/borderland-keep/internal/services"
+	"github.com/floodedrealms/borderland-keep/internal/util"
 	"github.com/floodedrealms/borderland-keep/renderer"
 
 	"github.com/floodedrealms/borderland-keep/types"
@@ -24,7 +25,9 @@ func NewHomePage(r renderer.Renderer, cs services.CampaignService, g guardsman.G
 }
 
 func (h HomePage) About(w http.ResponseWriter, r *http.Request) {
-	output, err := h.renderer.RenderPageWithNoData("about.html")
+	lang := util.ExtractLangageCookie(r)
+	loggedIn, edit := ExtractGuardsmanHeaders(r)
+	output, err := h.renderer.RenderPageWithNoData("about.html", lang, loggedIn, edit)
 	if err != nil {
 		h.renderer.MustRenderErrorPage(w, "error.html", err)
 	}
@@ -32,7 +35,9 @@ func (h HomePage) About(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h HomePage) GuildLanding(w http.ResponseWriter, r *http.Request) {
-	output, err := h.renderer.RenderPageWithNoData("guild.html")
+	lang := util.ExtractLangageCookie(r)
+	loggedIn, edit := ExtractGuardsmanHeaders(r)
+	output, err := h.renderer.RenderPageWithNoData("guild.html", lang, loggedIn, edit)
 	if err != nil {
 		h.renderer.MustRenderErrorPage(w, "error.html", err)
 	}
@@ -40,7 +45,9 @@ func (h HomePage) GuildLanding(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h HomePage) TavernLanding(w http.ResponseWriter, r *http.Request) {
-	output, err := h.renderer.RenderPageWithNoData("tavern.html")
+	lang := util.ExtractLangageCookie(r)
+	loggedIn, edit := ExtractGuardsmanHeaders(r)
+	output, err := h.renderer.RenderPageWithNoData("tavern.html", lang, loggedIn, edit)
 	if err != nil {
 		h.renderer.MustRenderErrorPage(w, "error.html", err)
 	}
@@ -63,7 +70,9 @@ func (h HomePage) Index(w http.ResponseWriter, r *http.Request) {
 		User:           u,
 		IsIndex:        true,
 	}
-	output, err := h.renderer.RenderPage("index.html", pdata)
+	lang := util.ExtractLangageCookie(r)
+	loggedIn, edit := ExtractGuardsmanHeaders(r)
+	output, err := h.renderer.RenderPage("index.html", pdata, lang, loggedIn, edit)
 	if err != nil {
 		h.renderer.MustRenderErrorPage(w, "error.html", err)
 	}
@@ -81,8 +90,9 @@ func (h HomePage) Campaigns(w http.ResponseWriter, r *http.Request) {
 		EndOfCampaigns: len(campaigns) < 10,
 		User:           guardsman.WebUser{LoggedIn: false},
 	}
-
-	output, err := h.renderer.RenderPage("campaigns.html", pdata)
+	lang := util.ExtractLangageCookie(r)
+	loggedIn, edit := ExtractGuardsmanHeaders(r)
+	output, err := h.renderer.RenderPage("campaigns.html", pdata, lang, loggedIn, edit)
 	if err != nil {
 		h.renderer.MustRenderErrorPage(w, "error.html", err)
 	}
@@ -91,20 +101,20 @@ func (h HomePage) Campaigns(w http.ResponseWriter, r *http.Request) {
 
 func (h HomePage) MyCampaigns(w http.ResponseWriter, r *http.Request) {
 	userId := r.PathValue("userId")
+	lang := util.ExtractLangageCookie(r)
+	loggedIn, edit := ExtractGuardsmanHeaders(r)
 	campaigns := h.cs.CampaignsForUser(userId)
 	pdata := struct {
 		Campaigns      []types.CampaignRecord
 		EndOfCampaigns bool
-		User           guardsman.WebUser
 		IsIndex        bool
 	}{
 		Campaigns:      campaigns,
 		EndOfCampaigns: len(campaigns) < 10,
-		User:           guardsman.WebUser{Id: userId, LoggedIn: true},
 		IsIndex:        false,
 	}
 
-	output, err := h.renderer.RenderPage("myCampaigns.html", pdata)
+	output, err := h.renderer.RenderPage("myCampaigns.html", pdata, lang, loggedIn, edit)
 	if err != nil {
 		h.renderer.MustRenderErrorPage(w, "error.html", err)
 	}
