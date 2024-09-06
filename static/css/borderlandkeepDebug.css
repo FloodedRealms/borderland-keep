@@ -1,5 +1,4 @@
 :root {
-  /* TWILIGHT DARK */
   /* normal colors*/
   --blackNormal: #1e1e1e;
   --redNormal: #cf6a4c;
@@ -12,7 +11,7 @@
 /* bright colors */
 --blackBright:   #5f5a60;
 --redBright:     #cf6a4c;
---greenBright:   #73b755;
+--greenBright:   #8f9d6a;
 --yellowBright:  #f9ee98;
 --blueBright:    #7587a6;
 --magentaBright: #9b859d;
@@ -38,7 +37,11 @@
 
 header {
   background-color: var(--main-bg);
-  border: 1px, solid, var(--magentaBright);
+  border: solid, 2px, red;
+
+  & pre {
+    border: dotted, 2px, red;
+  }
 }
 
 html,
@@ -52,25 +55,17 @@ body {
 main {
   display: flex;
   flex-direction: row;
+  border: solid, 2px, green;
 }
 
 section {
+  border: solid, 2px, red;
   color: var(--text-color);
   background-attachment: fixed;
-
-  border: 1px, solid, var(--greenNormal);
 
   & button {
     position: relative;
     bottom: 0;
-  }
-}
-
-.campaign-box {
-  margin: 5px 5px 5px 15px;
-  padding: 0px 1em 1em 1em;
-  & table {
-    background-color: var(--blackBright);
   }
 }
 
@@ -99,7 +94,22 @@ section {
   min-width: 850px;
 }
 
+.campaign-box {
+  background: #333;
+  color: #fff;
+  border-radius: 4px;
+  border:1px solid #777;
+
+}
+aside {
+  border: solid, 2px, purple;
+  width: 200px;
+  float: right;
+}
+
 nav {
+  border: solid, 2px, blue;
+  background-color: black;
 
   & ul {
     list-style-type: none;
@@ -112,7 +122,7 @@ nav {
     float: left;
     appearance: none;
     -webkit-appearance: none;
-    margin-right: 0.4em;
+   /* padding: 0.4em 0.6em;*/
     border-radius: 0px;
 
     --text-color: black
@@ -127,28 +137,6 @@ nav {
     box-shadow: 4px 6px 1px 0px var(--shadow-color);
 
   }
-  
-  & li.login {
-    float: right;
-    appearance: none;
-    -webkit-appearance: none;
-    border-radius: 0px;
-
-    --text-color: black
-      /* rgba(100, 100, 100)*/
-    ;
-    --shadow-color: gray;
-    --background: var(--greenNormal);
-
-    color: var(--text-color, var(--shadow-color));
-    background: var(--background);
-    border: 1px solid var(--shadow-color);
-    box-shadow: 4px 6px 1px 0px var(--shadow-color);
-
-  }
-  & li.login a:hover {
-    background-color: var(--greenBright);
-  }
 
   & li a {
     display: block;
@@ -160,16 +148,6 @@ nav {
   & li a:hover {
     background-color: #111;
   }
-  & li button {
-    display: block;
-    text-align: center;
-    padding: 10px;
-  }
-
-  /* Change the link color to #111 (black) on hover */
-  & li button:hover {
-    background-color: #111;
-  } 
 }
 
 a {
@@ -202,24 +180,6 @@ a.action-navigation {
     background-color: #111;
 }
 
-/* EDITORS */
-
-form ol {
-  list-style: none;
-}
-
-label {
-  flex-direction: row;
-  justify-content: flex-end;
-  text-align: right;
-}
-
-input {
-  height: 20px;
-  flex: 0 0 200px;
-  margin-left: 10px;
-}
-
 button {
   appearance: none;
   -webkit-appearance: none;
@@ -230,46 +190,12 @@ button {
     /* rgba(100, 100, 100)*/
   ;
   --shadow-color: gray;
-  --background: var(--whiteNormal);
+  --background: var(--white);
 
   color: var(--text-color, var(--shadow-color));
   background: var(--background);
   border: 1px solid var(--shadow-color);
   box-shadow: 4px 6px 1px 0px var(--shadow-color);
-}
-
-/* TABLES */
-table {
-  margin: 0 0 40px 0;
-  width: 100%;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
-  display: table;
-}
-@media screen and (max-width: 580px) {
-  .table {
-    display: block;
-  }
-}
-
-tr {
-  color: black;
-  display: table-row;
-  background: var(--lightgrey);
-}
-
-tr:nth-of-type(odd) {
-  background: var(--grey);
-}
-th {
-font-weight: 900;
-color: black;
-background: var(--blueBright);
-}
-
-/* BUTTONS */
-
-button:hover {
-  background: varr(--whiteBright);
 }
 
 button.danger {
@@ -279,21 +205,15 @@ button.danger {
 }
 
 button.add {
- --background: var(--greenNormal);
-}
-
-button.add:hover {
-  /*--text-color: rgba(0,100,0,1) black; */
-  --background: var(--greenBright);
+  --text-color: rgba(0, 100, 0, 1);
+  --shadow-color: green;
+  --background: rgba(0, 255, 0, 0.5);
 }
 
 button.success {
   /*--text-color: rgba(0,100,0,1) black; */
-  --background: var(--greenNormal);
-}
-button.success:hover {
-  /*--text-color: rgba(0,100,0,1) black; */
-  --background: var(--greenBright);
+  --shadow-color: green;
+  --background: rgba(0, 255, 0, 0.15);
 }
 
 button.warning {

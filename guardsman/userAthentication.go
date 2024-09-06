@@ -221,7 +221,7 @@ func (g Guardsman) UserMustBeLoggedIn(next http.HandlerFunc) http.HandlerFunc {
 			return
 		}
 		sessionToken := c.Value
-		_, _, expiry, exists, err := g.userService.RetrieveSession(sessionToken)
+		userId, _, expiry, exists, err := g.userService.RetrieveSession(sessionToken)
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
 			return
@@ -234,6 +234,8 @@ func (g Guardsman) UserMustBeLoggedIn(next http.HandlerFunc) http.HandlerFunc {
 			w.WriteHeader(http.StatusUnauthorized)
 			return
 		}
+		r.Header.Set(LoggedInHeader, "true")
+		r.Header.Set(UserIdHeader, userId)
 		next.ServeHTTP(w, r)
 	})
 }
@@ -253,7 +255,7 @@ func (g Guardsman) CheckLoggedIn(next http.HandlerFunc) http.HandlerFunc {
 			return
 		}
 		sessionToken := c.Value
-		_, _, expiry, exists, err := g.userService.RetrieveSession(sessionToken)
+		userId, _, expiry, exists, err := g.userService.RetrieveSession(sessionToken)
 		if err != nil {
 			g.logger.PrintWithSessionId(sessionToken, "failed to retreive session info", err)
 			w.WriteHeader(http.StatusInternalServerError)
@@ -268,6 +270,7 @@ func (g Guardsman) CheckLoggedIn(next http.HandlerFunc) http.HandlerFunc {
 			return
 		}
 		r.Header.Set(LoggedInHeader, "true")
+		r.Header.Set(UserIdHeader, userId)
 		next.ServeHTTP(w, r)
 	})
 }

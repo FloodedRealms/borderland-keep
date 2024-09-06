@@ -1,0 +1,14 @@
+<table id="adventureList">
+    <tr>
+        <th>Adventure Name</th>
+        <th>Date</th>
+    </tr>
+    {{ range .Data.Adventures }}
+    <tr>
+        <td><a style="color:darkyellow;" href="/adventure/{{ .Id }}"> {{ .Name }}</a></td>
+        <td>{{ call $.NaturalDate .AdventureDate }}</td>
+        <td> {{ if $.HasEditAccess }}<button class="danger" hx-delete="/adventure/{{ .Id }}" hx-target="closest tr"
+                hx-swap="delete">Delete Adventure</button></td>{{end}}
+    </tr>
+</table>
+{{ end }}
