@@ -1,6 +1,7 @@
 package util
 
 import (
+	"fmt"
 	"log"
 )
 
@@ -19,5 +20,11 @@ func (m *Logger) Debug(args ...interface{}) {
 }
 
 func (m *Logger) Print(args ...interface{}) {
+	log.Print(args...)
+}
+
+func (m *Logger) PrintWithSessionId(sessionId string, args ...interface{}) {
+	s := fmt.Sprintf("Session %s", sessionId)
+	log.Print(s)
 	log.Print(args...)
 }

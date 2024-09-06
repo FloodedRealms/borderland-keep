@@ -253,6 +253,8 @@ func (g Guardsman) CheckLoggedIn(next http.HandlerFunc) http.HandlerFunc {
 		sessionToken := c.Value
 		_, _, expiry, exists, err := g.userService.RetrieveSession(sessionToken)
 		if err != nil {
+			g.logger.PrintWithSessionId(sessionToken, "failed to retreive session info", err)
+			g.logger.Print(err)
 			w.WriteHeader(http.StatusInternalServerError)
 			return
 		}
