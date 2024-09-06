@@ -32,7 +32,7 @@ func main() {
 	case "create-user":
 		repo, _ := repository.NewSqliteRepo(util.NewLogger(true), dbName)
 		userService := services.NewUserService(repo, *util.NewLogger(true))
-		guardsman := guardsman.NewGuardsman(repo, *userService, nil)
+		guardsman := guardsman.NewGuardsman(repo, *userService, nil, *util.NewLogger(true))
 		if len(flags) == 1 {
 			fmt.Println("usage: archivist create-user [friendly-name]")
 			return
@@ -50,7 +50,7 @@ func main() {
 	case "unlimit-user":
 		repo, _ := repository.NewSqliteRepo(util.NewLogger(true), dbName)
 		userService := services.NewUserService(repo, *util.NewLogger(true))
-		guardsman := guardsman.NewGuardsman(repo, *userService, nil)
+		guardsman := guardsman.NewGuardsman(repo, *userService, nil, *util.NewLogger(true))
 		if len(flags) == 1 {
 			fmt.Println("usage: archivist unlimit-user [user-id]")
 			return
@@ -67,7 +67,7 @@ func main() {
 	case "limit-user":
 		repo, _ := repository.NewSqliteRepo(util.NewLogger(true), dbName)
 		userService := services.NewUserService(repo, *util.NewLogger(true))
-		guardsman := guardsman.NewGuardsman(repo, *userService, nil)
+		guardsman := guardsman.NewGuardsman(repo, *userService, nil, *util.NewLogger(true))
 		if len(flags) == 1 {
 
 			return
@@ -104,7 +104,7 @@ func main() {
 		// campaignActionService := services.NewCampaignActionService(sqlRepo)
 
 		//pages
-		guardsman := guardsman.NewGuardsman(sqlRepo, *userService, renderer)
+		guardsman := guardsman.NewGuardsman(sqlRepo, *userService, renderer, *logger)
 		homePages := archivist.NewHomePage(*renderer, *campaignService, *guardsman)
 		campaignPages := archivist.NewCampaignPage(*campaignService, *characterService, *adventureRecordService, *renderer)
 		adventurePages := archivist.NewAdventurePage(*adventureRecordService, *characterService, *renderer)

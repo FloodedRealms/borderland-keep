@@ -681,14 +681,19 @@ func (a AdventureService) ModifyMagicItems(aId int, data []map[string]string) er
 	return err
 }
 
-func (a AdventureService) ModifyCharacters(aId int, data []types.AdventureCharacter) error {
+func (a AdventureService) ModifyCharacters(aId int, data []types.AdventureCharacter, halfshare, fullshare int) error {
 	stmtStr := fmt.Sprintf("DELETE FROM %s WHERE adventure_id =?", adventureToCharactersTable)
 	queries := []string{stmtStr}
 	firstParamList := []interface{}{aId}
 	params := [][]interface{}{firstParamList}
 	for _, formData := range data {
-		queries = append(queries, fmt.Sprintf("INSERT INTO %s(adventure_id, character_id, half_share) values(?,?,?)", adventureToCharactersTable))
-		paramList := []interface{}{aId, formData.Id, formData.Halfshare}
+		var paramList []interface{}
+		queries = append(queries, fmt.Sprintf("INSERT INTO %s(adventure_id, character_id, half_share, xp_earned) values(?,?,?,?)", adventureToCharactersTable))
+		if formData.Halfshare {
+			paramList = []interface{}{aId, formData.Id, formData.Halfshare, halfshare}
+		} else {
+			paramList = []interface{}{aId, formData.Id, formData.Halfshare, fullshare}
+		}
 		params = append(params, paramList)
 	}
 	err := a.repo.DoTransaction(queries, params)
