@@ -1,31 +1,31 @@
 package types
 
-import "fmt"
-
 type MonsterGroup struct {
+	Id             int    `json:"id"`
+	Name           string `json:"name"`
+	Description    string `json:"description"`
+	XPPerOneKill   int    `json:"xp"`
+	NumberDefeated int    `json:"defeated"`
+}
+
+type MonsterGroupRequest struct {
 	MonsterName    string `json:"monster_name"`
+	XPPerMonster   int    `json:"xp"`
 	NumberDefeated int    `json:"number_defeated"`
-	XP             int    `json:"xp_per_monster"`
-	TotalXP        int    `json:"total_xp"`
 }
 
-func NewMonsterGroup(n string, d, v int) *MonsterGroup {
-	group := &MonsterGroup{
-		MonsterName:    n,
-		NumberDefeated: d,
-		XP:             v,
+func NewMonsterGroup(name, d string, numberDefeated, xp int) *MonsterGroup {
+	mon := MonsterGroup{
+		Name:           name,
+		Description:    d,
+		XPPerOneKill:   xp,
+		NumberDefeated: numberDefeated,
 	}
-	group.TotalXP = group.NumberDefeated * group.XP
-	return group
+	return &mon
+
 }
 
-func (m *MonsterGroup) XPValue() int {
-	return m.TotalXP
-}
+func (g MonsterGroup) TotalXPAmount() float64 {
+	return float64(g.XPPerOneKill * g.NumberDefeated)
 
-func (m *MonsterGroup) Summary() string {
-	if m.NumberDefeated == 1 {
-		return fmt.Sprintf("Defeated a vile %s. This brings %d XP.", m.MonsterName, m.TotalXP)
-	}
-	return fmt.Sprintf("Defeated a group of vile %ss. This brings %d XP.", m.MonsterName, m.TotalXP)
 }

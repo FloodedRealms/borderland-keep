@@ -1,0 +1,15 @@
+<form onsubmit="return false">
+    <table>
+        <tr>
+            <th>Name</th>
+            <th>Date (yyyy-mm-dd)</th>
+        </tr>
+        <tr>
+        <td><input name="new-adventure-name" type="text" value=""></input></td>
+        <td><input type="text" value=""></input></td>
+        <td><button hx-target="closest tr" hx-post=".AdventurePath.Display">Save</button></td>
+        <td><button hx-target="closest tr" hx-delete=".AdventurePath.Display">Delete</button></td>
+
+        </tr>
+    </table>
+</form>

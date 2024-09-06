@@ -1,70 +1,126 @@
 package api
 
+/*
 import (
+	"errors"
 	"net/http"
 	"strings"
 
-	"github.com/gin-gonic/gin"
-	"github.com/kevin/adventure-archivist/services"
-	"github.com/kevin/adventure-archivist/types"
+	"github.com/floodedrealms/borderland-keep/internal/services"
+	"github.com/floodedrealms/borderland-keep/types"
 )
 
 type CampaignApi struct {
-	campaignService services.CampaignService
+	campaignService  services.CampaignService
+	characterService services.CharacterService
 }
 
-func NewCampaignApi(cs services.CampaignService) CampaignApi {
-	return CampaignApi{campaignService: cs}
+func NewCampaignApi(cs services.CampaignService, chars services.CharacterService) CampaignApi {
+	return CampaignApi{
+		campaignService:  cs,
+		characterService: chars}
 }
 
-func (ca *CampaignApi) CreateCampaign(ctx *gin.Context) {
-	var cr *types.CreateCampaignRequest
+func (ca *CampaignApi) CreateCampaign(w http.ResponseWriter, r *http.Request) {
 
-	if err := ctx.ShouldBindJSON(&cr); err != nil {
-		ctx.JSON(http.StatusBadRequest, err.Error())
+	var cr types.CampaignRecord
+	err := decodeJSONBody(w, r, &cr)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
-	nc, err := ca.campaignService.CreateCampaign(cr)
+	clientId := r.Header["X-Archivist-Client-Id"]
+	if len(clientId) == 0 {
+		http.Error(w, errors.New("no client id supplied").Error(), http.StatusBadRequest)
+		return
+	}
+	passwordString := r.URL.Query()["password"][0]
+	password, _ := types.NewPassword(passwordString)
+	//should always be the first Client Id. Need to find a way to expose a possible mismatch from multipe client Id headers
+	cr.ClientId = clientId[0]
+	nc, err := ca.campaignService.CreateCampaign(cr, *password)
 	if err != nil {
 		if strings.Contains(err.Error(), "Index already exists") {
-			ctx.JSON(http.StatusConflict, gin.H{"status": "fail", "message": err.Error()})
+			http.Error(w, err.Error(), http.StatusConflict)
 			return
 		}
-		ctx.JSON(http.StatusBadGateway, gin.H{"status": "fail", "message": err.Error()})
+		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	ctx.JSON(http.StatusCreated, gin.H{"status": "success", "data": nc})
+	sendGoodResponseWithObject(w, nc)
 }
 
-func (ca *CampaignApi) ListCampaigns(ctx *gin.Context) {
-	applyCorsHeaders(ctx)
-
-	arr, err := ca.campaignService.ListCampaigns()
+func (ca *CampaignApi) UpdateCampaign(w http.ResponseWriter, r *http.Request) {
+	var cr types.CampaignRecord
+	err := decodeJSONBody(w, r, &cr)
 	if err != nil {
-		ctx.JSON(http.StatusBadGateway, gin.H{"status": "fail", "message": err.Error()})
+		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
-	ctx.JSON(http.StatusOK, gin.H{"status": "success", "data": arr})
+
+	nc, err := ca.campaignService.UpdateCampaign(&cr)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	sendGoodResponseWithObject(w, nc)
+
 }
 
-func (ca *CampaignApi) GetCampaign(ctx *gin.Context) {
-	applyCorsHeaders(ctx)
-	id := ctx.Param("campaignId")
+func (ca *CampaignApi) ListCampaigns(w http.ResponseWriter, r *http.Request) {
+	applyCorsHeaders(w)
+	var arr []*types.CampaignRecord
+	var err error
+	arr, err = ca.campaignService.ListCampaigns()
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	sendGoodResponseWithObject(w, arr)
+
+}
+
+func (ca *CampaignApi) GetCampaign(w http.ResponseWriter, r *http.Request) {
+	applyCorsHeaders(w)
+	id := r.PathValue("campaignId")
 
 	campaign, err := ca.campaignService.GetCampaign(id)
 
 	if err != nil {
-		if strings.Contains(err.Error(), "Index already exists") {
-			ctx.JSON(http.StatusNotFound, gin.H{"status": "fail", "message": err.Error()})
-			return
-		}
-		ctx.JSON(http.StatusBadGateway, gin.H{"status": "fail", "message": err.Error()})
+		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	ctx.JSON(http.StatusOK, gin.H{"status": "success", "data": campaign})
+
+	campaign.Characters, err = ca.characterService.GetCharactersForCampaign(campaign)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	sendGoodResponseWithObject(w, campaign)
 }
 
-func applyCorsHeaders(ctx *gin.Context) {
-	ctx.Header("Access-Control-Allow-Origin", "*")
-	ctx.Header("Access-Control-Allow-Headers", "access-control-allow-origin, access-control-allow-headers")
+func (ca *CampaignApi) DeleteCampaign(w http.ResponseWriter, r *http.Request) {
+	id := r.PathValue("campaignId")
+	campaign, err := ca.campaignService.DeleteCampaign(id)
+
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+
+		return
+	}
+	sendGoodResponseWithObject(w, campaign)
 }
+
+func (ca *CampaignApi) EditCampaignPassword(w http.ResponseWriter, r *http.Request) {
+	id := r.PathValue("campaignId")
+	password := r.URL.Query()["password"]
+	_, err := ca.campaignService.UpdateCampaignPassword(id, password[1])
+
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	sendSuccessResponse(w, "password successfuly updated")
+
+}
+*/

@@ -1,0 +1,804 @@
+{
+    "campaigns": [],
+    "characters": [],
+"adventures": [
+    {
+      "id": 1,
+      "campaign_id": 1,
+      "name": "[Hob]Goblin Slayer",
+      "total_xp": 1259,
+      "total_shares": 4,
+      "full_share": 315,
+      "half_share": 158,
+      "adventure_date": "2024-08-01",
+      "duration": 1,
+      "coins": {
+        "coin_xp": 664,
+        "copper": {
+          "type_of_loot": "",
+          "name": "Coppper Coins",
+          "description": "The meanest of coins, still worth something",
+          "xp_value": 0.01,
+          "gold_value": 0,
+          "total": 0
+        },
+        "silver": {
+          "type_of_loot": "",
+          "name": "Silver Coins",
+          "description": "A little bit of real money",
+          "xp_value": 0.1,
+          "gold_value": 0,
+          "total": 150
+        },
+        "electrum": {
+          "type_of_loot": "",
+          "name": "Electrum Coins",
+          "description": "The best coin, despite my players protests",
+          "xp_value": 0.5,
+          "gold_value": 0,
+          "total": 0
+        },
+        "gold": {
+          "type_of_loot": "",
+          "name": "Gold Coins",
+          "description": "THE standard",
+          "xp_value": 1,
+          "gold_value": 0,
+          "total": 649
+        },
+        "platinum": {
+          "type_of_loot": "",
+          "name": "Platinum Coins",
+          "description": "Fancy",
+          "xp_value": 5,
+          "gold_value": 0,
+          "total": 0
+        }
+      },
+      "gems": [],
+      "jewellery": [
+        {
+          "id": 11,
+          "jewellery_xp": 270,
+          "Loot": {
+            "type_of_loot": "",
+            "name": "Crown",
+            "description": "",
+            "xp_value": 135,
+            "gold_value": 0,
+            "total": 2
+          }
+        }
+      ],
+      "combat": [
+        {
+          "id": 15,
+          "combat_xp": 50,
+          "XP": {
+            "type_of_loot": "",
+            "name": "Goblin",
+            "description": "vicous monsters",
+            "xp_value": 10,
+            "gold_value": 0,
+            "total": 5
+          }
+        },
+        {
+          "id": 16,
+          "combat_xp": 105,
+          "XP": {
+            "type_of_loot": "",
+            "name": "Hobgoblin",
+            "description": "vicous monsters",
+            "xp_value": 15,
+            "gold_value": 0,
+            "total": 7
+          }
+        },
+        {
+          "id": 17,
+          "combat_xp": 10,
+          "XP": {
+            "type_of_loot": "",
+            "name": "Orc",
+            "description": "vicous monsters",
+            "xp_value": 10,
+            "gold_value": 0,
+            "total": 1
+          }
+        },
+        {
+          "id": 18,
+          "combat_xp": 20,
+          "XP": {
+            "type_of_loot": "",
+            "name": "Gnoll",
+            "description": "vicous monsters",
+            "xp_value": 20,
+            "gold_value": 0,
+            "total": 1
+          }
+        },
+        {
+          "id": 19,
+          "combat_xp": 140,
+          "XP": {
+            "type_of_loot": "",
+            "name": "Ogre",
+            "description": "vicous monsters",
+            "xp_value": 140,
+            "gold_value": 0,
+            "total": 1
+          }
+        }
+      ],
+      "magic_items": [],
+      "characters": [
+        {
+          "Details": {
+            "id": 1,
+            "name": "Odric",
+            "current_xp": 0,
+            "prime_req": 0,
+            "level": 1,
+            "class": "Fighter"
+          },
+          "halfshare": false,
+          "xp_gained": 315
+        },
+        {
+          "Details": {
+            "id": 2,
+            "name": "Owen",
+            "current_xp": 0,
+            "prime_req": 5,
+            "level": 1,
+            "class": "Assassin"
+          },
+          "halfshare": false,
+          "xp_gained": 331
+        },
+        {
+          "Details": {
+            "id": 3,
+            "name": "Dimadome Starsearer",
+            "current_xp": 0,
+            "prime_req": 10,
+            "level": 1,
+            "class": "Dwarven Vaultguard"
+          },
+          "halfshare": false,
+          "xp_gained": 346
+        },
+        {
+          "Details": {
+            "id": 4,
+            "name": "Kanum / Kane / Canus",
+            "current_xp": 0,
+            "prime_req": 10,
+            "level": 1,
+            "class": "Mage"
+          },
+          "halfshare": false,
+          "xp_gained": 346
+        }
+      ],
+      "created_at": "2024-06-21T23:15:54.675520424-04:00",
+      "updated_at": "2024-06-21T23:15:54.675520484-04:00"
+    },
+    {
+      "id": 2,
+      "campaign_id": 1,
+      "name": "Piss Clothes Mystery",
+      "total_xp": 11374,
+      "total_shares": 5,
+      "full_share": 2275,
+      "half_share": 1138,
+      "adventure_date": "2024-08-01",
+      "duration": 1,
+      "coins": {
+        "coin_xp": 6044,
+        "copper": {
+          "type_of_loot": "",
+          "name": "Coppper Coins",
+          "description": "The meanest of coins, still worth something",
+          "xp_value": 0.01,
+          "gold_value": 0,
+          "total": 0
+        },
+        "silver": {
+          "type_of_loot": "",
+          "name": "Silver Coins",
+          "description": "A little bit of real money",
+          "xp_value": 0.1,
+          "gold_value": 0,
+          "total": 5000
+        },
+        "electrum": {
+          "type_of_loot": "",
+          "name": "Electrum Coins",
+          "description": "The best coin, despite my players protests",
+          "xp_value": 0.5,
+          "gold_value": 0,
+          "total": 11000
+        },
+        "gold": {
+          "type_of_loot": "",
+          "name": "Gold Coins",
+          "description": "THE standard",
+          "xp_value": 1,
+          "gold_value": 0,
+          "total": 34
+        },
+        "platinum": {
+          "type_of_loot": "",
+          "name": "Platinum Coins",
+          "description": "Fancy",
+          "xp_value": 5,
+          "gold_value": 0,
+          "total": 2
+        }
+      },
+      "gems": [],
+      "jewellery": [
+        {
+          "id": 12,
+          "jewellery_xp": 4000,
+          "Loot": {
+            "type_of_loot": "",
+            "name": "Crown",
+            "description": "",
+            "xp_value": 4000,
+            "gold_value": 0,
+            "total": 1
+          }
+        },
+        {
+          "id": 13,
+          "jewellery_xp": 300,
+          "Loot": {
+            "type_of_loot": "",
+            "name": "Necklace",
+            "description": "",
+            "xp_value": 300,
+            "gold_value": 0,
+            "total": 1
+          }
+        },
+        {
+          "id": 14,
+          "jewellery_xp": 90,
+          "Loot": {
+            "type_of_loot": "",
+            "name": "Cup",
+            "description": "",
+            "xp_value": 90,
+            "gold_value": 0,
+            "total": 1
+          }
+        },
+        {
+          "id": 15,
+          "jewellery_xp": 900,
+          "Loot": {
+            "type_of_loot": "",
+            "name": "Tapestry",
+            "description": "",
+            "xp_value": 900,
+            "gold_value": 0,
+            "total": 1
+          }
+        }
+      ],
+      "combat": [
+        {
+          "id": 20,
+          "combat_xp": 10,
+          "XP": {
+            "type_of_loot": "",
+            "name": "Goblin",
+            "description": "vicous monsters",
+            "xp_value": 10,
+            "gold_value": 0,
+            "total": 1
+          }
+        },
+        {
+          "id": 21,
+          "combat_xp": 30,
+          "XP": {
+            "type_of_loot": "",
+            "name": "Hobgoblin",
+            "description": "vicous monsters",
+            "xp_value": 15,
+            "gold_value": 0,
+            "total": 2
+          }
+        }
+      ],
+      "magic_items": [],
+      "characters": [
+        {
+          "Details": {
+            "id": 1,
+            "name": "Odric",
+            "current_xp": 0,
+            "prime_req": 0,
+            "level": 1,
+            "class": "Fighter"
+          },
+          "halfshare": false,
+          "xp_gained": 2275
+        },
+        {
+          "Details": {
+            "id": 2,
+            "name": "Owen",
+            "current_xp": 0,
+            "prime_req": 5,
+            "level": 1,
+            "class": "Assassin"
+          },
+          "halfshare": false,
+          "xp_gained": 2389
+        },
+        {
+          "Details": {
+            "id": 3,
+            "name": "Dimadome Starsearer",
+            "current_xp": 0,
+            "prime_req": 10,
+            "level": 1,
+            "class": "Dwarven Vaultguard"
+          },
+          "halfshare": false,
+          "xp_gained": 2502
+        },
+        {
+          "Details": {
+            "id": 4,
+            "name": "Kanum / Kane / Canus",
+            "current_xp": 0,
+            "prime_req": 10,
+            "level": 1,
+            "class": "Mage"
+          },
+          "halfshare": false,
+          "xp_gained": 2502
+        },
+        {
+          "Details": {
+            "id": 7,
+            "name": "Montoya",
+            "current_xp": 0,
+            "prime_req": 0,
+            "level": 1,
+            "class": "Fighter"
+          },
+          "halfshare": true,
+          "xp_gained": 1138
+        },
+        {
+          "Details": {
+            "id": 8,
+            "name": "Craig",
+            "current_xp": 0,
+            "prime_req": 0,
+            "level": 1,
+            "class": "Fighter"
+          },
+          "halfshare": true,
+          "xp_gained": 1138
+        }
+      ],
+      "created_at": "2024-06-21T23:19:57.249793182-04:00",
+      "updated_at": "2024-06-21T23:19:57.249793243-04:00"
+    },
+    {
+      "id": 3,
+      "campaign_id": 1,
+      "name": "Dead Horse Adventure",
+      "total_xp": 1271,
+      "total_shares": 6,
+      "full_share": 212,
+      "half_share": 106,
+      "adventure_date": "2024-01-01",
+      "duration": 1,
+      "coins": {
+        "coin_xp": 23,
+        "copper": {
+          "type_of_loot": "",
+          "name": "Coppper Coins",
+          "description": "The meanest of coins, still worth something",
+          "xp_value": 0.01,
+          "gold_value": 0,
+          "total": 203
+        },
+        "silver": {
+          "type_of_loot": "",
+          "name": "Silver Coins",
+          "description": "A little bit of real money",
+          "xp_value": 0.1,
+          "gold_value": 0,
+          "total": 61
+        },
+        "electrum": {
+          "type_of_loot": "",
+          "name": "Electrum Coins",
+          "description": "The best coin, despite my players protests",
+          "xp_value": 0.5,
+          "gold_value": 0,
+          "total": 22
+        },
+        "gold": {
+          "type_of_loot": "",
+          "name": "Gold Coins",
+          "description": "THE standard",
+          "xp_value": 1,
+          "gold_value": 0,
+          "total": 4
+        },
+        "platinum": {
+          "type_of_loot": "",
+          "name": "Platinum Coins",
+          "description": "Fancy",
+          "xp_value": 5,
+          "gold_value": 0,
+          "total": 0
+        }
+      },
+      "gems": [],
+      "jewellery": [
+        {
+          "id": 16,
+          "jewellery_xp": 1200,
+          "Loot": {
+            "type_of_loot": "",
+            "name": "Necklace",
+            "description": "",
+            "xp_value": 1200,
+            "gold_value": 0,
+            "total": 1
+          }
+        }
+      ],
+      "combat": [
+        {
+          "id": 22,
+          "combat_xp": 30,
+          "XP": {
+            "type_of_loot": "",
+            "name": "Kobolds",
+            "description": "vicous monsters",
+            "xp_value": 5,
+            "gold_value": 0,
+            "total": 6
+          }
+        },
+        {
+          "id": 23,
+          "combat_xp": 18,
+          "XP": {
+            "type_of_loot": "",
+            "name": "Big Kobolds",
+            "description": "vicous monsters",
+            "xp_value": 6,
+            "gold_value": 0,
+            "total": 3
+          }
+        }
+      ],
+      "magic_items": [],
+      "characters": [
+        {
+          "Details": {
+            "id": 1,
+            "name": "Odric",
+            "current_xp": 0,
+            "prime_req": 0,
+            "level": 1,
+            "class": "Fighter"
+          },
+          "halfshare": false,
+          "xp_gained": 212
+        },
+        {
+          "Details": {
+            "id": 2,
+            "name": "Owen",
+            "current_xp": 0,
+            "prime_req": 5,
+            "level": 1,
+            "class": "Assassin"
+          },
+          "halfshare": false,
+          "xp_gained": 223
+        },
+        {
+          "Details": {
+            "id": 3,
+            "name": "Dimadome Starsearer",
+            "current_xp": 0,
+            "prime_req": 10,
+            "level": 1,
+            "class": "Dwarven Vaultguard"
+          },
+          "halfshare": false,
+          "xp_gained": 233
+        },
+        {
+          "Details": {
+            "id": 4,
+            "name": "Kanum / Kane / Canus",
+            "current_xp": 0,
+            "prime_req": 10,
+            "level": 1,
+            "class": "Mage"
+          },
+          "halfshare": false,
+          "xp_gained": 233
+        },
+        {
+          "Details": {
+            "id": 5,
+            "name": "Raskarr",
+            "current_xp": 0,
+            "prime_req": 10,
+            "level": 1,
+            "class": "Bard"
+          },
+          "halfshare": true,
+          "xp_gained": 117
+        },
+        {
+          "Details": {
+            "id": 6,
+            "name": "Samuel",
+            "current_xp": 0,
+            "prime_req": 5,
+            "level": 1,
+            "class": "Bard"
+          },
+          "halfshare": true,
+          "xp_gained": 111
+        },
+        {
+          "Details": {
+            "id": 10,
+            "name": "Valerius",
+            "current_xp": 0,
+            "prime_req": 0,
+            "level": 1,
+            "class": "Crusader"
+          },
+          "halfshare": false,
+          "xp_gained": 212
+        }
+      ],
+      "created_at": "2024-06-24T16:29:14.37152108-04:00",
+      "updated_at": "2024-06-24T16:29:14.37152115-04:00"
+    },
+    {
+      "id": 4,
+      "campaign_id": 1,
+      "name": "Wretched Hobgoblin Hole",
+      "total_xp": 2401,
+      "total_shares": 6,
+      "full_share": 400,
+      "half_share": 200,
+      "adventure_date": "2024-01-01",
+      "duration": 1,
+      "coins": {
+        "coin_xp": 515,
+        "copper": {
+          "type_of_loot": "",
+          "name": "Coppper Coins",
+          "description": "The meanest of coins, still worth something",
+          "xp_value": 0.01,
+          "gold_value": 0,
+          "total": 0
+        },
+        "silver": {
+          "type_of_loot": "",
+          "name": "Silver Coins",
+          "description": "A little bit of real money",
+          "xp_value": 0.1,
+          "gold_value": 0,
+          "total": 5000
+        },
+        "electrum": {
+          "type_of_loot": "",
+          "name": "Electrum Coins",
+          "description": "The best coin, despite my players protests",
+          "xp_value": 0.5,
+          "gold_value": 0,
+          "total": 0
+        },
+        "gold": {
+          "type_of_loot": "",
+          "name": "Gold Coins",
+          "description": "THE standard",
+          "xp_value": 1,
+          "gold_value": 0,
+          "total": 15
+        },
+        "platinum": {
+          "type_of_loot": "",
+          "name": "Platinum Coins",
+          "description": "Fancy",
+          "xp_value": 5,
+          "gold_value": 0,
+          "total": 0
+        }
+      },
+      "gems": [],
+      "jewellery": [
+        {
+          "id": 17,
+          "jewellery_xp": 1000,
+          "Loot": {
+            "type_of_loot": "",
+            "name": "Earrings",
+            "description": "",
+            "xp_value": 1000,
+            "gold_value": 0,
+            "total": 1
+          }
+        },
+        {
+          "id": 18,
+          "jewellery_xp": 500,
+          "Loot": {
+            "type_of_loot": "",
+            "name": "Necklace",
+            "description": "",
+            "xp_value": 500,
+            "gold_value": 0,
+            "total": 1
+          }
+        },
+        {
+          "id": 19,
+          "jewellery_xp": 25,
+          "Loot": {
+            "type_of_loot": "",
+            "name": "Gong",
+            "description": "",
+            "xp_value": 25,
+            "gold_value": 0,
+            "total": 1
+          }
+        }
+      ],
+      "combat": [
+        {
+          "id": 24,
+          "combat_xp": 225,
+          "XP": {
+            "type_of_loot": "",
+            "name": "Hobgoblin",
+            "description": "vicous monsters",
+            "xp_value": 15,
+            "gold_value": 0,
+            "total": 15
+          }
+        },
+        {
+          "id": 25,
+          "combat_xp": 16,
+          "XP": {
+            "type_of_loot": "",
+            "name": "Hobgoblin Champion",
+            "description": "vicous monsters",
+            "xp_value": 16,
+            "gold_value": 0,
+            "total": 1
+          }
+        }
+      ],
+      "magic_items": [
+        {
+          "id": 1,
+          "magic_item_xp": 120,
+          "Loot": {
+            "type_of_loot": "",
+            "name": "Shaman Wand",
+            "description": "",
+            "xp_value": 120,
+            "gold_value": 0,
+            "total": 1
+          },
+          "actual_value": 20000
+        }
+      ],
+      "characters": [
+        {
+          "Details": {
+            "id": 1,
+            "name": "Odric",
+            "current_xp": 0,
+            "prime_req": 0,
+            "level": 1,
+            "class": "Fighter"
+          },
+          "halfshare": false,
+          "xp_gained": 400
+        },
+        {
+          "Details": {
+            "id": 2,
+            "name": "Owen",
+            "current_xp": 0,
+            "prime_req": 5,
+            "level": 1,
+            "class": "Assassin"
+          },
+          "halfshare": false,
+          "xp_gained": 420
+        },
+        {
+          "Details": {
+            "id": 3,
+            "name": "Dimadome Starsearer",
+            "current_xp": 0,
+            "prime_req": 10,
+            "level": 1,
+            "class": "Dwarven Vaultguard"
+          },
+          "halfshare": false,
+          "xp_gained": 440
+        },
+        {
+          "Details": {
+            "id": 4,
+            "name": "Kanum / Kane / Canus",
+            "current_xp": 0,
+            "prime_req": 10,
+            "level": 1,
+            "class": "Mage"
+          },
+          "halfshare": false,
+          "xp_gained": 440
+        },
+        {
+          "Details": {
+            "id": 7,
+            "name": "Montoya",
+            "current_xp": 0,
+            "prime_req": 0,
+            "level": 1,
+            "class": "Fighter"
+          },
+          "halfshare": true,
+          "xp_gained": 200
+        },
+        {
+          "Details": {
+            "id": 8,
+            "name": "Craig",
+            "current_xp": 0,
+            "prime_req": 0,
+            "level": 1,
+            "class": "Fighter"
+          },
+          "halfshare": true,
+          "xp_gained": 200
+        },
+        {
+          "Details": {
+            "id": 10,
+            "name": "Valerius",
+            "current_xp": 0,
+            "prime_req": 0,
+            "level": 1,
+            "class": "Crusader"
+          },
+          "halfshare": false,
+          "xp_gained": 400
+        }
+      ],
+      "created_at": "2024-06-24T16:29:26.12111206-04:00",
+      "updated_at": "2024-06-24T16:29:26.12111212-04:00"
+    }
+   ]
+}

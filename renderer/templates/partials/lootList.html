@@ -1,0 +1,21 @@
+<h3>{{ .DisplayType}} Recovered</h3>
+<table class="xp-source" id="{{ .DisplayType}}List">
+	<thead>
+		<tr>
+			<th class="td">Name</th>
+			<th class="td">Number Found</th>
+			<th class="td">XP Per One</th>
+			<th class="td">Total XP</th>
+		</tr>
+	</thead>
+	<tbody> {{ range .Items }}
+		<tr hx-target="this" hx-swap="outerHTML">
+			<td>{{ .Name }}</td>
+			<td>{{ .Number }}</td>
+			<td>{{ .XPValue }}</td>
+			<td>{{ .TotalXPAmount }}</td>
+		</tr>
+		{{ end }}
+	</tbody>
+</table>
+<button hx-get="{{ .Path.Edit }}" hx-trigger="mousedown">Edit {{ .DisplayType }}</button>
