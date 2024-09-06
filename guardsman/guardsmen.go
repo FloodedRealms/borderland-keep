@@ -36,4 +36,5 @@ func (g Guardsman) RegisterRoutes(router *http.ServeMux) {
 const (
 	LoggedInHeader   = "x-borderland-keep-logged-in-status"
 	EditAccessHeader = "x-borderland-keep-can-edit"
+	UserIdHeader     = "x-borderland-keep-user-id"
 )

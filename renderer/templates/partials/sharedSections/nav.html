@@ -5,10 +5,10 @@
         <li><a href="/tavern">Tavern</a></li>
         <li><a href="/guild">Guild</a></li>
         {{ if .User.LoggedIn }}
-        <li style="float:right"><button hx-post="/depart">Logout</a></li>
+        <li style="float:right"><button  class="danger" hx-post="/depart">Depart</a></li>
         <li style="float:right"><a class="user-action" href="/user/{{ .User.Id }}/campaigns">Your Campaigns</a></li>
         {{ else }}
-        <!--<li style="float:right"><a class="login" href="/gate"></a></li>-->
+        <li class="login"><a class="login" href="/gate">Enter</a></li>
         {{ end }}
     </ul>
 </nav>

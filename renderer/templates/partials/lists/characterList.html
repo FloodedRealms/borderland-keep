@@ -1,5 +1,5 @@
      <h3>Characters</h3>
-                        {{ if lt .NumberOfCharacters 1}}
+                        {{ if lt .Data.NumberOfCharacters 1}}
                         <div class="box" id="proj">
                             <span> No Characters Defined for this Campaign to Display </span>
                         </div> {{ else }} <table>
@@ -9,7 +9,7 @@
                             <th>Class</th>
                             <th>Level</th>
                             <th> Bonus XP </th>
-                        </tr> {{ range .Characters }}
+                        </tr> {{ range .Data.Characters }}
                         <td>{{ .Name }}</td>
                         <td>{{ .CurrentXP }}</td>
                         <td>{{ .Class }}</td>
@@ -19,4 +19,4 @@
                         {{ end}}
                         </table>
                         {{ end }}
-                    <button hx-get="{{ .CharacterPath.Edit}}" hx-trigger="mousedown">Edit Characters</button>
+                    <button hx-get="{{ .Data.CharacterPath.Edit}}" hx-trigger="mousedown">Edit Characters</button>

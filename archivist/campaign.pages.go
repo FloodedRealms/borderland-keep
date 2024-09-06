@@ -204,8 +204,7 @@ func (ca CampaignPage) HandleEditCampaign(w http.ResponseWriter, r *http.Request
 func (ca CampaignPage) CampaignOverview(w http.ResponseWriter, r *http.Request) {
 	//applyCorsHeaders(w)
 	id := ca.mustExtractCampaignId(w, r)
-	loggedIn := r.Header.Get(http.CanonicalHeaderKey(guardsman.LoggedInHeader)) == "true"
-	canEdit := r.Header.Get(http.CanonicalHeaderKey(guardsman.EditAccessHeader)) == "true"
+	user, edit := ExtractGuardsmanHeaders(r)
 	campaign, err := ca.campaignService.CampaignSummary(id)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -222,43 +221,26 @@ func (ca CampaignPage) CampaignOverview(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 	pdata := struct {
-		Name               string
-		Judge              string
-		Recruitment        bool
-		LastAdventure      string
-		Timekeeping        string
-		Characters         []types.CharacterRecord
-		Adventures         []types.AdventureRecord
-		MainPath           path
-		CharacterPath      path
-		AdventurePath      path
-		NumberOfCharacters int
-		NumberOfAdventures int
+		types.CampaignRecord
 		OpenCampaignEditor bool
 		HasEditAccess      bool
 		IsIndex            bool
 		User               guardsman.WebUser
+		MainPath           path
+		CharacterPath      path
+		AdventurePath      path
 	}{
-		Name:               campaign.Name,
-		Judge:              campaign.Judge,
-		Recruitment:        campaign.Recruitment,
-		LastAdventure:      campaign.LastAdventure.Format("2006-01-02"),
-		Timekeeping:        campaign.Timekeeping,
-		Characters:         campaign.Characters,
-		Adventures:         campaign.Adventures,
+		CampaignRecord:     *campaign,
+		OpenCampaignEditor: false,
+		HasEditAccess:      edit,
+		IsIndex:            false,
 		MainPath:           newPhysicalCampaignPath("", campaign.Id),
 		CharacterPath:      newPhysicalCampaignPath("/characters", campaign.Id),
 		AdventurePath:      newPhysicalCampaignPath("/adventures", campaign.Id),
-		NumberOfCharacters: len(campaign.Characters),
-		NumberOfAdventures: len(campaign.Adventures),
-		OpenCampaignEditor: false,
-		HasEditAccess:      canEdit,
-		IsIndex:            false,
-		User:               guardsman.WebUser{LoggedIn: loggedIn},
+		User:               user,
 	}
 	lang := util.ExtractLangageCookie(r)
-	loggedIn, edit := ExtractGuardsmanHeaders(r)
-	output, err := ca.renderer.RenderPage("campaignPage.html", pdata, lang, loggedIn, edit)
+	output, err := ca.renderer.RenderPage("campaignPage.html", pdata, lang, user, edit)
 	if err != nil {
 		ca.renderer.MustRenderErrorPage(w, output, err)
 	}

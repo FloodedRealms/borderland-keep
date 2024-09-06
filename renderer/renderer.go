@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"time"
 )
 
 type Renderer struct {
@@ -24,12 +25,27 @@ func NewRenderer() *Renderer {
 }
 
 type PageData struct {
-	Data interface{}
-	Lang string
-	User struct {
-		LoggedIn bool
-	}
+	Data          interface{}
+	Lang          string
+	User          interface{}
 	HasEditAccess bool
+	NaturalDate   func(time.Time) string
+	YYYYMMDDDate  func(time.Time) string
+	BoolToString  func(bool) string
+}
+
+func RenderNaturalDate(d time.Time) string {
+	return d.Format("January 02, 2006")
+}
+
+func RenderYYYYMMDDDate(d time.Time) string {
+	return d.Format("2006-01-02")
+}
+func RenderBool(b bool) string {
+	if b {
+		return "Yes"
+	}
+	return "No"
 }
 
 func (r *Renderer) mustLoadTemplates() {
@@ -52,14 +68,17 @@ func (r *Renderer) mustLoadTemplates() {
 	r.templates = template.Must(template.ParseFiles(allFiles...))
 }
 
-func (r Renderer) RenderPageWithNoData(tmpl string, language string, loggedIn, canEdit bool) (string, error) {
+func (r Renderer) RenderPageWithNoData(tmpl string, language string, user interface{}, canEdit bool) (string, error) {
 
 	var renderedOutput bytes.Buffer
 	pdata := PageData{
 		Data:          nil,
-		User:          struct{ LoggedIn bool }{LoggedIn: loggedIn},
+		User:          user,
 		Lang:          language,
 		HasEditAccess: canEdit,
+		NaturalDate:   RenderNaturalDate,
+		YYYYMMDDDate:  RenderYYYYMMDDDate,
+		BoolToString:  RenderBool,
 	}
 
 	//try to render anglish version, if can't continue to default
@@ -75,12 +94,15 @@ func (r Renderer) RenderPageWithNoData(tmpl string, language string, loggedIn, c
 	return renderedOutput.String(), nil
 }
 
-func (r Renderer) RenderPage(tmpl string, data interface{}, language string, loggedIn, canEdit bool) (string, error) {
+func (r Renderer) RenderPage(tmpl string, data interface{}, language string, user interface{}, canEdit bool) (string, error) {
 	pdata := PageData{
 		Data:          data,
 		Lang:          language,
-		User:          struct{ LoggedIn bool }{LoggedIn: loggedIn},
+		User:          user,
 		HasEditAccess: canEdit,
+		NaturalDate:   RenderNaturalDate,
+		YYYYMMDDDate:  RenderYYYYMMDDDate,
+		BoolToString:  RenderBool,
 	}
 	var renderedOutput bytes.Buffer
 	//try to render anglish version, if can't continue to default
@@ -97,9 +119,17 @@ func (r Renderer) RenderPage(tmpl string, data interface{}, language string, log
 	return renderedOutput.String(), nil
 }
 
+// TODO: This is really hacky
 func (r Renderer) RenderPartial(tmpl string, data interface{}) (string, error) {
+	pdata := PageData{
+		Data:          data,
+		HasEditAccess: true,
+		NaturalDate:   RenderNaturalDate,
+		YYYYMMDDDate:  RenderYYYYMMDDDate,
+		BoolToString:  RenderBool,
+	}
 	var renderedOutput bytes.Buffer
-	if err := r.templates.ExecuteTemplate(&renderedOutput, tmpl, data); err != nil {
+	if err := r.templates.ExecuteTemplate(&renderedOutput, tmpl, pdata); err != nil {
 		return renderedOutput.String(), err
 	}
 	return renderedOutput.String(), nil

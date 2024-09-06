@@ -83,8 +83,9 @@ func sendEmptyResponse(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 }
 
-func ExtractGuardsmanHeaders(r *http.Request) (loggedIn, canEdit bool) {
-	loggedIn = r.Header.Get(http.CanonicalHeaderKey(guardsman.LoggedInHeader)) == "true"
+func ExtractGuardsmanHeaders(r *http.Request) (user guardsman.WebUser, canEdit bool) {
+	loggedIn := r.Header.Get(http.CanonicalHeaderKey(guardsman.LoggedInHeader)) == "true"
 	canEdit = r.Header.Get(http.CanonicalHeaderKey(guardsman.EditAccessHeader)) == "true"
-	return loggedIn, canEdit
+	userId := r.Header.Get(http.CanonicalHeaderKey(guardsman.UserIdHeader))
+	return guardsman.WebUser{LoggedIn: loggedIn, Id: userId}, canEdit
 }

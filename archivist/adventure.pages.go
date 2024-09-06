@@ -307,7 +307,7 @@ func (a AdventurePage) AdventureOverview(w http.ResponseWriter, r *http.Request)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	model := newAdventurePageModel(*data, l, c)
+	model := newAdventurePageModel(*data, l.LoggedIn, c)
 	model.Gems = createGemPageModels(data.Gems, data.Id)
 	model.Jewellery = createJewelleryPageModels(data.Jewellery, data.Id)
 	model.Combat = createCombatPageModels(data.Combat, data.Id)
@@ -348,7 +348,7 @@ func (a AdventurePage) CoinDisplay(w http.ResponseWriter, r *http.Request) {
 	id, _ := a.extractAdventureId(r)
 	adata, err := a.adventureService.GetAdventureRecordById(id)
 	l, c := ExtractGuardsmanHeaders(r)
-	adventure := newAdventurePageModel(*adata, l, c)
+	adventure := newAdventurePageModel(*adata, l.LoggedIn, c)
 	if err != nil {
 		a.renderer.MustRenderErrorPage(w, "", err)
 	}
@@ -363,7 +363,7 @@ func (a AdventurePage) CoinEditHandler(w http.ResponseWriter, r *http.Request) {
 	id, _ := a.extractAdventureId(r)
 	adata, err := a.adventureService.GetAdventureRecordById(id)
 	l, c := ExtractGuardsmanHeaders(r)
-	adventure := newAdventurePageModel(*adata, l, c)
+	adventure := newAdventurePageModel(*adata, l.LoggedIn, c)
 	if err != nil {
 		a.renderer.MustRenderErrorPage(w, "", err)
 	}
