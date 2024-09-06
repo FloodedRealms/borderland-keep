@@ -857,7 +857,7 @@ func (a AdventureService) GetMagicItemsForAdventure(id int) ([]types.MagicItem, 
 }
 
 func (a AdventureService) GetCharactersForAdventure(id int) ([]types.AdventureCharacter, error) {
-	stmtStr := fmt.Sprintf("SELECT atc.character_id, atc.half_share, atc.name FROM %s atc WHERE adventure_id=?;", characterToAdventureView)
+	stmtStr := fmt.Sprintf("SELECT atc.character_id, atc.half_share, atc.name, c.prime_req_percent FROM %s atc RIGHT JOIN characters c ON c.id =atc.character_id WHERE adventure_id=?;", characterToAdventureView)
 	rows, err := a.repo.RunQuery(stmtStr, id)
 	if err != nil {
 		return nil, err
@@ -866,7 +866,8 @@ func (a AdventureService) GetCharactersForAdventure(id int) ([]types.AdventureCh
 	defer rows.Close()
 	for rows.Next() {
 		cur := types.AdventureCharacter{}
-		rows.Scan(&cur.Id, &cur.Halfshare, &cur.Name)
+		rows.Scan(&cur.Id, &cur.Halfshare, &cur.Name, &cur.Preq)
+		cur.CreateXPFunc()
 		results = append(results, cur)
 	}
 	return results, nil

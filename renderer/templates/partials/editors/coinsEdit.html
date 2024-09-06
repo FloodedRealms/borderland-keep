@@ -1,32 +1,21 @@
 <form class="box" hx-put="{{ .CoinPath.Display }}" hx-target="this" hx-swap="outerHTML">
-    <table>
-        <thead>
-            <tr>
-              <th scope="col">Type</th>
-              <th scope="col">Amount</th>
-            </tr>
-          </thead>
-        <tr id="Copper-summary">
-            <td>Copper:</td>
-            <td><input type="text" name="copper" value="{{ .Coins.Copper.Number}}" /></td>
-        </tr>
-        <tr>
-            <td>Silver:</td>
-            <td><input type="text" name="silver" value="{{ .Coins.Silver.Number }}" /></td>
-        </tr>
-        <tr>
-            <td>Electrum:</td>
-            <td><input type="text" name="electrum" value="{{ .Coins.Electrum.Number }}" /></td>
-        </tr>
-        <tr>
-            <td>Gold:</td>
-            <td><input type="text" name="gold" value="{{ .Coins.Gold.Number }}" /></td>
-        </tr>
-        <tr>
-            <td>Platinum:</td>
-            <td><input type="text" name="platinum" value="{{ .Coins.Platinum.Number }}" /></td>
-        </tr>
-    </table> 
+    <ol>
+        <li>
+             <lable for="copper">Copper: </lable> <input type="text" name="copper" value="{{ .Coins.Copper.Number}}" />
+        </li>
+<li>
+             <lable for="silver">Silver: </lable> <input type="text" name="silver" value="{{ .Coins.Silver.Number}}" />
+        </li>
+<li>
+             <lable for="electrum">Electrum: </lable> <input type="text" name="electrum" value="{{ .Coins.Electrum.Number}}" />
+        </li>
+<li>
+             <lable for="gold">Gold: </lable> <input type="text" name="gold" value="{{ .Coins.Gold.Number}}" />
+        </li>
+<li>
+             <lable for="platinum">Platinum: </lable> <input type="text" name="platinum" value="{{ .Coins.Platinum.Number}}" />
+        </li>
+</ol>
     <button hx-put="{{ .CoinPath.Display }}">Save</button>
     <button hx-get="{{ .CoinPath.Display }}">Cancel</button>
 </form>

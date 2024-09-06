@@ -1,0 +1,34 @@
+<hgroup>
+                <h3>{{ .Data.Name }}</h3>
+                <ul>
+                    <li><span>Adventure Date: {{ .Data.AdventureDate}}</span></li>
+                    <li><span>Total XP: {{ .Data.TotalXPAmount }}</span></li>
+                    <li><span>Full Share: {{ .Data.FullShareXP }}</span> </li>
+                    <li><span>Half Share: {{ .Data.HalfShareXP }}</span></li>
+                </ul>
+            </hgroup>
+            <hgroup>
+                <h3>Characters</h3>
+                <table id="CharacterList">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Type</th>
+                            <th>Adjusted XP Earned</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {{ range .Data.Characters}}
+                        <tr>
+                            <td>{{ .Name }}</td>
+                            <td>{{ if .Halfshare}} Henchmen {{ else }} Player Character {{ end }}</td>
+                            <td>{{ if .Halfshare}} {{  call .ShowAdjustedXP $.Data.HalfShareXP }} {{ else }} {{ call .ShowAdjustedXP $.Data.FullShareXP }} {{ end }}</td>
+                        </tr>
+                        {{ end }}
+                    </tbody>
+                </table>
+                {{ if .HasEditAccess }}
+                <button hx-disinherit="true" hx-target="closest section" hx-swap="innerHTML"
+                    hx-get="{{ .Data.DetailsPath.Edit}}">Edit Details</button>
+                {{ end }}
+            </hgroup>
