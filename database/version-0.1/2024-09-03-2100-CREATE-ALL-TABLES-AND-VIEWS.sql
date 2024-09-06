@@ -1,3 +1,12 @@
+CREATE TABLE adventures (
+id INTEGER NOT NULL PRIMARY KEY,
+campaign_id INTEGER,
+name TEXT,
+adventure_date DATETIME,
+created_at DATETIME NOT NULL,
+updated_at DATETIME NOT NULL, copper INTEGER DEFAULT 0, silver INTEGER DEFAULT 0, electrum INTEGER DEFAULT 0, gold INTEGER DEFAULT 0, platinum INTEGER DEFAULT 0, duration INT DEFAULT 1,
+FOREIGN KEY(campaign_id) REFERENCES "_table1_old"(id)
+);
 CREATE TABLE adventures_to_characters (
 id INTEGER NOT NULL PRIMARY KEY,
 adventure_id INTEGER,
