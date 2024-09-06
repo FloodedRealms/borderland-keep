@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+{{ template "head.html" }}
+
+<body>
+    <header>
+        {{ template "banner.html" }}
+    </header>
+    <nav>
+        {{template "nav.html" .}}
+    </nav>
+<main>
+    <section class="box" id="hello">
+        <h2 style="display:inline">The Tavern</h2>
+        <p>The Tavern is Borderland Keep's Mastodon handwhile. Mastodon is a bounded kind of mircoblogging
+            upps like twitter or threads. Mark up just like you would on any of those upps, however now you
+            have ingang to any other mastodon handwhile that is being guestgave. No need to make feelfold tellalls for
+            Borderland Keep, Dice Camp or any other handwhile. You cross post and deal with them to your hearts
+            inhold.</p>
+    </section>
+    {{ template "sidebar.html" . }}
+</main>
+</body>
+
+</html>
