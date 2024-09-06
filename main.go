@@ -128,12 +128,20 @@ func main() {
 		router.HandleFunc("/about", homePages.About)
 		campaignPages.RegisterRoutes(router, *guardsman)
 		adventurePages.RegisterRoutes(router, *guardsman)
+
+		//User Pages
+
 		router.HandleFunc("/user/{userId}/campaigns", guardsman.UserMustBeLoggedIn(homePages.MyCampaigns))
-		router.HandleFunc("/user/{userId}/campaign/{campaignId}", guardsman.UserMustBeLoggedIn(campaignPages.CampaignPageForUser))
-		router.HandleFunc("POST /user/{userId}/campaign", guardsman.UserMustBeLoggedIn(campaignPages.CampaignPageForUser))
+		/*
+			router.HandleFunc("/user/{userId}/campaign/{campaignId}", guardsman.UserMustBeLoggedIn(campaignPages.CampaignPageForUser))
+			router.HandleFunc("POST /user/{userId}/campaign", guardsman.UserMustBeLoggedIn(campaignPages.CampaignPageForUser))
+		*/
 
 		// guardsmen pages
 		guardsman.RegisterRoutes(router)
+
+		// Utility Pages
+		router.HandleFunc("POST /lang", updateLangage)
 
 		server := &http.Server{
 			Addr:    ":9090",
@@ -147,4 +155,18 @@ func main() {
 
 	}
 
+}
+
+func updateLangage(w http.ResponseWriter, r *http.Request) {
+	r.ParseForm()
+	newLang := r.Form["lang"]
+	http.SetCookie(w, &http.Cookie{
+		Name:     "lang",
+		Value:    newLang[0],
+		Secure:   true,
+		HttpOnly: true,
+		SameSite: http.SameSiteLaxMode,
+	})
+	w.Header().Add("HX-Refresh", "true")
+	w.WriteHeader(http.StatusOK)
 }

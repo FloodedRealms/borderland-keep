@@ -1,4 +1,4 @@
-{{ range .Campaigns }}
+{{ range .Data.Campaigns }}
 <hgroup class="campaign-box">
     <h4>{{ .Name }}</h4>
     <table>
@@ -19,16 +19,12 @@
             <td> {{ .Timekeeping }} </td>
         </tr>
         <tr>
-            {{ if and $.User.LoggedIn (not $.IsIndex) }}
-            <td><a href="/me/campaign/{{ .Id }}">View and Edit</a></td>
-            {{ else }}
             <td><a href="/campaign/{{ .Id }}">View</a></td>
-            {{ end }}
         </tr>
     </table>
 </hgroup>
 {{ end }}
-{{ if .EndOfCampaigns }}
+{{ if .Data.EndOfCampaigns }}
 <br>
 <small>
     End of Campaign List

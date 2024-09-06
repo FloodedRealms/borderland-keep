@@ -8,6 +8,7 @@ import (
 
 	"github.com/floodedrealms/borderland-keep/guardsman"
 	"github.com/floodedrealms/borderland-keep/internal/services"
+	"github.com/floodedrealms/borderland-keep/internal/util"
 	"github.com/floodedrealms/borderland-keep/renderer"
 	"github.com/floodedrealms/borderland-keep/types"
 )
@@ -298,27 +299,29 @@ func (a AdventurePage) RegisterRoutes(m *http.ServeMux, g guardsman.Guardsman) {
 
 func (a AdventurePage) AdventureOverview(w http.ResponseWriter, r *http.Request) {
 	id, _ := a.extractAdventureId(r)
-	adventure, err := a.adventureService.GetAdventureRecordById(id)
+	data, err := a.adventureService.GetAdventureRecordById(id)
 	l, c := ExtractGuardsmanHeaders(r)
+	language := util.ExtractLangageCookie(r)
 
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	a.renderAdventurePage(w, *adventure, l, c)
-}
-
-func (a AdventurePage) renderAdventurePage(w http.ResponseWriter, data types.AdventureRecord, loggedin, canedit bool) {
-	model := newAdventurePageModel(data, loggedin, canedit)
+	model := newAdventurePageModel(*data, l, c)
 	model.Gems = createGemPageModels(data.Gems, data.Id)
 	model.Jewellery = createJewelleryPageModels(data.Jewellery, data.Id)
 	model.Combat = createCombatPageModels(data.Combat, data.Id)
 	model.MagicItems = createMagicItemPageModels(data.MagicItems, data.Id)
-	output, err := a.renderer.RenderPage("adventurePage.html", model)
+	output, err := a.renderer.RenderPage("adventurePage.html", model, language, l, c)
 	if err != nil {
 		a.renderer.MustRenderErrorPage(w, output, err)
+		return
 	}
 	w.Write([]byte(output))
+}
+
+func (a AdventurePage) renderAdventurePage(w http.ResponseWriter, data types.AdventureRecord, loggedin, canedit bool) {
+
 }
 
 func (a AdventurePage) updateDetails(w http.ResponseWriter, r *http.Request) {

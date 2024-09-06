@@ -22,27 +22,27 @@
 
     </nav>
     <main>
-        <section class="box" id="adventure-and-characters" hx-get="{{ .DetailsPath.Display }}"
+        <section class="box" id="adventure-and-characters" hx-get="{{ .Data.DetailsPath.Display }}"
             hx-trigger="updateOverview from:body" hx-target="this" hx-swap="outerHTML">
             <table id="adventure-overview">
                 <tr>
-                    <td><h3>{{ .Name }}</h3></td>
+                    <td><h3>{{ .Data.Name }}</h3></td>
                 </tr>
                 <tr>
                     <td><label for="date">Adventure Date:</label></td>
-                    <td><span id="date">{{ .AdventureDate}}</span></td>
+                    <td><span id="date">{{ .Data.AdventureDate}}</span></td>
                 </tr>
                 <tr>
                     <td><label for="xp-recovered">Amount of XP Recovered:</label></td>
-                    <td><span id="xp-recovered">{{ .TotalXPAmount }}</span></td>
+                    <td><span id="xp-recovered">{{ .Data.TotalXPAmount }}</span></td>
                 </tr>
                 <tr>
                     <td><label for="xp-fullshare">Amount of a Full Share:</label></td>
-                    <td><span id="xp-fullshare">{{ .FullShareXP }}</span> </td>
+                    <td><span id="xp-fullshare">{{ .Data.FullShareXP }}</span> </td>
                 </tr>
                 <tr>
                     <td><label for="xp-halfshare">Amount of a Half Share:</label></td>
-                    <td><span id="xp-halfshare">{{ .HalfShareXP }}</span> </td>
+                    <td><span id="xp-halfshare">{{ .Data.HalfShareXP }}</span> </td>
                 </tr>
             </table>
             <h3>Characters</h3>
@@ -55,23 +55,23 @@
                     </tr>
                 </thead>
                 <tbody>
-                    {{ range .Characters}}
+                    {{ range .Data.Characters}}
                     <tr>
                         <td>{{ .Name }}</td>
                         <td>{{ if .Halfshare}} Henchmen {{ else }} Player Character {{ end }}</td>
-                        <td>{{ if .Halfshare}} {{ $.HalfShareXP }} {{ else }} {{ $.FullShareXP }} {{ end }}
+                        <td>{{ if .Halfshare}} {{ $.Data.HalfShareXP }} {{ else }} {{ $.Data.FullShareXP }} {{ end }}
                         </td>
                     </tr>
                     {{ end }}
                 </tbody>
             </table>
-            {{ if .HasEditAccess }}
+            {{ if .Data.HasEditAccess }}
             <button hx-disinherit="true" hx-target="closest section" hx-swap="innerHTML"
-                hx-get="{{ .DetailsPath.Edit}}">Edit Details</button>
+                hx-get="{{ .Data.DetailsPath.Edit}}">Edit Details</button>
             {{ end }}
         </section>
         <section class="box" id="coins" hx-target="this" hx-swap="outerHTML">
-            <h3>Coins - {{.Coins.TotalXPAmount }} XP</h3>
+            <h3>Coins - {{.Data.Coins.TotalXPAmount }} XP</h3>
             <table>
                 <thead>
                     <th>Type</th>
@@ -80,33 +80,33 @@
                 </thead>
                 <tr>
                     <td>Copper:</td>
-                    <td>{{ .Coins.Copper.Number }}</td>
-                    <td>{{ .Coins.Copper.TotalXPAmount }}</td>
+                    <td>{{ .Data.Coins.Copper.Number }}</td>
+                    <td>{{ .Data.Coins.Copper.TotalXPAmount }}</td>
                 </tr>
                 <tr>
                     <td>Silver:</td>
-                    <td>{{ .Coins.Silver.Number }}</td>
-                    <td>{{ .Coins.Silver.TotalXPAmount }}</td>
+                    <td>{{ .Data.Coins.Silver.Number }}</td>
+                    <td>{{ .Data.Coins.Silver.TotalXPAmount }}</td>
                 </tr>
                 <tr>
                     <td>Electrum:</td>
-                    <td>{{ .Coins.Electrum.Number }}</td>
-                    <td>{{ .Coins.Electrum.TotalXPAmount }}</td>
+                    <td>{{ .Data.Coins.Electrum.Number }}</td>
+                    <td>{{ .Data.Coins.Electrum.TotalXPAmount }}</td>
 
                 </tr>
                 <tr>
                     <td>Gold:</td>
-                    <td>{{ .Coins.Gold.Number }}</td>
-                    <td>{{ .Coins.Gold.TotalXPAmount }}</td>
+                    <td>{{ .Data.Coins.Gold.Number }}</td>
+                    <td>{{ .Data.Coins.Gold.TotalXPAmount }}</td>
                 </tr>
                 <tr>
                     <td>Platinum:</td>
-                    <td>{{ .Coins.Platinum.Number }}</td>
-                    <td>{{ .Coins.Platinum.TotalXPAmount }}</td>
+                    <td>{{ .Data.Coins.Platinum.Number }}</td>
+                    <td>{{ .Data.Coins.Platinum.TotalXPAmount }}</td>
                 </tr>
             </table>
-                {{ if .HasEditAccess }}
-            <button hx-get="{{ .CoinPath.Edit }}">Edit</button>
+                {{ if .Data.HasEditAccess }}
+            <button hx-get="{{ .Data.CoinPath.Edit }}">Edit</button>
             {{ end }}
         </section>
         <section class="box">
@@ -122,7 +122,7 @@
                             <th class="td">Total XP</th>
                         </tr>
                     </thead>
-                    <tbody> {{ range .Gems }}
+                    <tbody> {{ range .Data.Gems }}
                         <tr>
                             <td>{{ .Name }}</td>
                             <td>{{ .Number }}</td>
@@ -132,8 +132,8 @@
                         {{ end }}
                     </tbody>
                 </table>
-                {{ if .HasEditAccess }}
-                <button hx-get="{{ .GemPath.Edit }}" hx-trigger="mousedown">Edit Gems</button>
+                {{ if .Data.HasEditAccess }}
+                <button hx-get="{{ .Data.GemPath.Edit }}" hx-trigger="mousedown">Edit Gems</button>
                 {{ end }}
             </hgroup>
             <hgroup hx-target="this" hx-swap="innerHTML">
@@ -147,7 +147,7 @@
                             <th class="td">Total XP</th>
                         </tr>
                     </thead>
-                    <tbody> {{ range .Jewellery }}
+                    <tbody> {{ range .Data.Jewellery }}
                         <tr>
                             <td>{{ .Name }}</td>
                             <td>{{ .Number }}</td>
@@ -157,8 +157,8 @@
                         {{ end }}
                     </tbody>
                 </table>
-                {{ if .HasEditAccess }}
-                <button hx-get="{{ .JewelleryPath.Edit }}" hx-trigger="mousedown">Edit Jewellery</button>
+                {{ if .Data.HasEditAccess }}
+                <button hx-get="{{ .Data.JewelleryPath.Edit }}" hx-trigger="mousedown">Edit Jewellery</button>
                 {{ end }}
             </hgroup>
                         <hgroup hx-target="this" hx-swap="innerHTML">
@@ -173,7 +173,7 @@
                         </tr>
                     </thead>
                     <tbody>
-                        {{ range .MagicItems }}
+                        {{ range .Data.MagicItems }}
                         <tr>
                             <td>{{ .Name }}</td>
                             <td>{{ .Number }}</td>
@@ -183,9 +183,9 @@
                         {{ end }}
                     </tbody>
                 </table>
-{{ if .HasEditAccess }}
+{{ if .Data.HasEditAccess }}
 
-                <button hx-get="{{ .MagicItemPath.Edit }}" hx-trigger="mousedown">Edit Magic Items</button>
+                <button hx-get="{{ .Data.MagicItemPath.Edit }}" hx-trigger="mousedown">Edit Magic Items</button>
                 {{ end }}
             </hgroup>
 
@@ -203,7 +203,7 @@
                         </tr>
                     </thead>
                     <tbody>
-                        {{ range .Combat }}
+                        {{ range .Data.Combat }}
                         <tr>
                             <td>{{ .Name }}</td>
                             <td>{{ .Number }}</td>
@@ -213,9 +213,9 @@
                         {{ end }}
                     </tbody>
                 </table>
-{{ if .HasEditAccess }}
+{{ if .Data.HasEditAccess }}
 
-                <button hx-get="{{ .CombatPath.Edit }}" hx-trigger="mousedown">Edit Combat</button>
+                <button hx-get="{{ .Data.CombatPath.Edit }}" hx-trigger="mousedown">Edit Combat</button>
                 {{ end }}
             </hgroup>
 

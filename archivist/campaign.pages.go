@@ -97,7 +97,9 @@ func (ca CampaignPage) CampaignPageForUser(w http.ResponseWriter, r *http.Reques
 			userId,
 			campaign.Id,
 		}
-		output, _ := ca.renderer.RenderPage("campaignPage.html", pageData)
+		lang := util.ExtractLangageCookie(r)
+		loggedIn, edit := ExtractGuardsmanHeaders(r)
+		output, _ := ca.renderer.RenderPage("campaignPage.html", pageData, lang, loggedIn, edit)
 		w.Write([]byte(output))
 
 	case http.MethodPatch:
@@ -147,7 +149,9 @@ func (ca CampaignPage) HandleEditCampaign(w http.ResponseWriter, r *http.Request
 			campaignId,
 			newPhysicalCampaignPath("", campaignId),
 		}
-		output, err := ca.renderer.RenderPage("campaignEditor.html", pageData)
+		lang := util.ExtractLangageCookie(r)
+		loggedIn, edit := ExtractGuardsmanHeaders(r)
+		output, err := ca.renderer.RenderPage("campaignEditor.html", pageData, lang, loggedIn, edit)
 		if err != nil {
 			ca.renderer.MustRenderErrorPage(w, output, err)
 		}
@@ -252,7 +256,9 @@ func (ca CampaignPage) CampaignOverview(w http.ResponseWriter, r *http.Request) 
 		IsIndex:            false,
 		User:               guardsman.WebUser{LoggedIn: loggedIn},
 	}
-	output, err := ca.renderer.RenderPage("campaignPage.html", pdata)
+	lang := util.ExtractLangageCookie(r)
+	loggedIn, edit := ExtractGuardsmanHeaders(r)
+	output, err := ca.renderer.RenderPage("campaignPage.html", pdata, lang, loggedIn, edit)
 	if err != nil {
 		ca.renderer.MustRenderErrorPage(w, output, err)
 	}
