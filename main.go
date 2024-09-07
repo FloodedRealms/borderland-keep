@@ -131,11 +131,11 @@ func main() {
 		//User Pages
 
 		router.HandleFunc("/user/{userId}/campaigns", guardsman.UserMustBeLoggedIn(homePages.MyCampaigns))
-		/*
-			router.HandleFunc("/user/{userId}/campaign/{campaignId}", guardsman.UserMustBeLoggedIn(campaignPages.CampaignPageForUser))
-			router.HandleFunc("POST /user/{userId}/campaign", guardsman.UserMustBeLoggedIn(campaignPages.CampaignPageForUser))
-		*/
 
+		router.HandleFunc("/user/{userId}/campaign/{campaignId}", guardsman.UserMustBeLoggedIn(campaignPages.CampaignPageForUser))
+		router.HandleFunc("POST /user/{userId}/campaign", guardsman.UserMustBeLoggedIn(campaignPages.CampaignPageForUser))
+
+		router.HandleFunc("DELETE /campaigns/{campaignId}", guardsman.UserLoggedInAndHasEditAccessToCampaign(campaignPages.CRUDRoutes))
 		// guardsmen pages
 		guardsman.RegisterRoutes(router)
 

@@ -12,7 +12,6 @@ type Repository interface {
 	CreateCampaign(*types.CampaignRecord) (*types.CampaignRecord, error)
 	UpdateCampaign(*types.CampaignRecord) (*types.CampaignRecord, error)
 	GetCampaign(int) (*types.CampaignRecord, error)
-	DeleteCampaign(*types.CampaignRecord) (bool, error)
 	ListCampaigns() ([]*types.CampaignRecord, error)
 	ListCampaignsForClient(string) ([]*types.CampaignRecord, error)
 

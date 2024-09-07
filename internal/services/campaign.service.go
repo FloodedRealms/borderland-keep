@@ -3,7 +3,6 @@ package services
 import (
 	"context"
 	"fmt"
-	"strconv"
 	"time"
 
 	"github.com/floodedrealms/borderland-keep/internal/repository"
@@ -106,12 +105,19 @@ func (c *CampaignService) ListCampaignsForClient(clientId string) ([]*types.Camp
 }
 
 func (c *CampaignService) DeleteCampaign(id string) (bool, error) {
-	campaignId, err := strconv.Atoi(id)
+	idList := []interface{}{id}
+	deleteAtcRecords := fmt.Sprintf("DELETE FROM %s WHERE adventure_id IN (SELECT a.id FROM adventures a WHERE a.campaign_id = ?);", adventureToCharactersTable)
+	deleteAdventureRecords := fmt.Sprintf("DELETE FROM %s WHERE campaign_id = ?;", adventureTable)
+	deleteCharacters := fmt.Sprintf("DELETE FROM %s WHERE campaign_id = ?;", adventureTable)
+	deleteCampaigns := fmt.Sprintf("DELETE FROM %s WHERE id = ?;", campaignTable)
+	statements := []string{deleteAtcRecords, deleteAdventureRecords, deleteCharacters, deleteCampaigns}
+	params := [][]interface{}{idList, idList, idList, idList}
+
+	err := c.repo.DoTransaction(statements, params)
 	if err != nil {
 		return false, err
 	}
-	campaignToDelete := types.NewCampaign(campaignId)
-	return c.repo.DeleteCampaign(campaignToDelete)
+	return true, nil
 }
 
 func (c *CampaignService) TenMostRecentlyActiveCampaigns(page int) []types.CampaignRecord {
