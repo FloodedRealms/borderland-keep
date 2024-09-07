@@ -1,5 +1,5 @@
-<h3>{{ .DisplayType}} Recovered</h3>
-<table class="xp-source" id="{{ .DisplayType}}List">
+<h3>{{ .Data.DisplayType}} Recovered</h3>
+<table class="xp-source" id="{{ .Data.DisplayType}}List">
 	<thead>
 		<tr>
 			<th class="td">Name</th>
@@ -8,14 +8,13 @@
 			<th class="td">Total XP</th>
 		</tr>
 	</thead>
-	<tbody> {{ range .Items }}
+	<tbody> {{ range .Data.Items }}
 		<tr hx-target="this" hx-swap="outerHTML">
 			<td>{{ .Name }}</td>
 			<td>{{ .Number }}</td>
 			<td>{{ .XPValue }}</td>
-			<td>{{ .TotalXPAmount }}</td>
 		</tr>
 		{{ end }}
 	</tbody>
 </table>
-<button hx-get="{{ .Path.Edit }}" hx-trigger="mousedown">Edit {{ .DisplayType }}</button>
+<button hx-get="{{ .Data.Path.Edit }}" hx-trigger="mousedown">Edit {{ .Data.DisplayType }}</button>

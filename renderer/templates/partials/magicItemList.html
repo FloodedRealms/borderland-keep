@@ -1,17 +1,14 @@
 <div class="tr">
-    <span class="td">{{ .DisplayType }} Name</span>
+    <span class="td">{{ .Data.DisplayType }} Name</span>
     <span class="td">XP Gained</span>
     <span class="td">Gold Value</span>
-    <span class="td button-space"></span>
-    <span class="td"></span>
 </div>
-{{ range .Loot }}
+{{ range .Data.Loot }}
 <div class="tr" hx-target="this" hx-swap="outerHTML">
-    <span class="td">{{ .Name }}</span>
+    <span class="td">{{ .Data.Name }}</span>
     <span class="td">{{ .XPValue }}</span>
     <span class="td">{{ .GoldValue }}</span>
-    <span class="td button-space"></span>
-    <span class="td"><button hx-trigger="mousedown" hx-get="{{ .Path.Edit }}">Edit</button></span>
-    <span class="td"><button class="danger" hx-trigger="mousedown" hx-delete="{{ .Path.Display }}">Delete</button></span>
+    <span class="td"><button hx-trigger="mousedown" hx-get="{{ .Data.Path.Edit }}">Edit</button></span>
+    <span class="td"><button class="danger" hx-trigger="mousedown" hx-delete="{{ .Data.Path.Display }}">Delete</button></span>
 </div>
 {{ end }}

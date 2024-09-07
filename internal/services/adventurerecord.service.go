@@ -689,10 +689,11 @@ func (a AdventureService) ModifyCharacters(aId int, data []types.AdventureCharac
 	for _, formData := range data {
 		var paramList []interface{}
 		queries = append(queries, fmt.Sprintf("INSERT INTO %s(adventure_id, character_id, half_share, xp_gained) values(?,?,?,?)", adventureToCharactersTable))
+		formData.CreateXPFunc()
 		if formData.Halfshare {
-			paramList = []interface{}{aId, formData.Id, formData.Halfshare, halfshare}
+			paramList = []interface{}{aId, formData.Id, formData.Halfshare, formData.ShowAdjustedXP(halfshare)}
 		} else {
-			paramList = []interface{}{aId, formData.Id, formData.Halfshare, fullshare}
+			paramList = []interface{}{aId, formData.Id, formData.Halfshare, formData.ShowAdjustedXP(fullshare)}
 		}
 		params = append(params, paramList)
 	}
@@ -857,7 +858,7 @@ func (a AdventureService) GetMagicItemsForAdventure(id int) ([]types.MagicItem, 
 }
 
 func (a AdventureService) GetCharactersForAdventure(id int) ([]types.AdventureCharacter, error) {
-	stmtStr := fmt.Sprintf("SELECT atc.character_id, atc.half_share, atc.name FROM %s atc WHERE adventure_id=?;", characterToAdventureView)
+	stmtStr := fmt.Sprintf("SELECT atc.character_id, atc.half_share, atc.name, c.prime_req_percent FROM %s atc RIGHT JOIN characters c ON c.id =atc.character_id WHERE adventure_id=?;", characterToAdventureView)
 	rows, err := a.repo.RunQuery(stmtStr, id)
 	if err != nil {
 		return nil, err
@@ -866,14 +867,15 @@ func (a AdventureService) GetCharactersForAdventure(id int) ([]types.AdventureCh
 	defer rows.Close()
 	for rows.Next() {
 		cur := types.AdventureCharacter{}
-		rows.Scan(&cur.Id, &cur.Halfshare, &cur.Name)
+		rows.Scan(&cur.Id, &cur.Halfshare, &cur.Name, &cur.Preq)
+		cur.CreateXPFunc()
 		results = append(results, cur)
 	}
 	return results, nil
 }
 
 func (a AdventureService) GetPossibleCharactersForAdventure(id int) ([]types.AdventureCharacter, []bool, error) {
-	stmtStr := fmt.Sprintf("SELECT atc.character_id, atc.character_name, atc.on_adventure FROM %s atc WHERE adventure_id=? ORDER BY character_name ASC;", possibleCharactersView)
+	stmtStr := fmt.Sprintf("SELECT atc.character_id, atc.character_name, atc.on_adventure, c.prime_req_percent FROM %s atc JOIN characters c ON atc.character_id = c.id WHERE adventure_id=? ORDER BY character_name ASC;", possibleCharactersView)
 	rows, err := a.repo.RunQuery(stmtStr, id)
 	if err != nil {
 		return nil, nil, err
@@ -884,7 +886,7 @@ func (a AdventureService) GetPossibleCharactersForAdventure(id int) ([]types.Adv
 	for rows.Next() {
 		cur := types.AdventureCharacter{}
 		wasThere := ""
-		rows.Scan(&cur.Id, &cur.Name, &wasThere)
+		rows.Scan(&cur.Id, &cur.Name, &wasThere, &cur.Preq)
 		results = append(results, cur)
 		if wasThere == "Yes" {
 			onAdventure = append(onAdventure, true)

@@ -1,5 +1,5 @@
 <div class="box money" hx-target="this" hx-swap="outerHTML">
-    <h3>Coins - {{ .TotalXPAmount }} XP</h3>
+    <h3>Coins - {{ .Data.Coins.TotalXPAmount }} XP</h3>
     <table>
         <thead>
             <th>Type</th>
@@ -8,30 +8,30 @@
         </thead>
         <tr id="Copper-summary" >
             <td>Copper:</td>
-            <td>{{ .Copper.Number }}</td>
-            <td>{{ .Copper.TotalXPAmount }}</td>
+            <td>{{ .Data.Coins.Copper.Number }}</td>
+            <td>{{ .Data.Coins.Copper.TotalXPAmount }}</td>
         </tr>
         <tr>
             <td>Silver:</td>
-            <td>{{ .Silver.Number }}</td>
-            <td>{{ .Silver.TotalXPAmount }}</td>
+            <td>{{ .Data.Coins.Silver.Number }}</td>
+            <td>{{ .Data.Coins.Silver.TotalXPAmount }}</td>
         </tr>
         <tr>
             <td>Electrum:</td>
-            <td>{{ .Electrum.Number }}</td>
-            <td>{{ .Electrum.TotalXPAmount }}</td>
+            <td>{{ .Data.Coins.Electrum.Number }}</td>
+            <td>{{ .Data.Coins.Electrum.TotalXPAmount }}</td>
 
         </tr>
         <tr>
             <td>Gold:</td>
-            <td>{{ .Gold.Number }}</td>
-            <td>{{ .Gold.TotalXPAmount }}</td>
+            <td>{{ .Data.Coins.Gold.Number }}</td>
+            <td>{{ .Data.Coins.Gold.TotalXPAmount }}</td>
         </tr>
         <tr>
             <td>Platinum:</td>
-            <td>{{ .Platinum.Number }}</td>
-            <td>{{ .Platinum.TotalXPAmount }}</td>
+            <td>{{ .Data.Coins.Platinum.Number }}</td>
+            <td>{{ .Data.Coins.Platinum.TotalXPAmount }}</td>
         </tr>
     </table>
-    <button hx-trigger="mousedown" hx-get="{{ .CoinPath.Edit }}">Edit</button>
+    <button hx-trigger="mousedown" hx-get="{{ .Data.CoinPath.Edit }}">Edit</button>
 </div>
