@@ -899,6 +899,8 @@ func parseCharacterForm(r http.Request) ([]types.AdventureCharacter, error) {
 
 	var characters = make([]types.AdventureCharacter, 0)
 	for _, id := range r.Form["character-id"] {
+		preqString := r.Form[fmt.Sprintf("character-preq-%s", id)]
+		preq, _ := strconv.Atoi(preqString[0])
 		_, ok := r.Form[fmt.Sprintf("on-adventure-%s", id)]
 		if !ok {
 			continue
@@ -912,7 +914,10 @@ func parseCharacterForm(r http.Request) ([]types.AdventureCharacter, error) {
 		if xpType[0] == "henchmen" {
 			halfShare = true
 		}
-		characters = append(characters, *types.NewAdventureCharacter(halfShare, charId))
+		c := *types.NewAdventureCharacter(halfShare, charId)
+		c.Preq = preq
+		c.CreateXPFunc()
+		characters = append(characters, c)
 
 	}
 	return characters, nil
