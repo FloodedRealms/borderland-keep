@@ -36,7 +36,7 @@
             {{ else }}
             {{ template "campaignDetails.html" . }}
             {{ end }}
-            <div id="characters" class="box" hx-target="this" hx-swap="innerHTML">
+            <hgroup id="characters" class="box" hx-target="this" hx-swap="innerHTML">
                 <h3>Characters</h3>
                 {{ if lt .Data.NumberOfCharacters 1}}
                 <div class="box" id="proj">
@@ -63,9 +63,9 @@
                 {{ if .Data.HasEditAccess }}
                 <button hx-get="{{ .Data.CharacterPath.Edit}}" hx-trigger="mousedown">Edit Characters</button>
                 {{ end }}
-            </div>
+            </hgroup>
 
-            <div id="adventures">
+            <hgroup id="adventures">
                 <div class="box">
                     <h3>Adventures</h3>
                     {{ if lt .Data.NumberOfAdventures 1}}
@@ -79,7 +79,14 @@
                         <button hx-disinherit="true"  hx-trigger="mousedown" hx-post="{{ .Data.AdventurePath.Display }}">Add New Adventure</button>
                         {{ end }}
                 </div>
-            </div>
+            </hgroup>
+            <hgroup class="danger-zone">
+                <h3>Danger Zone</h3>
+                <fieldset>
+                    <legend>Warning!</legend>
+                    <button class="danger" hx-delete="/campaigns/{{ .Data.Id}}" hx-trigger="mousedown">Delete Campaign</button>
+                </fieldset>
+            </hgroup>
         </section>
         {{ template "sidebar.html" . }}
     </main>

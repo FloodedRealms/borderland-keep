@@ -4,7 +4,7 @@
     <li>
         <a style="color:darkyellow;" href="/adventure/{{ .Id }}"> {{ .Name }}</a>
         {{ call $.NaturalDate .AdventureDate }}
-         {{ if $.HasEditAccess }}<button class="danger" hx-delete="/adventure/{{ .Id }}" hx-target="closest tr"
+         {{ if $.HasEditAccess }}<button class="danger" hx-trigger="mousedown" hx-delete="/adventure/{{ .Id }}" hx-target="closest li"
                 hx-swap="delete">Delete Adventure</button></td>{{end}}
 </li>
 {{ end }}

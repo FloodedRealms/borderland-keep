@@ -1,6 +1,6 @@
         <hgroup id="campaign-details">
                 <h3>{{ .Data.Name }}</h3>  
-                This campaign is an Adventurer Conqueror King II game, judged by {{ .Data.Judge }}. It's last adventure was on {{ call .NaturalDate .Data.LastAdventure }}
+                <p>This campaign is an Adventurer Conqueror King II game, judged by {{ .Data.Judge }}. It's last adventure was on {{ call .NaturalDate .Data.LastAdventure }}</p>
 <!--
                 <ul style="list-style: none;">
                     <li>
@@ -19,6 +19,6 @@
                     </li>
                     </ul>-->
                 {{ if .HasEditAccess }}
-                <button hx-get="{{ .Data.MainPath.Edit}}" hx-trigger="mousedown" hx-target="closest section" hx-swap="innerHTML">Edit Campaign</button>
+                <button hx-get="{{ .Data.MainPath.Edit}}" hx-trigger="mousedown" hx-target="closest hgroup" hx-swap="innerHTML">Edit Campaign</button>
                 {{ end }}
             </hgroup>

@@ -13,8 +13,9 @@
         <section class="content">
 
             <hgroup class="box">
-                <h2 style="display:inline">Welcome {{ if .User.LoggedIn }}{{ .User.Friendly_name }}{{ else }} Guest {{ end }}!</h2>
-                <br>
+                <h2 style="display:inline">Welcome!</h2>
+                <p> This is Borderland Keep dot com, the Keep on the Internet. It is a campaign experience tracker developed for the Adventurer Conqueror King II system!
+                    Feel free to browse the campaigns currently utilizing it, or to take a look around at other sections of the site. </p>
                 <h3 style="display:inline">Recent Campaigns</h3>
                 {{ template "campaigns.html" .}}
             </hgroup>

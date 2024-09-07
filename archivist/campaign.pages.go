@@ -68,12 +68,28 @@ func (c CampaignPage) RegisterRoutes(m *http.ServeMux, g guardsman.Guardsman) {
 	m.HandleFunc("POST "+adventurePath.Display, c.createNewAdventure)
 }
 
+func (c CampaignPage) CRUDRoutes(w http.ResponseWriter, r *http.Request) {
+	switch r.Method {
+	case http.MethodDelete:
+		campaignId, err := util.ExtractCampaignId(r)
+		user, _ := ExtractGuardsmanHeaders(r)
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+		newPage := fmt.Sprintf("/users/%s/campaigns", user.Id)
+		c.campaignService.DeleteCampaign(fmt.Sprint(campaignId))
+		w.Header().Set("HX-Redirect", newPage)
+		w.WriteHeader(http.StatusOK)
+	}
+}
+
 func (ca CampaignPage) CampaignPageForUser(w http.ResponseWriter, r *http.Request) {
 	userId := r.PathValue("userId")
 	switch r.Method {
 	case http.MethodPost:
 		campaign, _ := ca.campaignService.CreateCampaignForUser(userId)
-		newPage := fmt.Sprintf("/user/1/campaign/%d?edit=true", campaign.Id)
+		newPage := fmt.Sprintf("/campaign/%d", campaign.Id)
 		w.Header().Set("HX-Redirect", newPage)
 		w.Header().Set("location", newPage)
 		w.WriteHeader(http.StatusNoContent)
@@ -173,7 +189,7 @@ func (ca CampaignPage) HandleEditCampaign(w http.ResponseWriter, r *http.Request
 			w.WriteHeader(http.StatusInternalServerError)
 			return
 		}
-		campaign, err := ca.campaignService.GetCampaign(campaignId)
+		campaign, err := ca.campaignService.CampaignSummary(campaignId)
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
 			return
@@ -422,11 +438,14 @@ func extractCharactersToUpdate(r http.Request) (charsToUpdate []types.CharacterR
 	ids := r.Form["character-id"]
 	for _, id := range ids {
 		fieldname := "character-status-" + id
+		preqField := "charact-preq-" + id
 		statusId, _ := strconv.Atoi(r.Form[fieldname][0])
+		preq, _ := strconv.Atoi(r.Form[preqField][0])
 		idInt, _ := strconv.Atoi(id)
 		charsToUpdate = append(charsToUpdate, types.CharacterRecord{
-			Id:       idInt,
-			StatusId: statusId,
+			Id:              idInt,
+			StatusId:        statusId,
+			PrimeReqPercent: preq,
 		})
 		fErrs = append(fErrs, formError{}) // keep arrays parrallel
 
