@@ -274,9 +274,6 @@ func (s SqliteRepo) ListCampaignsForClient(clientId string) ([]*types.CampaignRe
 	return results, nil
 
 }
-func (s SqliteRepo) DeleteCampaign(c *types.CampaignRecord) (bool, error) {
-	return false, util.NotYetImplmented()
-}
 
 // Adventures
 func (s SqliteRepo) insertAdventureRecord(a types.AdventureRecord) (int, error) {
