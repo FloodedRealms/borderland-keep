@@ -1,0 +1,35 @@
+<fieldset>
+    <legend>
+        Gems and Jewellery
+    </legend>
+    <ol>
+        {{ range Data.GemsAndJewellery }}
+        <li>
+            <input name="loot-name" type="text" value="{{ .Item.Name }}" />
+            {{ if nt .Valid }}
+            <br>
+            <small class="form-text text-danger">
+                {{ .Errors.Name }}
+            </small>
+            {{end}}
+            <input name="loot-number" type="text" value="{{ .Number }}"></input>
+            {{ if nt .Valid }}
+            <br>
+            <small class="form-text text-danger">
+                {{ .Errors.Number }}
+            </small>
+            {{end}}
+            <input name="loot-gp-value" type="text" value="{{ .GPValue }}"></input>
+
+            {{ if .Errors.GPValue }}
+            <small class="form-text text-danger">
+                {{ .Errors.GPValue }}
+            </small>
+            <button hx-target="closest li" hx-swap="outerHTML" hx-trigger="mousedown"
+                hx-delete="/calculator/loot?type=gem_jewellery">Delete</button>
+             {{end}} 
+        </li>
+        {{ end }}
+    <li><button class="add" hx-target="closest li" hx-swap="beforebegin" hx-trigger="mousedown" hx-post="/calculator/loot?type=gem_jewellery"></button></li>
+    </ol>
+</fieldset>

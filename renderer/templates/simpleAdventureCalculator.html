@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+
+{{ template "head.html" }}
+<body>
+    <header>
+        {{ template "banner.html" }}
+    </header>
+    <nav>
+        {{ template "nav.html" . }}
+    </nav>
+    <main>
+        <section class="content">
+            <div id="results">
+
+            </div>
+            {{ template "simpleAdventureForm.html" .}}
+        </section>
+        {{ template "sidebar.html" . }}
+    </main>
+</body>
+
+</html>

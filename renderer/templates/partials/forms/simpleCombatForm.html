@@ -1,0 +1,35 @@
+<fieldset></fieldset>
+    <legend>
+        Combat
+    </legend>
+    <ol>
+        {{ range Data.Combat }}
+        <li>
+            <input name="combat-name" type="text" value="{{ .Item.Name }}" />
+            {{ if nt .Valid }}
+            <br>
+            <small class="form-text text-danger">
+                {{ .Errors.Name }}
+            </small>
+            {{end}}
+            <input name="combat-number" type="text" value="{{ .Number }}"></input>
+            {{ if nt .Valid }}
+            <br>
+            <small class="form-text text-danger">
+                {{ .Errors.Number }}
+            </small>
+            {{end}}
+            <input name="combat-xp-value" type="text" value="{{ .XPPerOne }}"></input>
+
+            {{ if nt .Valid }}
+            <small class="form-text text-danger">
+                {{ .Error.XPValue }}
+            </small>
+            <button hx-target="closest li" hx-swap="outerHTML" hx-trigger="mousedown"
+                hx-delete="/calculator/loot?type=combat">Delete</button>
+             {{end}} 
+        </li>
+        {{ end }}
+    <li><button class="add" hx-target="closest li" hx-swap="beforebegin" hx-trigger="mousedown" hx-post="/calculator/loot?type=combat"></button></li>
+    </ol>
+</fieldset>
