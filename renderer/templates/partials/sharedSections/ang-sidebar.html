@@ -1,0 +1,48 @@
+<section class="sidebar">
+    <h3> Stead Wields </h3>
+    <form onsubmit="return false" hx-post="/lang">
+       <fieldset >
+        <legend>Pick a tongue</legend>
+        <select name="lang"   >
+            <option value="english">English</option>
+            <option value="anglish" {{ if eq .Lang "anglish" }}  selected {{end}}>Anglish</option>
+        </select>
+        <button  class="add" hx-trigger="mousdown">Save</button>
+       </fieldset> 
+
+    </form>
+    <!--<hgroup>
+        <h4>People who Participate</h4>
+        <ul>
+            <li>Flooded Realms</li>
+        </ul>
+    </hgroup>
+    <hgroup>
+        <h4 style="display:inline">Borderland Keep Services Status</h4>
+        <table>
+            <tbody>
+                <tr id="statuses">
+                    <td>
+                        <span>
+                            [
+                            <span id="foundry-status" class="status-ok"> OK </span>
+                            ] Guild - Matrix Homeserver
+                        </span>
+                        <br>
+                        <span>
+                            [
+                            <span id="borderland-status" class="status-ok"> OK </span>
+                            ] Tavern - Mastodon Instance
+                        </span>
+                        <br>
+                        <span>
+                            [
+                            <span id="borderland-status" class="status-err"> OFFLINE </span>
+                            ] Cryer - Campaign Reporter
+                        </span>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </hgroup>-->
+</section>

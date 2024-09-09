@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+
+{{ template "head.html" }}
+<body>
+    <header>
+        {{ template "banner.html" }}
+    </header>
+    <nav>
+        {{ template "nav.html" . }}
+    </nav>
+    <main>
+        <section class="content">
+
+            <hgroup class="box">
+                <h2 style="display:inline">Welcome!</h2>
+                <p> This is Borderland Keep dot com, the Keep on the Internet. It is a husting livedness tracker crafted for the Adventurer Conqueror King II setup!
+                    Feel free to look through the hustings anwardly brooking it, or to take a look around at other bits of the stead. </p>
+                <h3 style="display:inline">Latemost Hustings</h3>
+                {{ template "campaigns.html" .}}
+            </hgroup>
+        </section>
+        {{ template "sidebar.html" . }}
+    </main>
+</body>
+
+</html>
