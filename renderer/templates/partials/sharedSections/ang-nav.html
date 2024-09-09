@@ -1,0 +1,14 @@
+<nav>
+    <ul>
+        <li><a href="/home">Home</a></li>
+        <li><a href="/about">About</a></li>
+        <li><a href="/tavern">Alehouse</a></li>
+        <li><a href="/guild">Guild</a></li>
+        {{ if .User.LoggedIn }}
+        <li style="float:right"><button  class="danger" hx-post="/depart">Ago</a></li>
+        <li style="float:right"><a class="user-action" href="/user/{{ .User.Id }}/campaigns">Your Hustings</a></li>
+        {{ else }}
+        <li class="login"><a class="login" href="/gate">Infare</a></li>
+        {{ end }}
+    </ul>
+</nav>
