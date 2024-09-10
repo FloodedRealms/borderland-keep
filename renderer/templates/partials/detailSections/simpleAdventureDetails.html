@@ -1,5 +1,5 @@
 <hgroup id="results" hx-patch="/calculator"
-            hx-trigger="updateOverview from:body" hx-target="this" hx-swap="innerHTML" >
+            hx-trigger="updateOverview from:body delay:500ms"  hx-target="this" hx-swap="innerHTML" >
     <h3>Adventure Results</h3>
     <span>Total Shares: {{ .Data.DisplayTotalShares }}</span>
     <h4>XP Totals</h4>
