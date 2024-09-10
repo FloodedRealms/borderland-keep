@@ -80,6 +80,7 @@
                         {{ end }}
                 </div>
             </hgroup>
+            {{ if .Data.HasEditAccess }}
             <hgroup class="danger-zone">
                 <h3>Danger Zone</h3>
                 <fieldset>
@@ -87,6 +88,7 @@
                     <button class="danger" hx-delete="/campaigns/{{ .Data.Id}}" hx-trigger="mousedown">Delete Campaign</button>
                 </fieldset>
             </hgroup>
+            {{ end }}
         </section>
         {{ template "sidebar.html" . }}
     </main>
