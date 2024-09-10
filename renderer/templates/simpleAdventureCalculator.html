@@ -2,6 +2,7 @@
 <html lang="en">
 
 {{ template "head.html" }}
+
 <body>
     <header>
         {{ template "banner.html" }}
@@ -14,19 +15,19 @@
         <section class="content">
             <form class="simple-adventure-form" onsubmit="return false;">
                 <div>
-                {{ template "simpleAdventureDetails.html" .}}
-                {{ template "simpleAttendanceForm.html" .}}
-                {{ template "simpleCoinForm.html" . }}
+                    {{ template "simpleAdventureDetails.html" .}}
                 </div>
                 <div>
-                {{ template "simpleLootForm.html" .}}
+                    <div style="display: flex; flex-direction: row;">
+                        {{ template "simpleAttendanceForm.html" .}}
+                        {{ template "simpleCoinForm.html" . }}
+                    </div>
+                    <div style="display: flex; flex-direction: row;">
+                        {{ template "simpleLootForm.html" .}}
+                        {{ template "simpleCombatForm.html" . }}
+                        {{ template "simpleMagicItemForm.html" . }}
+                    </div>
                 </div>
-                <div>
-                {{ template "simpleCombatForm.html" . }}
-                </div>
-                <div>
-                {{ template "simpleMagicItemForm.html" . }}
-</div>
             </form>
         </section>
         {{template "sidebar.html" . }}
