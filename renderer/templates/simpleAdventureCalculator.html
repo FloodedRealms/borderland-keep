@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+
+{{ template "head.html" }}
+<body>
+    <header>
+        {{ template "banner.html" }}
+    </header>
+    <nav>
+        {{ template "nav.html" . }}
+    </nav>
+    <main>
+
+        <section class="content">
+            <form class="simple-adventure-form" onsubmit="return false;">
+                <div>
+                {{ template "simpleAdventureDetails.html" .}}
+                {{ template "simpleAttendanceForm.html" .}}
+                {{ template "simpleCoinForm.html" . }}
+                </div>
+                <div>
+                {{ template "simpleLootForm.html" .}}
+                </div>
+                <div>
+                {{ template "simpleCombatForm.html" . }}
+                </div>
+                <div>
+                {{ template "simpleMagicItemForm.html" . }}
+</div>
+            </form>
+        </section>
+        {{template "sidebar.html" . }}
+    </main>
+</body>
+
+</html>

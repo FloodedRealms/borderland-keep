@@ -151,8 +151,8 @@ func newAdventurePageModel(a types.AdventureRecord, loggedIn, canEdit bool) Adve
 		CampaignId:    a.CampaignId,
 		Name:          a.Name,
 		TotalXPAmount: a.TotalXPAmount(),
-		FullShareXP:   a.FullShareXP,
-		HalfShareXP:   a.HalfShareXP,
+		FullShareXP:   int(a.FullShareXP),
+		HalfShareXP:   int(a.HalfShareXP),
 		AdventureDate: a.AdventureDate.Format(DATE_DISPLAY),
 		GameDays:      a.GameDays,
 		Coins:         a.Coins,
@@ -212,8 +212,8 @@ func NewLootPageModelFromMagicItem(adata types.MagicItem, adventureId int) LootP
 	m.LootType = types.CombatLoot
 	m.Name = adata.Name
 	m.Number = "1"
-	m.XPValue = intToString(int(adata.XPValue))
-	m.GoldValue = intToString(adata.GoldValue)
+	m.XPValue = intToString(int(adata.ApparentValue))
+	m.GoldValue = intToString(adata.ActualValue)
 	m.TotalXPAmount = int(adata.TotalXPAmount())
 	m.Path = newPhysicalAdventurePath("/combat", adventureId)
 	return *m
@@ -326,8 +326,8 @@ func (a AdventurePage) updateDetails(w http.ResponseWriter, r *http.Request) {
 	pdata := AdventurePageModel{
 		DetailsPath:   newPhysicalAdventurePath("/adventure-details", aid),
 		TotalXPAmount: adventure.TotalXPAmount(),
-		FullShareXP:   adventure.FullShareXP,
-		HalfShareXP:   adventure.HalfShareXP,
+		FullShareXP:   int(adventure.FullShareXP),
+		HalfShareXP:   int(adventure.HalfShareXP),
 		Characters:    adventure.Characters,
 		Name:          adventure.Name,
 		AdventureDate: adventure.AdventureDate.Format(DATE_DISPLAY),

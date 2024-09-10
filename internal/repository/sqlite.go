@@ -396,7 +396,7 @@ func (s SqliteRepo) getMagicItemsForAdventure(id int) []types.MagicItem {
 		value := 0.0
 		err := rows.Scan(&id, &trashInt, &name, &desc, &value, &actualValue)
 		util.CheckErr(err)
-		current := types.NewMagicItem(name, desc, int(value), int(actualValue))
+		current := types.NewMagicItem(name, desc, int(value), int(actualValue), false)
 		magicItems = append(magicItems, *current)
 	}
 	return magicItems
@@ -595,7 +595,7 @@ func (s SqliteRepo) AddMagicItemToAdventure(a *types.AdventureRecord, g *types.M
 	s.logger.Debug(stmt_string)
 	stmt, err := s.db.Prepare(stmt_string)
 	util.CheckErr(err)
-	_, resErr := stmt.Exec(a.Id, g.Name, g.Description, g.GoldValue, g.XPValue)
+	_, resErr := stmt.Exec(a.Id, g.Name, g.Description, g.ActualValue, g.ApparentValue)
 	if resErr != nil {
 		return false, resErr
 	}

@@ -1,0 +1,17 @@
+<hgroup id="results" hx-patch="/calculator"
+            hx-trigger="updateOverview from:body" hx-target="this" hx-swap="innerHTML" >
+    <h3>Adventure Results</h3>
+    <span>Total Shares: {{ .Data.DisplayTotalShares }}</span>
+    <h4>XP Totals</h4>
+    <ul>
+        <li><span>Total XP: {{ .Data.DisplayTotalXPAmount }}</span></li>
+        <li><span>Full Share: {{ .Data.DisplayFullXPShare }}</span> </li>
+        <li><span>Half Share: {{ .Data.DisplayHalfXPShare }}</span></li>
+    </ul>
+    <h4>Gold Totals</h4>
+    <ul>
+        <li><span>Total GP: {{ .Data.DisplayTotalGPAmount }}</span></li>
+        <li><span>Full Share: {{ .Data.DisplayFullGPShare }}</span> </li>
+        <li><span>Half Share: {{ .Data.DisplayHalfGPShare }}</span></li>
+    </ul>
+</hgroup>
