@@ -155,3 +155,18 @@ func (g HomePage) DisplayLoginPage(w http.ResponseWriter, r *http.Request) {
 	}
 	w.Write([]byte(output))
 }
+
+func (g HomePage) ErrorPage(w http.ResponseWriter, r *http.Request) {
+	msg := r.Header.Get("x-borderland-keep-error")
+	pdata := struct {
+		Message string
+	}{
+		msg,
+	}
+	output, err := g.renderer.RenderPage("errorPage.html", pdata, "english", nil, false)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+	w.Write([]byte(output))
+}

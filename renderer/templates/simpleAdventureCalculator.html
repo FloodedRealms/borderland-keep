@@ -10,12 +10,23 @@
         {{ template "nav.html" . }}
     </nav>
     <main>
-        <section class="content">
-            <div id="results">
 
-            </div>
-            {{ template "simpleAdventureForm.html" .}}
+        <section class="content">
+
+            <form onsubmit="return false;">
+                <div>
+                {{ template "simpleAdventureDetails.html" .}}
+                {{ template "simpleAttendanceForm.html" .}}
+                </div>
+                <div>
+                {{ template "simpleCoinForm.html" . }}
+                {{ template "simpleLootForm.html" .}}
+                {{ template "simpleCombatForm.html" . }}
+                {{ template "simpleMagicItemForm.html" . }}
+</div>
+            </form>
         </section>
+
         {{ template "sidebar.html" . }}
     </main>
 </body>

@@ -4,23 +4,29 @@
         </legend>
         <ol>
             <li>
-                <lable for="copper">Copper: </lable> <input type="text" name="copper"
+                <label for="copper"  >Copper: </label> <input id="copper" hx-swap="none" hx-trigger="change"
+                hx-patch="/calculator/coins" type="text" name="copper"
                     value="{{ .Data.Copper}}" />
             </li>
             <li>
-                <lable for="silver">Silver: </lable> <input type="text" name="silver"
-                    value="{{ .Data.Silver}}" />
+                <label for="silver" >Silver: </label> <input type="text" name="silver"
+                    value="{{ .Data.Silver}}" id="silver" hx-swap="none" hx-trigger="change"
+                hx-patch="/calculator/coins"  />
             </li>
             <li>
-                <lable for="electrum">Electrum: </lable> <input type="text" name="electrum"
-                    value="{{ .Data.Electrum}}" />
+                <label for="electrum"  >Electrum: </label> <input type="text" name="electrum"
+                    value="{{ .Data.Electrum}}" id="electrum" hx-swap="none" hx-trigger="change"
+                hx-patch="/calculator/coins" />
             </li>
             <li>
-                <lable for="gold">Gold: </lable> <input type="text" name="gold" value="{{ .Data.Gold }}" />
+                <label for="gold">Gold: </label> <input id="gold" hx-swap="none" hx-trigger="change"
+                hx-patch="/calculator/coins"  type="text" name="gold" value="{{ .Data.Gold }}" />
             </li>
             <li>
-                <lable for="platinum">Platinum: </lable> <input type="text" name="platinum"
+                <label for="platinum" >Platinum: </label> <input id="platinum" hx-swap="none" hx-trigger="change"
+                hx-patch="/calculator/coins"  type="text" name="platinum"
                     value="{{ .Data.Platinum }}" />
             </li>
         </ol>
 </fieldset>
+

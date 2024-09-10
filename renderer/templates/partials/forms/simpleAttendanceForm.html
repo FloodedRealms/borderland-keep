@@ -1,15 +1,17 @@
-    <fieldset></fieldset>
+    <fieldset>
         <legend>
             Character Attendence
         </legend>
         <ol>
             <li>
                 <label for="num-characters">Number of Characters:</label>
-                <input type="text" name="num-characters" value="{{ .Data.CharacterCount }}" />
+                <input id="num-characters" hx-swap="none" hx-trigger="change"
+                hx-patch="/calculator/attendance" type="text" name="num-characters" value="{{ .Data.CharacterCount }}" />
             </li>
             <li>
             <label for="num-henchmen">Number of Henchmen:</label>
-            <input type="text" name="num-henchmen" value=".Data.HenchmenCount" />
+            <input id="num-henchmen" hx-swap="none" hx-trigger="change"
+                hx-patch="/calculator/attendance"  type="text" name="num-henchmen" value="{{ .Data.HenchmenCount }}" />
             </li>
         </ol>
     </fieldset>

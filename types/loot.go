@@ -1,8 +1,8 @@
 package types
 
 import (
-	"encoding/json"
 	"math"
+	"strconv"
 )
 
 type GenericLootType string
@@ -15,7 +15,7 @@ const (
 	MagicItemLoot GenericLootType = "magicItem"
 )
 
-type genericLoot struct {
+type GenericLoot struct {
 	Id          int             `json:"id"`
 	LootType    GenericLootType `json:"type"`
 	Name        string          `json:"name"`
@@ -26,55 +26,55 @@ type genericLoot struct {
 }
 
 // Basic Coins and Gems and Jewellery opaque types on genericLoot
-type Copper genericLoot
-type Silver genericLoot
-type Electrum genericLoot
-type Gold genericLoot
-type Platinum genericLoot
-type Gem genericLoot
-type Jewellery genericLoot
+type Copper GenericLoot
+type Silver GenericLoot
+type Electrum GenericLoot
+type Gold GenericLoot
+type Platinum GenericLoot
+type Gem GenericLoot
+type Jewellery GenericLoot
 
-func (c Copper) TotalGoldAmount() int {
-	return genericLoot(c).TotalGoldAmount()
+func (c Copper) TotalGoldAmount() float64 {
+	return GenericLoot(c).TotalGoldAmount()
 }
 func (c Copper) TotalXPAmount() float64 {
-	return genericLoot(c).TotalXPAmount()
+	return GenericLoot(c).TotalXPAmount()
 }
-func (c Silver) TotalGoldAmount() int {
-	return genericLoot(c).TotalGoldAmount()
+func (c Silver) TotalGoldAmount() float64 {
+	return GenericLoot(c).TotalGoldAmount()
 }
 func (c Silver) TotalXPAmount() float64 {
-	return genericLoot(c).TotalXPAmount()
+	return GenericLoot(c).TotalXPAmount()
 }
-func (c Electrum) TotalGoldAmount() int {
-	return genericLoot(c).TotalGoldAmount()
+func (c Electrum) TotalGoldAmount() float64 {
+	return GenericLoot(c).TotalGoldAmount()
 }
 func (c Electrum) TotalXPAmount() float64 {
-	return genericLoot(c).TotalXPAmount()
+	return GenericLoot(c).TotalXPAmount()
 }
-func (c Gold) TotalGoldAmount() int {
-	return genericLoot(c).TotalGoldAmount()
+func (c Gold) TotalGoldAmount() float64 {
+	return GenericLoot(c).TotalGoldAmount()
 }
 func (c Gold) TotalXPAmount() float64 {
-	return genericLoot(c).TotalXPAmount()
+	return GenericLoot(c).TotalXPAmount()
 }
-func (c Platinum) TotalGoldAmount() int {
-	return genericLoot(c).TotalGoldAmount()
+func (c Platinum) TotalGoldAmount() float64 {
+	return GenericLoot(c).TotalGoldAmount()
 }
 func (c Platinum) TotalXPAmount() float64 {
-	return genericLoot(c).TotalXPAmount()
+	return GenericLoot(c).TotalXPAmount()
 }
-func (c Gem) TotalGoldAmount() int {
-	return genericLoot(c).TotalGoldAmount()
+func (c Gem) TotalGoldAmount() float64 {
+	return GenericLoot(c).TotalGoldAmount()
 }
 func (c Gem) TotalXPAmount() float64 {
-	return genericLoot(c).TotalXPAmount()
+	return GenericLoot(c).TotalXPAmount()
 }
-func (c Jewellery) TotalGoldAmount() int {
-	return genericLoot(c).TotalGoldAmount()
+func (c Jewellery) TotalGoldAmount() float64 {
+	return GenericLoot(c).TotalGoldAmount()
 }
 func (c Jewellery) TotalXPAmount() float64 {
-	return genericLoot(c).TotalXPAmount()
+	return GenericLoot(c).TotalXPAmount()
 }
 
 /*
@@ -163,96 +163,34 @@ func NewJewellery(number int, name, d string, xpv, gv float64) *Jewellery {
 		GoldValue:   gv,
 	}
 }
-func (c *Copper) UnmarshalJSON(data []byte) error {
-	if string(data) == "null" || string(data) == `""` {
-		return nil
-	}
-	var genericLoot genericLoot
-	if err := json.Unmarshal(data, &genericLoot); err != nil {
-		return nil
-	}
-	*c = *NewCopper(genericLoot.Number)
-	return nil
-}
 
-func (c *Silver) UnmarshalJSON(data []byte) error {
-	if string(data) == "null" || string(data) == `""` {
-		return nil
-	}
-	var genericLoot genericLoot
-	if err := json.Unmarshal(data, &genericLoot); err != nil {
-		return nil
-	}
-	*c = *NewSilver(genericLoot.Number)
-	return nil
-}
-
-func (c *Electrum) UnmarshalJSON(data []byte) error {
-	if string(data) == "null" || string(data) == `""` {
-		return nil
-	}
-	var genericLoot genericLoot
-	if err := json.Unmarshal(data, &genericLoot); err != nil {
-		return nil
-	}
-	*c = *NewElectrum(genericLoot.Number)
-	return nil
-}
-
-func (c *Gold) UnmarshalJSON(data []byte) error {
-	if string(data) == "null" || string(data) == `""` {
-		return nil
-	}
-	var genericLoot genericLoot
-	if err := json.Unmarshal(data, &genericLoot); err != nil {
-		return nil
-	}
-	*c = *NewGold(genericLoot.Number)
-	return nil
-}
-
-func (c *Platinum) UnmarshalJSON(data []byte) error {
-	if string(data) == "null" || string(data) == `""` {
-		return nil
-	}
-	var genericLoot genericLoot
-	if err := json.Unmarshal(data, &genericLoot); err != nil {
-		return nil
-	}
-	*c = *NewPlatinum(genericLoot.Number)
-	return nil
-}
-func (c *Gem) UnmarshalJSON(data []byte) error {
-	if string(data) == "null" || string(data) == `""` {
-		return nil
-	}
-	var genericLoot genericLoot
-	if err := json.Unmarshal(data, &genericLoot); err != nil {
-		return nil
-	}
-	*c = *NewGem(genericLoot.Number, genericLoot.Name, genericLoot.Description, genericLoot.XPValue, genericLoot.GoldValue)
-	return nil
-}
-
-func (c *Jewellery) UnmarshalJSON(data []byte) error {
-	if string(data) == "null" || string(data) == `""` {
-		return nil
-	}
-	var genericLoot genericLoot
-	if err := json.Unmarshal(data, &genericLoot); err != nil {
-		return nil
-	}
-	*c = *NewJewellery(genericLoot.Number, genericLoot.Name, genericLoot.Description, genericLoot.XPValue, genericLoot.GoldValue)
-
-	return nil
-}
-
-func (c genericLoot) TotalXPAmount() float64 {
+func (c GenericLoot) TotalXPAmount() float64 {
 	return c.XPValue * float64(c.Number)
 }
 
-func (c genericLoot) TotalGoldAmount() int {
-	return int(math.Round(c.GoldValue * float64(c.Number)))
+func (c GenericLoot) TotalGoldAmount() float64 {
+	return math.Round(c.GoldValue * float64(c.Number))
+}
+
+func (c GenericLoot) DisplayName() string {
+	return c.Name
+}
+func (c GenericLoot) DisplayGPAmount() int {
+	return int(c.GoldValue)
+}
+func (c GenericLoot) DisplayXPAmount() int {
+	return int(c.XPValue)
+}
+
+func (c GenericLoot) DisplayTotalGPAmount() int {
+	return int(c.TotalGoldAmount())
+}
+func (c GenericLoot) DisplayTotalXPAmount() int {
+	return int(c.TotalXPAmount())
+}
+
+func (c GenericLoot) DisplayNumber() string {
+	return strconv.Itoa(c.Number)
 }
 
 type Coins struct {
@@ -284,6 +222,6 @@ func NewCoins(c, s, e, g, p int) *Coins {
 func (c Coins) TotalXPAmount() float64 {
 	return c.Copper.TotalXPAmount() + c.Silver.TotalXPAmount() + c.Electrum.TotalXPAmount() + c.Gold.TotalXPAmount() + c.Platinum.TotalXPAmount()
 }
-func (c Coins) TotalGoldAmount() int {
+func (c Coins) TotalGoldAmount() float64 {
 	return c.Copper.TotalGoldAmount() + c.Silver.TotalGoldAmount() + c.Electrum.TotalGoldAmount() + c.Gold.TotalGoldAmount() + c.Platinum.TotalGoldAmount()
 }

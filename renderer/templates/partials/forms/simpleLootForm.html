@@ -3,33 +3,31 @@
         Gems and Jewellery
     </legend>
     <ol>
-        {{ range Data.GemsAndJewellery }}
         <li>
-            <input name="loot-name" type="text" value="{{ .Item.Name }}" />
-            {{ if nt .Valid }}
-            <br>
-            <small class="form-text text-danger">
-                {{ .Errors.Name }}
-            </small>
-            {{end}}
-            <input name="loot-number" type="text" value="{{ .Number }}"></input>
-            {{ if nt .Valid }}
-            <br>
-            <small class="form-text text-danger">
-                {{ .Errors.Number }}
-            </small>
-            {{end}}
-            <input name="loot-gp-value" type="text" value="{{ .GPValue }}"></input>
-
-            {{ if .Errors.GPValue }}
-            <small class="form-text text-danger">
-                {{ .Errors.GPValue }}
-            </small>
-            <button hx-target="closest li" hx-swap="outerHTML" hx-trigger="mousedown"
-                hx-delete="/calculator/loot?type=gem_jewellery">Delete</button>
-             {{end}} 
+            <span>Item Type</span>
+            <span>Number found</span>
+            <span>Gold Value</span>
+        </li>
+        {{ range $i, $item := .Data.Loot }}
+        <li>
+            <span>Gem or Jewellery</span>
+            <input type="hidden" name="loot-id" value="{{ $i }}" />
+            <input hx-target="next .loot-totals" hx-swap="outerHTML" hx-trigger="change"
+                hx-patch="/calculator/loot?type=gem_jewellery&item={{ $i }}" class="numberInput" name="loot-number" type="text" value="{{ $item.DisplayNumber }}"></input>
+            <input hx-target="next .loot-totals" hx-swap="outerHTML" hx-trigger="change"
+                hx-patch="/calculator/loot?type=gem_jewellery&item={{ $i }}" class="numberInput" name="loot-gp-value" type="text" value="{{ $item.DisplayGPAmount }}"></input>
+            <div class="loot-totals">
+            <span>Total GP value {{ $item.DisplayTotalGPAmount }}</span>
+            <span>Total XP value {{ $item.DisplayTotalXPAmount }}</span>
+            </div>
+            <button hx-target="closest li" hx-swap="delete" hx-trigger="mousedown"
+                hx-delete="/calculator/loot" class="danger">Delete</button>
         </li>
         {{ end }}
-    <li><button class="add" hx-target="closest li" hx-swap="beforebegin" hx-trigger="mousedown" hx-post="/calculator/loot?type=gem_jewellery"></button></li>
+        <li><button class="add" hx-target="closest fieldset" hx-swap="outerHTML" hx-trigger="mousedown"
+                hx-post="/calculator/loot?type=gem_jewellery">Add Gem or Jewellery</button></li>
     </ol>
+    <div id="lootError"></div>
 </fieldset>
+
+

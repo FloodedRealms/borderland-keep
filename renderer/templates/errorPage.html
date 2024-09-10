@@ -1,4 +1,3 @@
-{{$message := .}}
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -10,10 +9,8 @@
 <body>
     <h1>Error</h1>
     <div> 
-    {{ .E.Error }}
+    {{ .Data.Message }}
     </div>
     <!-- Todo List will be loaded here -->
-    <p>Partial render follows...</p>
-    {{ .Rendered }}
 </body>
 </html>
