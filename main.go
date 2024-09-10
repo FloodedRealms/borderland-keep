@@ -108,6 +108,7 @@ func main() {
 		homePages := archivist.NewHomePage(*renderer, *campaignService, *guardsman)
 		campaignPages := archivist.NewCampaignPage(*campaignService, *characterService, *adventureRecordService, *renderer)
 		adventurePages := archivist.NewAdventurePage(*adventureRecordService, *characterService, *renderer)
+		calculatorPages := archivist.NewSimpleAdventurePage(*renderer)
 
 		//router
 		router := http.NewServeMux()
@@ -125,8 +126,10 @@ func main() {
 		router.HandleFunc("/tavern", guardsman.CheckLoggedIn(homePages.TavernLanding))
 		router.HandleFunc("/campaign-list", homePages.LoadNextCampaignSet)
 		router.HandleFunc("/about", homePages.About)
+		router.HandleFunc("/error", homePages.ErrorPage)
 		campaignPages.RegisterRoutes(router, *guardsman)
 		adventurePages.RegisterRoutes(router, *guardsman)
+		calculatorPages.RegisterRoutes(router, *guardsman)
 
 		//User Pages
 

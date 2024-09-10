@@ -1,17 +1,10 @@
 package test
 
-/*
 import (
 	"testing"
 
-	"github.com/floodedrealms/borderland-keep/internal/repository"
 	"github.com/floodedrealms/borderland-keep/types"
 )
-
-func setup_adventureTests() repository.Repository {
-	return repository.NewJSONRepo("/json-data.json")
-
-}
 
 func fiveShareGroup() []types.AdventureCharacter {
 	return []types.AdventureCharacter{
@@ -60,9 +53,9 @@ func jewellery() []types.Jewellery {
 }
 func magicItems() []types.MagicItem {
 	return []types.MagicItem{
-		{XPValue: 250},
-		{XPValue: 250},
-		{XPValue: 500},
+		{ApparentValue: 250},
+		{ApparentValue: 250},
+		{ApparentValue: 500},
 	}
 }
 func combat() []types.MonsterGroup {
@@ -165,7 +158,8 @@ func TestXPCalculationsForAdventures(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			shares := tt.adventure.CalculateNumberOfShares()
+			tt.adventure.CalculateNumberOfShares()
+			shares := tt.adventure.NumberOfShares
 			totalXp := tt.adventure.TotalXPAmount()
 			fullShare, halfShare := tt.adventure.CalculateXPShares()
 			if shares != tt.expextedNumberOfShares {
@@ -185,4 +179,102 @@ func TestXPCalculationsForAdventures(t *testing.T) {
 	}
 
 }
-*/
+
+func TestSimpleCalculatorDetailOnFirstOpen(t *testing.T) {
+	adventure := *types.NewAdventureRecordByNumberOfCharacters(0, 0)
+	expectedTotalXP := 0
+	actualTotalXP := adventure.DisplayTotalXPAmount()
+	if expectedTotalXP != actualTotalXP {
+		t.Errorf("Expected %d shares, got %d shares instead.", expectedTotalXP, actualTotalXP)
+	}
+
+	expectedShares := 0.0
+	actualShares := adventure.NumberOfShares
+	if expectedShares != actualShares {
+		t.Errorf("Expected %f shares, got %f shares instead.", expectedShares, actualShares)
+	}
+
+	expectedDisplayShares := "0.0"
+	actualDisplayShares := adventure.DisplayTotalShares()
+	if expectedDisplayShares != actualDisplayShares {
+		t.Errorf("Expected %s shares, got %s shares instead.", expectedDisplayShares, actualDisplayShares)
+	}
+
+	expectFullXPShare := 0
+	actualFullXPShare := adventure.DisplayFullXPShare()
+	if expectFullXPShare != actualFullXPShare {
+		t.Errorf("Expect a full XP share to be %d, got %d", expectFullXPShare, actualFullXPShare)
+	}
+
+	expectHalfXPShare := 0
+	actualHalfXPShare := adventure.DisplayHalfXPShare()
+	if expectHalfXPShare != actualHalfXPShare {
+		t.Errorf("Expect a full XP share to be %d, got %d", expectHalfXPShare, actualHalfXPShare)
+	}
+
+	expectFullGPShare := 0
+	actualFullGPShare := adventure.DisplayFullGPShare()
+	if expectFullGPShare != actualFullGPShare {
+		t.Errorf("Expect a full GP share to be %d, got %d", expectFullGPShare, actualFullGPShare)
+	}
+
+	expectHalfGPShare := 0
+	actualHalfGPShare := adventure.DisplayHalfGPShare()
+	if expectHalfGPShare != actualHalfGPShare {
+		t.Errorf("Expect a full GP share to be %d, got %d", expectHalfGPShare, actualHalfGPShare)
+	}
+
+}
+
+func TestTotalsWithZeroShares(t *testing.T) {
+	adventure := *types.NewAdventureRecordByNumberOfCharacters(0, 0)
+	adventure.Coins = *types.NewCoins(0, 0, 0, 400, 0)
+	expectedTotalXP := 400
+	actualTotalXP := adventure.DisplayTotalXPAmount()
+	if expectedTotalXP != actualTotalXP {
+		t.Errorf("Expected %d XP Total, got %d XP Total instead.", expectedTotalXP, actualTotalXP)
+	}
+
+	expectedTotalGp := 400
+	actualTotalGp := adventure.DisplayTotalGPAmount()
+	if expectedTotalGp != actualTotalGp {
+		t.Errorf("Expected %d GP Total, got %d GP total instead.", expectedTotalGp, actualTotalGp)
+	}
+
+	expectedShares := 0.0
+	actualShares := adventure.NumberOfShares
+	if expectedShares != actualShares {
+		t.Errorf("Expected %f shares, got %f shares instead.", expectedShares, actualShares)
+	}
+
+	expectedDisplayShares := "0.0"
+	actualDisplayShares := adventure.DisplayTotalShares()
+	if expectedDisplayShares != actualDisplayShares {
+		t.Errorf("Expected %s shares, got %s shares instead.", expectedDisplayShares, actualDisplayShares)
+	}
+
+	expectFullXPShare := 0
+	actualFullXPShare := adventure.DisplayFullXPShare()
+	if expectFullXPShare != actualFullXPShare {
+		t.Errorf("Expect a full XP share to be %d, got %d", expectFullXPShare, actualFullXPShare)
+	}
+
+	expectHalfXPShare := 0
+	actualHalfXPShare := adventure.DisplayHalfXPShare()
+	if expectHalfXPShare != actualHalfXPShare {
+		t.Errorf("Expect a full XP share to be %d, got %d", expectHalfXPShare, actualHalfXPShare)
+	}
+
+	expectFullGPShare := 0
+	actualFullGPShare := adventure.DisplayFullGPShare()
+	if expectFullGPShare != actualFullGPShare {
+		t.Errorf("Expect a full GP share to be %d, got %d", expectFullGPShare, actualFullGPShare)
+	}
+
+	expectHalfGPShare := 0
+	actualHalfGPShare := adventure.DisplayHalfGPShare()
+	if expectHalfGPShare != actualHalfGPShare {
+		t.Errorf("Expect a full GP share to be %d, got %d", expectHalfGPShare, actualHalfGPShare)
+	}
+
+}

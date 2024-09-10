@@ -4,9 +4,8 @@
         {{ if .User.LoggedIn }}
         <li ><a class="user-action" href="/user/{{ .User.Id }}/campaigns">Your Campaigns</a></li>
         {{ end }}
+        <li><a href="/calculator">Adventure Calculator</a></li>
         <li><a href="/about">About</a></li>
-        <li><a href="/tavern">Tavern</a></li>
-        <li><a href="/guild">Guild</a></li>
         {{ if .User.LoggedIn }}
         <li style="float:right"><button  class="danger" hx-post="/depart">Depart</a></li>
         {{ else }}

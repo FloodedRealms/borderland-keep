@@ -89,3 +89,12 @@ func ExtractGuardsmanHeaders(r *http.Request) (user guardsman.WebUser, canEdit b
 	userId := r.Header.Get(http.CanonicalHeaderKey(guardsman.UserIdHeader))
 	return guardsman.WebUser{LoggedIn: loggedIn, Id: userId}, canEdit
 }
+
+func RedirectToErrorPage(w http.ResponseWriter, err error, debug bool) {
+	if debug {
+		w.Header().Add("x-borderland-keep-error", err.Error())
+	}
+	w.Header().Add("HX-Redirect", "/error")
+	w.Header().Add("location", "/error")
+	w.WriteHeader(http.StatusSeeOther)
+}

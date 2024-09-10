@@ -1,31 +1,66 @@
 package types
 
-import (
-	"html/template"
-	"net/http"
-)
-
 type XPSource interface {
 	TotalXPAmount() float64
 }
 
 type GoldSource interface {
-	TotalValueInGold() int
+	TotalGoldAmount() float64
+}
+
+type ViewableXPSource interface {
+	DisplayXPAmount() int
+}
+
+type ViewableGPSource interface {
+	DisplayGPAmount() int
+}
+
+type ViewableMultiMemberXPSource interface {
+	DisplayTotalXPAmount() int
+}
+
+type ViewableMultiMemberGPSource interface {
+	DisplayTotalGPAmount() int
 }
 
 type Loot interface {
 	XPSource
 	GoldSource
+	ViewableMetadata
+	ViewableXPSource
+	ViewableGPSource
+	ViewableMultiMemberGPSource
+	ViewableMultiMemberXPSource
+	DisplayNumber() string
 }
 
-type SQLObject interface {
-	DiffWithExisting(SQLObject) (SQLObject, error)
+type Combat interface {
+	ViewableMultiMemberXPSource
+	ViewableXPSource
+	DisplayNumber() string
 }
 
-type HTMLAble interface {
-	HTML(*http.Request) template.Template
+type ViewableMetadata interface {
+	DisplayName() string
 }
 
-type Blurbable interface {
-	HTMLBlurb(*http.Request) template.Template
+type Adventure interface {
+	ViewableMetadata
+	ViewableMultiMemberGPSource
+	ViewableMultiMemberXPSource
+	DisplayDate() string
+	DisplayTotalShares() string
+	DisplayFullXPShare() int
+	DisplayFullGPShare() int
+	DisplayHalfXPShare() int
+	DisplayHalfGPShare() int
+}
+
+type MagicalLoot interface {
+	ViewableGPSource
+	ViewableXPSource
+	DisplayActualValue() int
+	DisplayApparentValue() int
+	WasSold() bool
 }

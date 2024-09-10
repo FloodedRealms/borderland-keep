@@ -1,0 +1,31 @@
+<fieldset>
+    <legend>
+        Magic Items
+    </legend>
+    <ol>
+        {{ range $i, $item := .Data.MagicItems }}
+        <div>
+        <li>
+            <h4>Magic Item</h4>
+            </li><li>
+            <input type="hidden" name="magic-item-id" value="{{ $i }}" />
+            <label for="magic-item-gp-value-{{ $i }}">Apparent Value</label>
+            <input id="magic-item-gp-value-{{ $i }}" hx-target="this" hx-swap="none" hx-trigger="change"
+                hx-patch="/calculator/magic-item" class="numberInput" name="magic-item-gp-value" type="text" value="{{ $item.DisplayApparentValue }}"></input>
+            </li>
+            <li>
+                <label for="magic-item-gp-sold-value-{{ $i }}">Actual Value</label>
+            <input id="magic-item-gp-sold-value-{{ $i }}" hx-target="this" hx-swap="none" hx-trigger="change"
+                hx-patch="/calculator/magic-item" class="numberInput" name="magic-item-gp-sold-value" type="text" value="{{ $item.DisplayActualValue }}" ></input>
+</li>
+            <li>
+            <button hx-target="closest div" hx-swap="delete" hx-trigger="mousedown"
+                hx-delete="/calculator/magic-item" class="danger">Delete</button>
+        </li>
+</div>
+        {{ end }}
+        <li><button class="add" hx-target="closest fieldset" hx-swap="outerHTML" hx-trigger="mousedown"
+                hx-post="/calculator/magic-item">Add Magic Item</button></li>
+    </ol>
+    <div id="magic-itemError"></div>
+</fieldset>

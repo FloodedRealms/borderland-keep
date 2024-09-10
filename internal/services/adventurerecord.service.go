@@ -266,9 +266,7 @@ func (a *AdventureService) GetAdventureRecordById(id int) (*types.AdventureRecor
 		adventureToReturn.MagicItems = mi
 		adventureToReturn.Combat = c
 		adventureToReturn.Characters = chars
-		f, h := adventureToReturn.CalculateXPShares()
-		adventureToReturn.HalfShareXP = h
-		adventureToReturn.FullShareXP = f
+		adventureToReturn.CalculateXPShares()
 
 	} else {
 		return nil, util.UnableToFindResourceWithId("adventure", id)
@@ -831,7 +829,7 @@ func (a AdventureService) GetMagicItemById(id string) (*types.MagicItem, error) 
 	for rows.Next() {
 		cur := &types.MagicItem{}
 		var trashInt int
-		rows.Scan(&cur.Id, &trashInt, &cur.Name, &cur.Description, &cur.XPValue, &cur.GoldValue)
+		rows.Scan(&cur.Id, &trashInt, &cur.Name, &cur.Description, &cur.ApparentValue, &cur.ActualValue)
 		results = append(results, cur)
 	}
 	if len(results) < 1 {
@@ -851,7 +849,7 @@ func (a AdventureService) GetMagicItemsForAdventure(id int) ([]types.MagicItem, 
 	for rows.Next() {
 		cur := types.MagicItem{}
 		var trashInt int
-		rows.Scan(&cur.Id, &trashInt, &cur.Name, &cur.Description, &cur.XPValue, &cur.GoldValue)
+		rows.Scan(&cur.Id, &trashInt, &cur.Name, &cur.Description, &cur.ApparentValue, &cur.ActualValue)
 		results = append(results, cur)
 	}
 	return results, nil
