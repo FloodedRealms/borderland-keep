@@ -3,26 +3,26 @@
         Gems and Jewellery
     </legend>
     <ol>
-        <li>
-            <span>Item Type</span>
-            <span>Number found</span>
-            <span>Gold Value</span>
-        </li>
         {{ range $i, $item := .Data.Loot }}
+
+            <div>
         <li>
-            <span>Gem or Jewellery</span>
+            <h4>Gem or Jewellery</h4>
             <input type="hidden" name="loot-id" value="{{ $i }}" />
-            <input hx-target="next .loot-totals" hx-swap="outerHTML" hx-trigger="change"
-                hx-patch="/calculator/loot?type=gem_jewellery&item={{ $i }}" class="numberInput" name="loot-number" type="text" value="{{ $item.DisplayNumber }}"></input>
-            <input hx-target="next .loot-totals" hx-swap="outerHTML" hx-trigger="change"
-                hx-patch="/calculator/loot?type=gem_jewellery&item={{ $i }}" class="numberInput" name="loot-gp-value" type="text" value="{{ $item.DisplayGPAmount }}"></input>
-            <div class="loot-totals">
-            <span>Total GP value {{ $item.DisplayTotalGPAmount }}</span>
-            <span>Total XP value {{ $item.DisplayTotalXPAmount }}</span>
-            </div>
-            <button hx-target="closest li" hx-swap="delete" hx-trigger="mousedown"
-                hx-delete="/calculator/loot" class="danger">Delete</button>
+            <label for="loot-number-{{ $i }}">Number Found</label>
+            <input hx-swap="none"  hx-trigger="change"
+                hx-patch="/calculator/loot?item={{ $i }}" class="numberInput" id="loot-number-{{ $i }}" name="loot-number" type="text" value="{{ $item.DisplayNumber }}"></input>
+            </li>
+            <li>
+            <label for="loot-gp-value-{{ $i }}">GP Value</label>
+            <input id="loot-gp-value-{{ $i }}"  hx-swap="none" hx-trigger="change"
+                hx-patch="/calculator/loot?item={{ $i }}" class="numberInput" name="loot-gp-value" type="text" value="{{ $item.DisplayGPAmount }}"></input>
+</li>
+<li>
+            <button hx-target="closest div" hx-swap="outerHTML" hx-trigger="mousedown"
+                hx-delete="/calculator/loot?item={{ $i }}" class="danger">Delete</button>
         </li>
+</div>
         {{ end }}
         <li><button class="add" hx-target="closest fieldset" hx-swap="outerHTML" hx-trigger="mousedown"
                 hx-post="/calculator/loot?type=gem_jewellery">Add Gem or Jewellery</button></li>

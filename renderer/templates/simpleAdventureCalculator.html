@@ -12,22 +12,24 @@
     <main>
 
         <section class="content">
-
-            <form onsubmit="return false;">
+            <form class="simple-adventure-form" onsubmit="return false;">
                 <div>
                 {{ template "simpleAdventureDetails.html" .}}
                 {{ template "simpleAttendanceForm.html" .}}
+                {{ template "simpleCoinForm.html" . }}
                 </div>
                 <div>
-                {{ template "simpleCoinForm.html" . }}
                 {{ template "simpleLootForm.html" .}}
+                </div>
+                <div>
                 {{ template "simpleCombatForm.html" . }}
+                </div>
+                <div>
                 {{ template "simpleMagicItemForm.html" . }}
 </div>
             </form>
         </section>
-
-        {{ template "sidebar.html" . }}
+        {{template "sidebar.html" . }}
     </main>
 </body>
 

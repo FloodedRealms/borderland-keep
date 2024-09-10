@@ -3,21 +3,25 @@
         Combat Encounters
     </legend>
     <ol>
-        <li>
-            <span>Number Defeated</span>
-            <span>XP Per Kill</span>
-        </li>
         {{ range $i, $item := .Data.Combat }}
+        <div>
         <li>
-            <span>Combat Encounter</span>
+            <h4>Combat Encounter</h4>
             <input type="hidden" name="combat-id" value="{{ $i }}" />
-            <input hx-target="this" hx-swap="none" hx-trigger="change"
+            <label for="combat-number{{ $i }}">Number Defeated</label>
+            <input id="combat-number{{ $i }}" hx-target="this" hx-swap="none" hx-trigger="change"
                 hx-patch="/calculator/combat?item={{ $i }}" class="numberInput" name="combat-number" type="text" value="{{ $item.DisplayNumber }}"></input>
-            <input hx-target="this" hx-swap="none" hx-trigger="change"
+</li>
+            <li>
+            <label for="combaer-xp-value-{{ $i }}">XP Value</label>
+            <input id="combaer-xp-value-{{ $i }}" hx-target="this" hx-swap="none" hx-trigger="change"
                 hx-patch="/calculator/combat?item={{ $i }}" class="numberInput" name="combat-xp-value" type="text" value="{{ $item.DisplayXPAmount }}"></input>
-            <button hx-target="closest li" hx-swap="delete" hx-trigger="mousedown"
+            </li>
+            <li>
+            <button hx-target="closest div" hx-swap="delete" hx-trigger="mousedown"
                 hx-delete="/calculator/combat" class="danger">Delete</button>
         </li>
+</div>
         {{ end }}
         <li><button class="add" hx-target="closest fieldset" hx-swap="outerHTML" hx-trigger="mousedown"
                 hx-post="/calculator/combat">Add Combat</button></li>

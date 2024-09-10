@@ -218,24 +218,15 @@ func ParseAndValidateMagicItem(itemData url.Values, cur int) *MagicItem {
 		errors.XPValue = "Apparent must be at least 1."
 		valid = false
 	}
-	s, ok := itemData["magic-item-sold"]
+	soldAmount := itemData["magic-item-gp-sold-value"]
 	sold := false
-	if ok && s[0] == "on" {
-		sold = true
+	gp, err := strconv.Atoi(soldAmount[cur])
+	soldAmountString := soldAmount[cur]
+	if err != nil {
+		gp = 0
 	}
-	soldAmount, ok := itemData["magic-item-gp-sold-value"]
-	soldAmountString := ""
-	gp := 0
-	if ok && sold {
-		gp, _ = strconv.Atoi(soldAmount[cur])
-		soldAmountString = soldAmount[cur]
-		if err != nil {
-			errors.XPValue = "Apparent value must be a numeric value."
-			valid = false
-		} else if gp < 1 {
-			errors.XPValue = "Apparent must be at least 1."
-			valid = false
-		}
+	if gp > 0 {
+		sold = true
 	}
 
 	return &MagicItem{
@@ -379,16 +370,16 @@ func (p SimpleAdventurePage) Loot(w http.ResponseWriter, r *http.Request) {
 		w.Header().Add("HX-Trigger", "updateOverview")
 		w.WriteHeader(http.StatusOK)
 	case http.MethodPatch:
-		id, _ := strconv.Atoi(r.URL.Query()["item"][0])
+		/*id, _ := strconv.Atoi(r.URL.Query()["item"][0])
 		item := ParseLootItem(r.Form, id)
 
 		output, err := p.renderer.RenderPartial("simpleLootDetails.html", item)
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
 			return
-		}
+		}*/
 		w.Header().Add("HX-Trigger", "updateOverview")
-		w.Write([]byte(output))
+		w.WriteHeader(http.StatusOK)
 
 	}
 }
