@@ -1,7 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
 
-    {{ template "head.html" }}
+{{ template "head.html" }}
+
 <body>
     <header>
         {{ template "banner.html" }}
@@ -10,10 +11,12 @@
         {{ template "nav.html" }}
     </nav>
     <main>
-        <p>Signup is currently disabled. Look for news about the upcoming beta!  </p>
-        <small>If you would like to sign up for the alpha (current version of the site) You may reach out to me. Keep in mind, the alpha is being rapidly developed and may be unstable.</small>
         <section class="content">
- {{ template "loginForm.html" }}
+            {{ template "loginForm.html" }}
+            <p>Signup is currently disabled. Look for news about the upcoming beta! </p>
+            <small>If you would like to sign up for the alpha (current version of the site) You may reach out to me.
+                Keep in mind, the alpha is being rapidly developed and may be unstable.</small>
+
         </section>
         {{ template "sidebar.html" }}
     </main>
