@@ -30,10 +30,6 @@ func NewAdventureRecordService(repo repository.Repository, ctx context.Context) 
 	return &AdventureService{repo, ctx}
 }
 
-func (a *AdventureService) CreateAdventureRecordForCampaign(r *types.AdventureRecord) (*types.AdventureRecord, error) {
-	return a.repo.CreateAdventureRecordForCampaign(r)
-}
-
 func (a *AdventureService) CreateNewAdventureRecordForCampaign(campaignId int) (*types.AdventureRecord, error) {
 	stmt := fmt.Sprintf("INSERT INTO %s(name, campaign_id, adventure_date, created_at, updated_at) values(?,?,?,?,?);", adventureTable)
 	time := time.Now()
@@ -69,153 +65,16 @@ func (a *AdventureService) ModifyMetadata(ad types.AdventureRecord) error {
 	return err
 }
 
+func (a *AdventureService) UpdateAdventureCoins(adventureId int, coins types.Coins) error {
+	stmt := fmt.Sprintf("UPDATE %s SET copper = ?, silver = ?, electrum = ?, gold = ?, platinum = ? WHERE id = ?;")
+	_, err := a.repo.ExecuteQuery(stmt, coins.Copper.Number, coins.Silver.Number, coins.Electrum.Number, coins.Gold.Number, coins.Platinum.Number, adventureId)
+	return err
+}
+
 func (a *AdventureService) DeleteAdventure(id int) error {
 	q := fmt.Sprintf("DELETE FROM %s WHERE id=?;", adventureTable)
 	_, err := a.repo.ExecuteQuery(q, id)
 	return err
-}
-
-func (a *AdventureService) UpdateAdventureRecord(r *types.AdventureRecord) (*types.AdventureRecord, error) {
-	adventureToUpdate, err := a.repo.GetAdventureRecordById(r)
-	if err != nil {
-		return nil, err
-	}
-	charactersInCampaign, _ := a.repo.GetCharactersForCampaign(types.NewCampaign(adventureToUpdate.CampaignId))
-	fullShare, halfShare := r.CalculateXPShares()
-	if r.Name != "" && r.Name != adventureToUpdate.Name {
-		err := a.repo.UpdateAdventureName(adventureToUpdate, r.Name)
-		if err != nil {
-			return nil, util.UnableToUpdateAdventure("Name", err.Error())
-		}
-	}
-	err = a.updateAdventureCoins(adventureToUpdate, &r.Coins)
-	if err != nil {
-		return nil, util.UnableToUpdateAdventure("Coins", err.Error())
-	}
-	err = a.updateAdventureGems(adventureToUpdate, r.Gems)
-	if err != nil {
-		return nil, util.UnableToUpdateAdventure("Gems", err.Error())
-	}
-	err = a.updateAdventureJewellery(adventureToUpdate, r.Jewellery)
-	if err != nil {
-		return nil, util.UnableToUpdateAdventure("Jewellery", err.Error())
-	}
-	err = a.updateAdventureMagicItems(adventureToUpdate, r.MagicItems)
-	if err != nil {
-		return nil, util.UnableToUpdateAdventure("Magic Items", err.Error())
-	}
-	err = a.updateAdventureCombat(adventureToUpdate, r.Combat)
-	if err != nil {
-		return nil, util.UnableToUpdateAdventure("Combats", err.Error())
-	}
-	err = a.updateAdventureCharacters(adventureToUpdate, r.Characters, fullShare, halfShare, charactersInCampaign)
-	if err != nil {
-		return nil, util.UnableToUpdateAdventure("Characters", err.Error())
-	}
-
-	updatedRecorded, err := a.repo.GetAdventureRecordById(adventureToUpdate)
-	return updatedRecorded, err
-}
-
-func (a AdventureService) updateAdventureCoins(ad *types.AdventureRecord, coins *types.Coins) error {
-	stmt := fmt.Sprintf("UPATE %s set copper=?, silver=? electrum=? gold=? platinum=? WHERE id=?", adventureTable)
-	_, err := a.repo.ExecuteQuery(stmt, coins.Copper.Number, coins.Silver.Number, coins.Electrum.Number, coins.Gold.Number, coins.Platinum.Number, ad.Id)
-	return err
-}
-
-func (a AdventureService) updateAdventureGems(ad *types.AdventureRecord, gems []types.Gem) error {
-	err := a.repo.DeleteGemsForAdventure(ad)
-	if err != nil {
-		return err
-	}
-	for _, gem := range gems {
-		_, err := a.repo.AddGemToAdventure(ad, &gem)
-		if err != nil {
-			return err
-		}
-	}
-	return err
-}
-
-func (a AdventureService) updateAdventureJewellery(ad *types.AdventureRecord, jewellery []types.Jewellery) error {
-	err := a.repo.DeleteJewelleryForAdventure(ad)
-	if err != nil {
-		return err
-	}
-	for _, gem := range jewellery {
-		_, err := a.repo.AddJewelleryToAdventure(ad, &gem)
-		if err != nil {
-			return err
-		}
-	}
-	return err
-}
-
-func (a AdventureService) updateAdventureMagicItems(ad *types.AdventureRecord, gems []types.MagicItem) error {
-	err := a.repo.DeleteMagicItemsForAdventure(ad)
-	if err != nil {
-		return err
-	}
-	for _, gem := range gems {
-		_, err := a.repo.AddMagicItemToAdventure(ad, &gem)
-		if err != nil {
-			return err
-		}
-	}
-	return err
-}
-
-func (a AdventureService) updateAdventureCombat(ad *types.AdventureRecord, gems []types.MonsterGroup) error {
-	err := a.repo.DeleteCombatForAdventure(ad)
-	if err != nil {
-		return err
-	}
-	for _, gem := range gems {
-		_, err := a.repo.AddCombatToAdventure(ad, &gem)
-		if err != nil {
-			return err
-		}
-	}
-	return err
-}
-
-func (a AdventureService) updateAdventureCharacters(ad *types.AdventureRecord, chars []types.AdventureCharacter, fullShareAmount, halfShareAmount int, campChars []types.CharacterRecord) error {
-	charMap := map[int]types.CharacterRecord{}
-	for _, c := range campChars {
-		charMap[c.Id] = c
-	}
-	err := a.repo.DeleteCharactersForAdventure(ad)
-	if err != nil {
-		return err
-	}
-	for _, char := range chars {
-		xpToGain := fullShareAmount
-		if char.Halfshare {
-			xpToGain = halfShareAmount
-		}
-		c := charMap[char.Id]
-		adjustedAmount := c.ApplyPrimeReq(xpToGain)
-		if char.Halfshare {
-			_, err := a.repo.AddHalfshareCharacterToAdventure(ad, &char, adjustedAmount)
-			if err != nil {
-				return err
-			}
-		} else {
-			_, err := a.repo.AddFullshareCharacterToAdventure(ad, &char, adjustedAmount)
-
-			if err != nil {
-				return err
-			}
-		}
-	}
-	return err
-}
-
-func (a *AdventureService) ListAdventureRecordsForCampaign(i string) ([]*types.AdventureRecord, error) {
-	id, err := strconv.Atoi(i)
-	util.CheckErr(err)
-	campaign := types.NewCampaign(id)
-	return a.repo.GetAdventureRecordsForCampaign(campaign)
 }
 
 func (a *AdventureService) GetAdventureRecordById(id int) (*types.AdventureRecord, error) {
@@ -272,30 +131,6 @@ func (a *AdventureService) GetAdventureRecordById(id int) (*types.AdventureRecor
 		return nil, util.UnableToFindResourceWithId("adventure", id)
 	}
 	return adventureToReturn, nil
-}
-
-func (a AdventureService) GetCoinsForAdventure(i string) (*types.Coins, error) {
-	id, err := strconv.Atoi(i)
-	if err != nil {
-		return nil, err
-	}
-	coins, err := a.repo.GetCoinsForAdventure(types.NewAdventureRecordById(id))
-	if err != nil {
-		return nil, err
-	}
-	return coins, nil
-}
-
-func (a AdventureService) UpdateAdventureCoins(id string, data map[string]string) (*types.Coins, error) {
-	i, _ := strconv.Atoi(id)
-	copper, _ := stripGoodNumberValueFromFormData("copper", data)
-	silver, _ := stripGoodNumberValueFromFormData("silver", data)
-	electrum, _ := stripGoodNumberValueFromFormData("electrum", data)
-	gold, _ := stripGoodNumberValueFromFormData("gold", data)
-	platinum, _ := stripGoodNumberValueFromFormData("platinum", data)
-	stmtStr := fmt.Sprintf("UPDATE %s set copper=?, silver=?, electrum=?, gold=?, platinum=? WHERE ID =?", adventureTable)
-	a.repo.ExecuteQuery(stmtStr, copper, silver, electrum, gold, platinum, id)
-	return a.repo.GetCoinsForAdventure(types.NewAdventureRecordById(i))
 }
 
 func stripGoodNumberValueFromFormData(field string, data map[string]string) (int, error) {
@@ -894,17 +729,3 @@ func (a AdventureService) GetPossibleCharactersForAdventure(id int) ([]types.Adv
 	}
 	return results, onAdventure, nil
 }
-
-/*
-func (a *AdventureRecordServiceImpl) AddGemLootToAdventure(ad *types.Adventure, g *types.Gem) (bool, error) {
-	return a.repo.AddGemToAdventure(ad, g)
-}
-func (a *AdventureRecordServiceImpl) AddJewelleryLootToAdventure(ad *types.Adventure, j *types.Jewellery) (bool, error) {
-	return a.repo.AddJewelleryToAdventure(ad, j)
-}
-func (a *AdventureRecordServiceImpl) AddMagicItemToAdventure(ad *types.Adventure, j *types.MagicItem) (bool, error) {
-	return a.repo.AddMagicItemToAdventure(ad, j)
-}
-func (a *AdventureRecordServiceImpl) AddCombatToAdventure(ad *types.Adventure, j *types.MonsterGroup) (bool, error) {
-	return a.repo.AddCombatToAdventure(ad, j)
-}*/

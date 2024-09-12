@@ -23,12 +23,6 @@ func NewCampaignService(repo repository.Repository, logger *util.Logger, ctx con
 	return &CampaignService{repo, *logger, ctx}
 }
 
-func (c *CampaignService) UpdateCampaign(ur *types.CampaignRecord) (*types.CampaignRecord, error) {
-	ur.UpdatedAt = time.Now()
-
-	return c.repo.UpdateCampaign(ur)
-}
-
 func (c *CampaignService) GetCampaign(id int) (*types.CampaignRecord, error) {
 	tableq := fmt.Sprintf("SELECT c.name, c.judge, c.timekeeping, c.recruitment FROM %s c where c.id =?;", campaignTable)
 	//tableq1 := fmt.Sprintf("SELECT * FROM %s c where c.id = ?", campaignTable)
@@ -94,14 +88,6 @@ func (c *CampaignService) CampaignAdventuresSummary(id int) ([]types.AdventureRe
 	}
 	return results, nil
 
-}
-
-func (c *CampaignService) ListCampaigns() ([]*types.CampaignRecord, error) {
-	return c.repo.ListCampaigns()
-}
-
-func (c *CampaignService) ListCampaignsForClient(clientId string) ([]*types.CampaignRecord, error) {
-	return c.repo.ListCampaignsForClient(clientId)
 }
 
 func (c *CampaignService) DeleteCampaign(id string) (bool, error) {

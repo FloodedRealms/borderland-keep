@@ -28,14 +28,6 @@ func NewCharacterService(repo repository.Repository, logger *util.Logger, ctx co
 	}
 }
 
-func (s CharacterService) CreateCharacterForCampaign(campaign *types.CampaignRecord, charToInsert *types.CharacterRecord) (*types.CharacterRecord, error) {
-	return s.repo.CreateCharacterForCampaign(campaign, charToInsert)
-}
-
-func (s CharacterService) UpdateCharacter(id int, char *types.CharacterRecord) (*types.CharacterRecord, error) {
-	return s.repo.UpdateCharacter(*char)
-}
-
 func (s CharacterService) CreateCharactersForCampaign(campaignId int, charactersToCreate []types.CharacterRecord) error {
 	queries := make([]string, 0)
 	paramList := make([][]interface{}, 0)
@@ -120,19 +112,6 @@ func (s CharacterService) GetPossibleCharactersForAdventure(aId int) ([]types.Ch
 		chars = append(chars, c)
 	}
 	return chars, nil
-}
-
-func (s CharacterService) UpdateTotalCharacterXP(char types.CharacterRecord, xpGained int) (*types.CharacterRecord, error) {
-	currentChar, err := s.repo.GetCharacterById(char)
-	if err != nil {
-		return nil, err
-	}
-	currentChar.AddXP(xpGained)
-	c, err := s.repo.UpdateCharacter(char)
-	if err != nil {
-		return nil, err
-	}
-	return c, err
 }
 
 func (s CharacterService) sumXP(a []int) int {

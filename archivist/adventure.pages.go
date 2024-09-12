@@ -375,13 +375,49 @@ func (a AdventurePage) SaveAndDisplayCoins(w http.ResponseWriter, r *http.Reques
 	formErr := r.ParseForm()
 	if formErr != nil {
 		a.renderer.MustRenderErrorPage(w, "", formErr)
+		return
 	}
 	var data = map[string]string{}
 	for key, value := range r.Form {
 		data[key] = value[0]
 	}
-	coins, err := a.adventureService.UpdateAdventureCoins(id, data)
-	aid, _ := strconv.Atoi(id)
+	copper, err := strconv.Atoi(data["copper"])
+	if err != nil {
+		a.renderer.MustRenderErrorPage(w, "", formErr)
+		return
+	}
+	silver, err := strconv.Atoi(data["silver"])
+	if err != nil {
+		a.renderer.MustRenderErrorPage(w, "", formErr)
+		return
+	}
+	electrum, err := strconv.Atoi(data["electrum"])
+	if err != nil {
+		a.renderer.MustRenderErrorPage(w, "", formErr)
+		return
+	}
+	gold, err := strconv.Atoi(data["gold"])
+	if err != nil {
+		a.renderer.MustRenderErrorPage(w, "", formErr)
+		return
+	}
+	platinum, err := strconv.Atoi(data["platinum"])
+	if err != nil {
+		a.renderer.MustRenderErrorPage(w, "", formErr)
+		return
+	}
+
+	coins := types.NewCoins(copper, silver, electrum, gold, platinum)
+	aid, err := strconv.Atoi(id)
+	if err != nil {
+		a.renderer.MustRenderErrorPage(w, "", formErr)
+		return
+	}
+	err = a.adventureService.UpdateAdventureCoins(aid, *coins)
+	if err != nil {
+		a.renderer.MustRenderErrorPage(w, "", formErr)
+		return
+	}
 	pageData := struct {
 		types.Coins
 		CoinPath path
