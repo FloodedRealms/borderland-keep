@@ -3,18 +3,18 @@
             <li></li>
         <label><b>Username:</b></label>
         <input type="text" name="username">
-        {{ if .NameError }}
+        {{ if .Data.NameError }}
         <small>
-            {{ .NameError }}
+            {{ .Data.NameError }}
         </small>
         {{ end }}
     </li>
     <li>
         <label> <b>Password:</b> </label>
         <input type="password" name="password">
-        {{ if .PasswordError }}
+        {{ if .Data.PasswordError }}
         <small>
-            {{ .PasswordError }}
+            {{ .Data.PasswordError }}
         </small>
         {{ end }}
 </li>
@@ -23,4 +23,10 @@
     <button hx-post="/gate" hx-target="closest form">Login</button>
 </li>
 </ol>
+
 </form>
+  {{ if .Data.ValidationError }}
+        <small>
+            {{ .Data.ValidationError }}
+        </small>
+ {{ end }}

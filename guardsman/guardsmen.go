@@ -17,7 +17,7 @@ type Guardsman struct {
 }
 
 // Ya'll are lucky I didn't name this "RecruitGuardsman"
-// renderer can be a pointet because it might not be needed for a given application
+// renderer can be a pointer because it might not be needed for a given application
 func NewGuardsman(r repository.Repository, s services.UserService, renderer *renderer.Renderer, l util.Logger) *Guardsman {
 	return &Guardsman{
 		repo:        r,

@@ -17,6 +17,7 @@ const sessionCookie = "session_token"
 type PasswordForm struct {
 	NameError     string
 	PasswordError string
+	ValidationError string
 }
 
 func (g Guardsman) DisplayLoginPage(w http.ResponseWriter, r *http.Request) {
@@ -31,13 +32,16 @@ func (g Guardsman) DisplayLoginPage(w http.ResponseWriter, r *http.Request) {
 }
 
 func (g Guardsman) HandleLogin(w http.ResponseWriter, r *http.Request) {
+	fmt.Println("Recieved Login Request")
 	lang := util.ExtractLangageCookie(r)
 	errors := PasswordForm{}
 	isFormValid, username, providedPassword := errors.validateLoginForm(r)
 	if !isFormValid {
-		output, err := g.renderer.RenderPage("loginForm.html", errors, lang, false, false)
-		if err != nil {
+		errors.ValidationError = "Error validating Form"
+		output, rerr := g.renderer.RenderPage("loginForm.html", errors, lang, false, false)
+		if rerr != nil {
 			w.WriteHeader(http.StatusInternalServerError)
+			fmt.Println(rerr)
 			return
 		}
 		w.Write([]byte(output))
@@ -49,14 +53,16 @@ func (g Guardsman) HandleLogin(w http.ResponseWriter, r *http.Request) {
 		_, isNotFoundError := err.(services.UserNotFoundError)
 		if isNotFoundError {
 			errors.NameError = "That name was not found in our database."
-			output, err := g.renderer.RenderPage("loginForm.html", errors, lang, false, false)
-			if err != nil {
+			output, rerr := g.renderer.RenderPage("loginForm.html", errors, lang, false, false)
+			if rerr != nil {
+				fmt.Println(rerr)
 				w.WriteHeader(http.StatusInternalServerError)
 				return
 			}
 			w.Write([]byte(output))
 			return
 		} else {
+			fmt.Println(err)
 			w.WriteHeader(http.StatusInternalServerError)
 			return
 		}
@@ -73,11 +79,12 @@ func (g Guardsman) HandleLogin(w http.ResponseWriter, r *http.Request) {
 		_, isBadPassword := err.(BadPasswordError)
 		if isBadPassword {
 			errors.PasswordError = "That password is incorrect"
-			output, err := g.renderer.RenderPage("loginForm.html", errors, lang, false, false)
-			if err != nil {
+			output, rerr := g.renderer.RenderPage("loginForm.html", errors, lang, false, false)
+			if rerr != nil {
 				w.WriteHeader(http.StatusInternalServerError)
 				return
 			}
+			fmt.Println(err)
 			w.Write([]byte(output))
 			return
 
